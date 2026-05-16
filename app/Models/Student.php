@@ -18,12 +18,16 @@ class Student extends Model
         'birth_date',
         'classroom_id',
         'parent_id',
+        'is_active',
+        'left_at',
     ];
 
     protected function casts(): array
     {
         return [
             'birth_date' => 'date',
+            'is_active' => 'boolean',
+            'left_at' => 'datetime',
         ];
     }
 
@@ -40,6 +44,18 @@ class Student extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function schoolYearRecords(): HasMany
+    {
+        return $this->hasMany(StudentSchoolYearRecord::class)
+            ->orderByDesc('school_year_id')
+            ->orderByDesc('id');
+    }
+
+    public function bookLoans(): HasMany
+    {
+        return $this->hasMany(BookLoan::class);
     }
 
     protected function fullName(): Attribute

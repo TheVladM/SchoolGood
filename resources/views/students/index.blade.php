@@ -30,13 +30,36 @@
         <div class="toolbar">
             <div>
                 <h2 class="section-title">Annuaire des eleves</h2>
-                <p class="section-subtitle">Recherchez par nom, parent ou classe sans recharger la page.</p>
+                <p class="section-subtitle">Recherchez par nom, parent, classe ou annee scolaire sans recharger la page.</p>
             </div>
 
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap items-end gap-3">
+                <form method="GET" class="flex flex-wrap items-end gap-3">
+                    <label class="search-shell">
+                        <span class="search-shell__label">Statut</span>
+                        <select name="status_scope" class="field min-w-[12rem]">
+                            <option value="active" @selected($statusScope === 'active')>Actifs</option>
+                            <option value="archives" @selected($statusScope === 'archives')>Archives</option>
+                            <option value="all" @selected($statusScope === 'all')>Tous</option>
+                        </select>
+                    </label>
+                    <label class="search-shell">
+                        <span class="search-shell__label">Annee scolaire</span>
+                        <select name="school_year_id" class="field min-w-[14rem]">
+                            <option value="">Toutes</option>
+                            @foreach ($schoolYears as $schoolYear)
+                                <option value="{{ $schoolYear->id }}" @selected((string) request('school_year_id') === (string) $schoolYear->id)>
+                                    {{ $schoolYear->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <button type="submit" class="btn-secondary">Filtrer</button>
+                </form>
+
                 <label class="search-shell">
                     <span class="search-shell__label">Recherche locale</span>
-                    <input type="search" class="field min-w-[18rem]" placeholder="Nom, parent ou classe" data-table-search>
+                    <input type="search" class="field min-w-[18rem]" placeholder="Nom, parent, classe ou statut" data-table-search>
                 </label>
 
                 @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
@@ -53,11 +76,12 @@
                             <p class="mobile-record__title">{{ $student->full_name }}</p>
                             <p class="mt-1 text-sm text-slate-500">{{ $student->classroom?->name }}</p>
                         </div>
-                        <span class="badge">{{ $student->birth_date?->format('d/m/Y') }}</span>
+                        <span class="badge">{{ $student->is_active ? 'Actif' : 'Archive' }}</span>
                     </div>
 
                     <div class="mobile-record__meta">
                         <p><span class="font-semibold text-slate-900">Parent:</span> {{ $student->parent?->name }}</p>
+                        <p><span class="font-semibold text-slate-900">Naissance:</span> {{ $student->birth_date?->format('d/m/Y') }}</p>
                     </div>
 
                     <div class="record-actions">
@@ -85,6 +109,7 @@
                         <th>Eleve</th>
                         <th>Classe</th>
                         <th>Parent</th>
+                        <th>Statut</th>
                         <th>Naissance</th>
                         <th class="text-right">Actions</th>
                     </tr>
@@ -95,6 +120,7 @@
                             <td class="font-semibold text-slate-900">{{ $student->full_name }}</td>
                             <td>{{ $student->classroom?->name }}</td>
                             <td>{{ $student->parent?->name }}</td>
+                            <td><span class="badge">{{ $student->is_active ? 'Actif' : 'Archive' }}</span></td>
                             <td>{{ $student->birth_date?->format('d/m/Y') }}</td>
                             <td>
                                 <div class="record-actions justify-end">

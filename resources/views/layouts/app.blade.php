@@ -49,6 +49,34 @@
                     ],
                 ];
 
+                if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
+                    $navItems[] = [
+                        'route' => 'school-years.*',
+                        'url' => route('school-years.index'),
+                        'label' => 'Annees scolaires',
+                        'eyebrow' => 'Historique',
+                        'caption' => 'Promotions et periodes',
+                    ];
+                }
+
+                if (! auth()->user()->hasRole(\App\Enums\UserRole::Parent)) {
+                    $navItems[] = [
+                        'route' => 'books.*',
+                        'url' => route('books.index'),
+                        'label' => 'Bibliotheque',
+                        'eyebrow' => 'Ressources',
+                        'caption' => 'Livres et stock',
+                    ];
+
+                    $navItems[] = [
+                        'route' => 'book-loans.*',
+                        'url' => route('book-loans.index'),
+                        'label' => 'Emprunts',
+                        'eyebrow' => 'Ressources',
+                        'caption' => 'Sorties et retours',
+                    ];
+                }
+
                 if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
                     $navItems[] = [
                         'route' => 'payments.*',
@@ -85,6 +113,9 @@
                     request()->routeIs('classrooms.*') => 'Classes',
                     request()->routeIs('courses.*') => 'Cours',
                     request()->routeIs('timetable-entries.*') => 'Emplois du temps',
+                    request()->routeIs('school-years.*') => 'Annees scolaires',
+                    request()->routeIs('books.*') => 'Bibliotheque',
+                    request()->routeIs('book-loans.*') => 'Emprunts',
                     request()->routeIs('payments.*') => 'Paiements',
                     request()->routeIs('announcements.*') => 'Messages',
                     request()->routeIs('users.*') => 'Utilisateurs',

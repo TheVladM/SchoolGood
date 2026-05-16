@@ -9,13 +9,19 @@ use App\Enums\CourseDay;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
+use App\Enums\SchoolYearStatus;
+use App\Enums\StudentSchoolYearStatus;
 use App\Enums\UserDepartment;
 use App\Enums\UserRole;
 use App\Models\Announcement;
+use App\Models\Book;
+use App\Models\BookLoan;
 use App\Models\Classroom;
 use App\Models\Course;
 use App\Models\Payment;
+use App\Models\SchoolYear;
 use App\Models\Student;
+use App\Models\StudentSchoolYearRecord;
 use App\Models\TimetableEntry;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -101,6 +107,32 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $currentSchoolYear = SchoolYear::updateOrCreate(
+            ['name' => '2025-2026'],
+            [
+                'starts_on' => '2025-09-01',
+                'ends_on' => '2026-07-05',
+                'diploma_awarded_on' => '2026-07-05',
+                'promotion_opens_on' => '2026-05-10',
+                'status' => SchoolYearStatus::Current,
+            ]
+        );
+
+        $nextSchoolYear = SchoolYear::updateOrCreate(
+            ['name' => '2026-2027'],
+            [
+                'starts_on' => '2026-09-01',
+                'ends_on' => '2027-07-05',
+                'diploma_awarded_on' => '2027-07-05',
+                'promotion_opens_on' => '2027-05-10',
+                'status' => SchoolYearStatus::Planned,
+            ]
+        );
+
+        $currentSchoolYear->update([
+            'next_school_year_id' => $nextSchoolYear->id,
+        ]);
+
         $classroom = Classroom::updateOrCreate(
             ['name' => 'CM1 A'],
             [
@@ -113,12 +145,40 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $nextClassroom = Classroom::updateOrCreate(
+            ['name' => 'CM2 A'],
+            [
+                'level' => 'CM2',
+                'section' => ClassroomSection::Francophone,
+                'room' => 'B14',
+                'location' => 'Batiment B',
+                'main_teacher_id' => $mainTeacher->id,
+                'language_teacher_id' => $languageTeacher->id,
+            ]
+        );
+
         $student = Student::updateOrCreate(
             ['first_name' => 'Kevin', 'last_name' => 'Ndzi'],
             [
                 'birth_date' => '2016-04-18',
                 'classroom_id' => $classroom->id,
                 'parent_id' => $parent->id,
+                'is_active' => true,
+                'left_at' => null,
+            ]
+        );
+
+        StudentSchoolYearRecord::updateOrCreate(
+            [
+                'student_id' => $student->id,
+                'school_year_id' => $currentSchoolYear->id,
+            ],
+            [
+                'classroom_id' => $classroom->id,
+                'classroom_name_snapshot' => $classroom->name,
+                'level_snapshot' => $classroom->level,
+                'section_snapshot' => $classroom->section?->value,
+                'status' => StudentSchoolYearStatus::Active,
             ]
         );
 
@@ -206,6 +266,68 @@ class DatabaseSeeder extends Seeder
                 'author_id' => $scolarite->id,
                 'approved_by_id' => $founder->id,
                 'approved_at' => now(),
+            ]
+        );
+
+        $mathBook = Book::updateOrCreate(
+            ['title' => 'Mon premier cahier de mathematiques', 'author' => 'Equipe pedagogique'],
+            [
+                'isbn' => 'BK-MATH-001',
+                'category' => 'Mathematiques',
+                'language' => 'Francais',
+                'total_copies' => 4,
+                'shelf_location' => 'Rayon A1',
+                'loan_duration_days' => 7,
+                'late_fee_per_day' => 250,
+                'description' => 'Livre de soutien pour les classes de primaire.',
+                'acquired_at' => '2026-01-12',
+                'managed_by_id' => $scolarite->id,
+            ]
+        );
+
+        $englishBook = Book::updateOrCreate(
+            ['title' => 'Young English Readers', 'author' => 'Cambridge Team'],
+            [
+                'isbn' => 'BK-ENG-010',
+                'category' => 'Anglais',
+                'language' => 'English',
+                'total_copies' => 3,
+                'shelf_location' => 'Rayon B2',
+                'loan_duration_days' => 5,
+                'late_fee_per_day' => 300,
+                'description' => 'Lectures guidees pour l anglais oral et ecrit.',
+                'acquired_at' => '2026-02-18',
+                'managed_by_id' => $scolarite->id,
+            ]
+        );
+
+        BookLoan::updateOrCreate(
+            [
+                'book_id' => $mathBook->id,
+                'student_id' => $student->id,
+                'borrowed_at' => '2026-05-12',
+            ],
+            [
+                'due_at' => '2026-05-19',
+                'daily_penalty_rate' => 250,
+                'notes' => 'Emprunt a domicile pour revision.',
+                'issued_by_id' => $scolarite->id,
+            ]
+        );
+
+        BookLoan::updateOrCreate(
+            [
+                'book_id' => $englishBook->id,
+                'user_id' => $languageTeacher->id,
+                'borrowed_at' => '2026-04-20',
+            ],
+            [
+                'due_at' => '2026-04-25',
+                'returned_at' => '2026-04-24',
+                'daily_penalty_rate' => 300,
+                'notes' => 'Preparation de sequence pedagogique.',
+                'issued_by_id' => $scolarite->id,
+                'returned_by_id' => $scolarite->id,
             ]
         );
     }

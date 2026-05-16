@@ -26,6 +26,18 @@
         </select>
     </div>
 
+    <div>
+        <label for="school_year_id" class="label">Annee scolaire</label>
+        <select id="school_year_id" name="school_year_id" required class="field">
+            <option value="">Selectionner</option>
+            @foreach ($schoolYears as $schoolYear)
+                <option value="{{ $schoolYear->id }}" @selected(old('school_year_id', $selectedSchoolYearId ?? '') == $schoolYear->id)>
+                    {{ $schoolYear->name }} - {{ $schoolYear->status?->label() }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
     <div class="md:col-span-2">
         <label for="parent_id" class="label">Parent responsable</label>
         <select id="parent_id" name="parent_id" required class="field">

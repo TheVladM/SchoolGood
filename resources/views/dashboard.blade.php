@@ -12,6 +12,15 @@
             ['title' => 'Voir les emplois du temps', 'text' => 'Retrouver les plages horaires par niveau.', 'url' => route('timetable-entries.index')],
         ];
 
+        if (! auth()->user()->hasRole(\App\Enums\UserRole::Parent)) {
+            $actions[] = ['title' => 'Bibliotheque', 'text' => 'Suivre les livres et leur disponibilite.', 'url' => route('books.index')];
+            $actions[] = ['title' => 'Emprunts', 'text' => 'Voir les sorties, retours et retards.', 'url' => route('book-loans.index')];
+        }
+
+        if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
+            $actions[] = ['title' => 'Annees scolaires', 'text' => 'Piloter l historique et les promotions.', 'url' => route('school-years.index')];
+        }
+
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
             $actions[] = ['title' => 'Verifier les paiements', 'text' => 'Suivre les tranches reglees et en attente.', 'url' => route('payments.index')];
         }

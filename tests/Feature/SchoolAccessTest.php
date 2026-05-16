@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\Classroom;
+use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,6 +52,12 @@ class SchoolAccessTest extends TestCase
     {
         $scolarite = User::factory()->create(['role' => UserRole::Scolarite]);
         $parent = User::factory()->create(['role' => UserRole::Parent]);
+        $schoolYear = SchoolYear::create([
+            'name' => '2025-2026',
+            'starts_on' => '2025-09-01',
+            'ends_on' => '2026-07-05',
+            'status' => 'current',
+        ]);
         $classroom = Classroom::create([
             'name' => 'CM2 B',
             'level' => 'Primaire',
@@ -65,6 +72,7 @@ class SchoolAccessTest extends TestCase
                 'birth_date' => '2015-05-12',
                 'classroom_id' => $classroom->id,
                 'parent_id' => $parent->id,
+                'school_year_id' => $schoolYear->id,
             ])
             ->assertRedirect(route('students.index'));
 

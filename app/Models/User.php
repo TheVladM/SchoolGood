@@ -85,6 +85,26 @@ class User extends Authenticatable
         return $this->hasMany(Announcement::class, 'approved_by_id');
     }
 
+    public function managedBooks(): HasMany
+    {
+        return $this->hasMany(Book::class, 'managed_by_id');
+    }
+
+    public function borrowedBookLoans(): HasMany
+    {
+        return $this->hasMany(BookLoan::class, 'user_id');
+    }
+
+    public function issuedBookLoans(): HasMany
+    {
+        return $this->hasMany(BookLoan::class, 'issued_by_id');
+    }
+
+    public function returnedBookLoans(): HasMany
+    {
+        return $this->hasMany(BookLoan::class, 'returned_by_id');
+    }
+
     public function hasRole(UserRole|string $role): bool
     {
         $value = $role instanceof UserRole ? $role->value : $role;
