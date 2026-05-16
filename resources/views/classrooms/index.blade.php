@@ -57,6 +57,7 @@
 
                     <div class="mobile-record__meta">
                         <p><span class="font-semibold text-slate-900">Titulaire:</span> {{ $classroom->mainTeacher?->name ?: '-' }}</p>
+                        <p><span class="font-semibold text-slate-900">Langue:</span> {{ $classroom->languageTeacher?->name ?: '-' }}</p>
                         <p><span class="font-semibold text-slate-900">Effectif:</span> {{ $classroom->students_count }}</p>
                     </div>
 
@@ -84,7 +85,8 @@
                         <th>Classe</th>
                         <th>Niveau</th>
                         <th>Section</th>
-                        <th>Enseignant principal</th>
+                        <th>Titulaire</th>
+                        <th>Langue</th>
                         <th>Effectif</th>
                         <th class="text-right">Actions</th>
                     </tr>
@@ -96,6 +98,7 @@
                             <td>{{ $classroom->level }}</td>
                             <td>{{ $classroom->section?->label() }}</td>
                             <td>{{ $classroom->mainTeacher?->name ?: '-' }}</td>
+                            <td>{{ $classroom->languageTeacher?->name ?: '-' }}</td>
                             <td>{{ $classroom->students_count }}</td>
                             <td>
                                 <div class="record-actions justify-end">

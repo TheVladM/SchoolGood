@@ -31,11 +31,7 @@ class PaymentController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorizePaymentManagement($request->user());
 
         return view('payments.create', [
             'students' => Student::with('classroom')->orderBy('last_name')->get(),
@@ -47,13 +43,9 @@ class PaymentController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorizePaymentManagement($request->user());
 
-        Payment::create($this->validatedData($request));
+        Payment::create($this->normalizedPaymentData($request->user(), $this->validatedData($request)));
 
         return redirect()
             ->route('payments.index')
@@ -64,18 +56,14 @@ class PaymentController extends Controller
     {
         $this->authorizePaymentAccess($request->user());
         $this->ensurePaymentVisible($request->user(), $payment);
-        $payment->load(['student.classroom', 'student.parent']);
+        $payment->load(['student.classroom', 'student.parent', 'receivedBy', 'validatedBy']);
 
         return view('payments.show', ['payment' => $payment]);
     }
 
     public function edit(Request $request, Payment $payment): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorizePaymentManagement($request->user());
 
         return view('payments.edit', [
             'payment' => $payment,
@@ -88,13 +76,9 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorizePaymentManagement($request->user());
 
-        $payment->update($this->validatedData($request));
+        $payment->update($this->normalizedPaymentData($request->user(), $this->validatedData($request), $payment));
 
         return redirect()
             ->route('payments.index')
@@ -103,11 +87,7 @@ class PaymentController extends Controller
 
     public function destroy(Request $request, Payment $payment): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorizePaymentManagement($request->user());
 
         $payment->delete();
 
@@ -122,8 +102,11 @@ class PaymentController extends Controller
             'student_id' => ['required', 'exists:students,id'],
             'type' => ['required', Rule::enum(PaymentType::class)],
             'amount' => ['required', 'numeric', 'min:0'],
+            'reference' => ['nullable', 'string', 'max:255'],
             'method' => ['required', Rule::enum(PaymentMethod::class)],
+            'account_reference' => ['nullable', 'string', 'max:255'],
             'status' => ['required', Rule::enum(PaymentStatus::class)],
+            'notes' => ['nullable', 'string'],
         ]);
     }
 
@@ -131,9 +114,16 @@ class PaymentController extends Controller
     {
         $this->authorizeRoles($user, [
             UserRole::Founder,
-            UserRole::Admin,
             UserRole::Scolarite,
             UserRole::Parent,
+        ]);
+    }
+
+    private function authorizePaymentManagement(User $user): void
+    {
+        $this->authorizeRoles($user, [
+            UserRole::Founder,
+            UserRole::Scolarite,
         ]);
     }
 
@@ -153,5 +143,22 @@ class PaymentController extends Controller
             403,
             'Vous ne pouvez pas consulter ce paiement.'
         );
+    }
+
+    private function normalizedPaymentData(User $user, array $data, ?Payment $payment = null): array
+    {
+        $data['received_by_id'] = $payment?->received_by_id ?? $user->id;
+
+        if ($data['status'] === PaymentStatus::Paid->value) {
+            $data['validated_by_id'] = $user->id;
+            $data['validated_at'] = now();
+
+            return $data;
+        }
+
+        $data['validated_by_id'] = null;
+        $data['validated_at'] = null;
+
+        return $data;
     }
 }

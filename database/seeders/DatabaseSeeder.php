@@ -2,16 +2,21 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AnnouncementAudience;
+use App\Enums\AnnouncementStatus;
 use App\Enums\ClassroomSection;
 use App\Enums\CourseDay;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
+use App\Enums\UserDepartment;
 use App\Enums\UserRole;
+use App\Models\Announcement;
 use App\Models\Classroom;
 use App\Models\Course;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\TimetableEntry;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -32,6 +37,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Fondateur SchoolGood',
                 'phone' => '+237600000001',
                 'role' => UserRole::Founder,
+                'department' => UserDepartment::Direction,
+                'job_title' => 'Fondateur de l etablissement',
                 'password' => Hash::make('password'),
             ]
         );
@@ -42,6 +49,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Admin SchoolGood',
                 'phone' => '+237600000002',
                 'role' => UserRole::Admin,
+                'department' => UserDepartment::Administration,
+                'job_title' => 'Administrateur de la plateforme',
                 'password' => Hash::make('password'),
             ]
         );
@@ -52,6 +61,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Agent Scolarite',
                 'phone' => '+237600000003',
                 'role' => UserRole::Scolarite,
+                'department' => UserDepartment::Scolarite,
+                'job_title' => 'Responsable inscriptions et pension',
                 'password' => Hash::make('password'),
             ]
         );
@@ -62,6 +73,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Marie Essomba',
                 'phone' => '+237600000004',
                 'role' => UserRole::Teacher,
+                'department' => UserDepartment::Teaching,
+                'job_title' => 'Titulaire francophone',
                 'password' => Hash::make('password'),
             ]
         );
@@ -72,6 +85,8 @@ class DatabaseSeeder extends Seeder
                 'name' => 'John Nfor',
                 'phone' => '+237600000005',
                 'role' => UserRole::Teacher,
+                'department' => UserDepartment::Teaching,
+                'job_title' => 'Enseignant de langue',
                 'password' => Hash::make('password'),
             ]
         );
@@ -89,8 +104,8 @@ class DatabaseSeeder extends Seeder
         $classroom = Classroom::updateOrCreate(
             ['name' => 'CM1 A'],
             [
-                'level' => 'Primaire',
-                'section' => ClassroomSection::Bilingue,
+                'level' => 'CM1',
+                'section' => ClassroomSection::Francophone,
                 'room' => 'B12',
                 'location' => 'Batiment B',
                 'main_teacher_id' => $mainTeacher->id,
@@ -130,7 +145,13 @@ class DatabaseSeeder extends Seeder
             [
                 'amount' => 35000,
                 'method' => PaymentMethod::OrangeMoney,
+                'reference' => 'OM-2026-0001',
+                'account_reference' => '237600000006',
                 'status' => PaymentStatus::Paid,
+                'notes' => 'Inscription reglee par Orange Money.',
+                'received_by_id' => $scolarite->id,
+                'validated_by_id' => $founder->id,
+                'validated_at' => now(),
             ]
         );
 
@@ -139,7 +160,52 @@ class DatabaseSeeder extends Seeder
             [
                 'amount' => 50000,
                 'method' => PaymentMethod::Bank,
+                'reference' => 'BANK-2026-0002',
+                'account_reference' => 'ACC-SCHOOLGOOD-01',
                 'status' => PaymentStatus::Pending,
+                'notes' => 'Premiere tranche en attente de confirmation bancaire.',
+                'received_by_id' => $scolarite->id,
+            ]
+        );
+
+        TimetableEntry::updateOrCreate(
+            [
+                'level' => 'CM1',
+                'section' => ClassroomSection::Francophone->value,
+                'day' => CourseDay::Monday->value,
+                'start_time' => '08:00',
+                'end_time' => '09:00',
+            ],
+            [
+                'subject' => 'Mathematiques',
+                'notes' => 'Bloc commun a toutes les classes du niveau CM1.',
+            ]
+        );
+
+        TimetableEntry::updateOrCreate(
+            [
+                'level' => 'CM1',
+                'section' => ClassroomSection::Francophone->value,
+                'day' => CourseDay::Thursday->value,
+                'start_time' => '10:00',
+                'end_time' => '11:00',
+            ],
+            [
+                'subject' => 'Anglais',
+                'notes' => 'Cours partage pour toutes les classes CM1 francophones.',
+            ]
+        );
+
+        Announcement::updateOrCreate(
+            ['title' => 'Reunion de rentree'],
+            [
+                'content' => 'Une reunion d information parents-ecole est prevue vendredi a 15h.',
+                'audience' => AnnouncementAudience::AllParents,
+                'status' => AnnouncementStatus::Approved,
+                'classroom_id' => null,
+                'author_id' => $scolarite->id,
+                'approved_by_id' => $founder->id,
+                'approved_at' => now(),
             ]
         );
     }

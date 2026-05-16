@@ -38,7 +38,7 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Eleve, type, mode ou statut" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
                     <a href="{{ route('payments.create') }}" class="btn-primary self-end">Nouveau paiement</a>
                 @endif
             </div>
@@ -62,7 +62,7 @@
 
                     <div class="record-actions">
                         <a href="{{ route('payments.show', $payment) }}" class="btn-secondary">Voir</a>
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
                             <a href="{{ route('payments.edit', $payment) }}" class="btn-secondary">Modifier</a>
                             <form method="POST" action="{{ route('payments.destroy', $payment) }}">
                                 @csrf
@@ -85,6 +85,7 @@
                         <th>Type</th>
                         <th>Montant</th>
                         <th>Mode</th>
+                        <th>Reference</th>
                         <th>Statut</th>
                         <th class="text-right">Actions</th>
                     </tr>
@@ -96,11 +97,12 @@
                             <td>{{ $payment->type?->label() }}</td>
                             <td>{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</td>
                             <td>{{ $payment->method?->label() }}</td>
+                            <td>{{ $payment->reference ?: '-' }}</td>
                             <td><span class="badge">{{ $payment->status?->label() }}</span></td>
                             <td>
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('payments.show', $payment) }}" class="btn-secondary">Voir</a>
-                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
                                         <a href="{{ route('payments.edit', $payment) }}" class="btn-secondary">Modifier</a>
                                         <form method="POST" action="{{ route('payments.destroy', $payment) }}">
                                             @csrf

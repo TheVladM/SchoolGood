@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserDepartment;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -32,12 +34,13 @@ class UserController extends Controller
     {
         return view('users.create', [
             'roles' => $this->availableRoles($request->user()),
+            'departments' => UserDepartment::options(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $this->validatedData($request);
+        $data = $this->normalizedUserData($this->validatedData($request));
         $this->guardFounderRole($request->user(), $data['role']);
 
         User::create($data);
@@ -61,6 +64,7 @@ class UserController extends Controller
         return view('users.edit', [
             'managedUser' => $user,
             'roles' => $this->availableRoles($request->user()),
+            'departments' => UserDepartment::options(),
         ]);
     }
 
@@ -68,7 +72,7 @@ class UserController extends Controller
     {
         $this->guardProtectedFounder($request->user(), $user);
 
-        $data = $this->validatedData($request, $user);
+        $data = $this->normalizedUserData($this->validatedData($request, $user));
         $this->guardFounderRole($request->user(), $data['role'], $user);
 
         if (blank($data['password'] ?? null)) {
@@ -110,6 +114,8 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'phone' => ['nullable', 'string', 'max:255'],
             'role' => ['required', Rule::enum(UserRole::class)],
+            'department' => ['nullable', Rule::enum(UserDepartment::class)],
+            'job_title' => ['nullable', 'string', 'max:255'],
             'password' => $passwordRules,
         ]);
     }
@@ -147,5 +153,31 @@ class UserController extends Controller
         if ($managedUser->hasRole(UserRole::Founder) && ! $actor->hasRole(UserRole::Founder)) {
             abort(403, 'Seul le fondateur peut modifier ce compte.');
         }
+    }
+
+    private function normalizedUserData(array $data): array
+    {
+        if ($data['role'] === UserRole::Teacher->value) {
+            $data['department'] = UserDepartment::Teaching->value;
+        }
+
+        if ($data['role'] === UserRole::Scolarite->value && blank($data['department'] ?? null)) {
+            $data['department'] = UserDepartment::Scolarite->value;
+        }
+
+        if ($data['role'] === UserRole::Parent->value) {
+            $data['department'] = null;
+            $data['job_title'] = null;
+
+            return $data;
+        }
+
+        if (blank($data['department'] ?? null)) {
+            throw ValidationException::withMessages([
+                'department' => 'Veuillez renseigner le service ou le departement de cette personne.',
+            ]);
+        }
+
+        return $data;
     }
 }

@@ -29,6 +29,11 @@
     </div>
 
     <div>
+        <label for="reference" class="label">Reference du paiement</label>
+        <input id="reference" name="reference" type="text" value="{{ old('reference', $payment->reference ?? '') }}" class="field">
+    </div>
+
+    <div>
         <label for="method" class="label">Mode de paiement</label>
         <select id="method" name="method" required class="field">
             <option value="">Selectionner</option>
@@ -41,6 +46,11 @@
     </div>
 
     <div>
+        <label for="account_reference" class="label">Numero de compte ou transaction</label>
+        <input id="account_reference" name="account_reference" type="text" value="{{ old('account_reference', $payment->account_reference ?? '') }}" class="field">
+    </div>
+
+    <div>
         <label for="status" class="label">Statut</label>
         <select id="status" name="status" required class="field">
             <option value="">Selectionner</option>
@@ -50,5 +60,10 @@
                 </option>
             @endforeach
         </select>
+    </div>
+
+    <div class="md:col-span-2">
+        <label for="notes" class="label">Notes</label>
+        <textarea id="notes" name="notes" rows="4" class="field">{{ old('notes', $payment->notes ?? '') }}</textarea>
     </div>
 </div>

@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TimetableEntryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,12 @@ Route::middleware('auth')->group(function (): void {
     Route::resource('classrooms', ClassroomController::class);
     Route::resource('courses', CourseController::class);
     Route::resource('payments', PaymentController::class);
+    Route::resource('announcements', AnnouncementController::class);
+    Route::post('/announcements/{announcement}/approve', [AnnouncementController::class, 'approve'])
+        ->name('announcements.approve');
+    Route::post('/announcements/{announcement}/reject', [AnnouncementController::class, 'reject'])
+        ->name('announcements.reject');
+    Route::resource('timetable-entries', TimetableEntryController::class);
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

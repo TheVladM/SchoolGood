@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Enums\UserDepartment;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +20,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'role',
+        'department',
+        'job_title',
         'password',
     ];
 
@@ -37,6 +40,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'role' => UserRole::class,
+            'department' => UserDepartment::class,
             'password' => 'hashed',
         ];
     }
@@ -59,6 +63,26 @@ class User extends Authenticatable
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class, 'teacher_id');
+    }
+
+    public function receivedPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'received_by_id');
+    }
+
+    public function validatedPayments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'validated_by_id');
+    }
+
+    public function authoredAnnouncements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'author_id');
+    }
+
+    public function approvedAnnouncements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'approved_by_id');
     }
 
     public function hasRole(UserRole|string $role): bool

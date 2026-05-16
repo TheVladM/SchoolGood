@@ -48,4 +48,27 @@ class Classroom extends Model
     {
         return $this->belongsTo(User::class, 'language_teacher_id');
     }
+
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class);
+    }
+
+    public function timetableEntries(): HasMany
+    {
+        return $this->hasMany(TimetableEntry::class, 'level', 'level')
+            ->where('section', $this->section?->value)
+            ->orderByRaw("
+                case day
+                    when 'Lundi' then 1
+                    when 'Mardi' then 2
+                    when 'Mercredi' then 3
+                    when 'Jeudi' then 4
+                    when 'Vendredi' then 5
+                    when 'Samedi' then 6
+                    else 7
+                end
+            ")
+            ->orderBy('start_time');
+    }
 }

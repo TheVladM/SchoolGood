@@ -40,15 +40,32 @@
                         'eyebrow' => 'Pedagogie',
                         'caption' => 'Planning et contenu',
                     ],
+                    [
+                        'route' => 'timetable-entries.*',
+                        'url' => route('timetable-entries.index'),
+                        'label' => 'Emplois du temps',
+                        'eyebrow' => 'Organisation',
+                        'caption' => 'Horaires par niveau',
+                    ],
                 ];
 
-                if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
+                if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
                     $navItems[] = [
                         'route' => 'payments.*',
                         'url' => route('payments.index'),
                         'label' => 'Paiements',
                         'eyebrow' => 'Finance',
                         'caption' => 'Tranches et statuts',
+                    ];
+                }
+
+                if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
+                    $navItems[] = [
+                        'route' => 'announcements.*',
+                        'url' => route('announcements.index'),
+                        'label' => 'Messages',
+                        'eyebrow' => 'Parents',
+                        'caption' => 'Validation et diffusion',
                     ];
                 }
 
@@ -67,7 +84,9 @@
                     request()->routeIs('students.*') => 'Eleves',
                     request()->routeIs('classrooms.*') => 'Classes',
                     request()->routeIs('courses.*') => 'Cours',
+                    request()->routeIs('timetable-entries.*') => 'Emplois du temps',
                     request()->routeIs('payments.*') => 'Paiements',
+                    request()->routeIs('announcements.*') => 'Messages',
                     request()->routeIs('users.*') => 'Utilisateurs',
                     default => 'Pilotage scolaire',
                 };
@@ -78,47 +97,49 @@
 
                 <aside class="app-sidebar" aria-label="Navigation principale">
                     <div class="app-sidebar__inner">
-                        <div class="sidebar-brand">
-                            <div class="sidebar-brand__mark">SG</div>
-                            <div>
-                                <a href="{{ route('dashboard') }}" class="sidebar-brand__title">schoolGood</a>
-                                <p class="sidebar-brand__text">Campus command center</p>
+                        <div class="app-sidebar__scroll">
+                            <div class="sidebar-brand">
+                                <div class="sidebar-brand__mark">SG</div>
+                                <div>
+                                    <a href="{{ route('dashboard') }}" class="sidebar-brand__title">schoolGood</a>
+                                    <p class="sidebar-brand__text">Campus command center</p>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="sidebar-profile">
-                            <span class="sidebar-profile__role">{{ auth()->user()->role?->label() }}</span>
-                            <p class="sidebar-profile__name">{{ auth()->user()->name }}</p>
-                            <p class="sidebar-profile__meta">{{ auth()->user()->email }}</p>
-                        </div>
+                            <div class="sidebar-profile">
+                                <span class="sidebar-profile__role">{{ auth()->user()->role?->label() }}</span>
+                                <p class="sidebar-profile__name">{{ auth()->user()->name }}</p>
+                                <p class="sidebar-profile__meta">{{ auth()->user()->email }}</p>
+                            </div>
 
-                        <nav class="sidebar-nav">
-                            @foreach ($navItems as $item)
-                                @php
-                                    $pattern = $item['route'];
-                                    $url = $item['url'] ?? route($item['route']);
-                                    $isActive = request()->routeIs($pattern);
-                                @endphp
+                            <nav class="sidebar-nav">
+                                @foreach ($navItems as $item)
+                                    @php
+                                        $pattern = $item['route'];
+                                        $url = $item['url'] ?? route($item['route']);
+                                        $isActive = request()->routeIs($pattern);
+                                    @endphp
 
-                                <a href="{{ $url }}" class="nav-link {{ $isActive ? 'is-active' : '' }}">
-                                    <span class="nav-link__eyebrow">{{ $item['eyebrow'] }}</span>
-                                    <span class="nav-link__label">{{ $item['label'] }}</span>
-                                    <span class="nav-link__caption">{{ $item['caption'] }}</span>
-                                </a>
-                            @endforeach
-                        </nav>
+                                    <a href="{{ $url }}" class="nav-link {{ $isActive ? 'is-active' : '' }}">
+                                        <span class="nav-link__eyebrow">{{ $item['eyebrow'] }}</span>
+                                        <span class="nav-link__label">{{ $item['label'] }}</span>
+                                        <span class="nav-link__caption">{{ $item['caption'] }}</span>
+                                    </a>
+                                @endforeach
+                            </nav>
 
-                        <div class="sidebar-footer">
-                            <div class="sidebar-note">
-                                <p class="sidebar-note__title">Session active</p>
-                                <p class="sidebar-note__text">
-                                    Gardez une vue claire sur les eleves, les classes et les paiements depuis une seule interface.
-                                </p>
+                            <div class="sidebar-footer">
+                                <div class="sidebar-note">
+                                    <p class="sidebar-note__title">Session active</p>
+                                    <p class="sidebar-note__text">
+                                        Gardez une vue claire sur les eleves, les classes et les paiements depuis une seule interface.
+                                    </p>
 
-                                <form method="POST" action="{{ route('logout') }}" class="mt-4">
-                                    @csrf
-                                    <button type="submit" class="btn-danger w-full">Deconnexion</button>
-                                </form>
+                                    <form method="POST" action="{{ route('logout') }}" class="mt-4">
+                                        @csrf
+                                        <button type="submit" class="btn-danger w-full">Deconnexion</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

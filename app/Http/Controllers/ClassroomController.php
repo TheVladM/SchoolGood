@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ClassroomController extends Controller
 {
@@ -85,7 +86,7 @@ class ClassroomController extends Controller
             UserRole::Scolarite,
         ]);
 
-        $classroom->update($this->validatedData($request));
+        $classroom->update($this->validatedData($request, $classroom));
 
         return redirect()
             ->route('classrooms.index')
@@ -107,9 +108,9 @@ class ClassroomController extends Controller
             ->with('success', 'Classe supprimee avec succes.');
     }
 
-    private function validatedData(Request $request): array
+    private function validatedData(Request $request, ?Classroom $classroom = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string', 'max:255'],
             'section' => ['required', Rule::enum(ClassroomSection::class)],
@@ -124,6 +125,44 @@ class ClassroomController extends Controller
                 Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', UserRole::Teacher->value)),
             ],
         ]);
+
+        if (
+            filled($data['main_teacher_id'] ?? null)
+            && ($data['main_teacher_id'] === ($data['language_teacher_id'] ?? null))
+        ) {
+            throw ValidationException::withMessages([
+                'language_teacher_id' => 'Le titulaire et l enseignant de langue doivent etre differents.',
+            ]);
+        }
+
+        if ($this->requiresTwoTeachers($data['level'], $data['section'])) {
+            if (blank($data['main_teacher_id'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'main_teacher_id' => 'Cette classe doit avoir un enseignant titulaire.',
+                ]);
+            }
+
+            if (blank($data['language_teacher_id'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'language_teacher_id' => 'Cette classe doit avoir un enseignant de langue.',
+                ]);
+            }
+        }
+
+        if (filled($data['main_teacher_id'] ?? null)) {
+            $alreadyTitular = Classroom::query()
+                ->where('main_teacher_id', $data['main_teacher_id'])
+                ->when($classroom, fn ($query) => $query->whereKeyNot($classroom->id))
+                ->exists();
+
+            if ($alreadyTitular) {
+                throw ValidationException::withMessages([
+                    'main_teacher_id' => 'Un enseignant ne peut etre titulaire que d une seule classe.',
+                ]);
+            }
+        }
+
+        return $data;
     }
 
     private function visibleClassroomsQuery(User $user): Builder
@@ -150,5 +189,28 @@ class ClassroomController extends Controller
             403,
             'Vous ne pouvez pas consulter cette classe.'
         );
+    }
+
+    private function requiresTwoTeachers(string $level, string $section): bool
+    {
+        $normalizedLevel = strtolower(trim($level));
+
+        return in_array($section, [
+            ClassroomSection::Francophone->value,
+            ClassroomSection::Anglophone->value,
+        ], true) && in_array($normalizedLevel, [
+            'sil',
+            'cp',
+            'ce1',
+            'ce2',
+            'cm1',
+            'cm2',
+            'class 1',
+            'class 2',
+            'class 3',
+            'class 4',
+            'class 5',
+            'class 6',
+        ], true);
     }
 }

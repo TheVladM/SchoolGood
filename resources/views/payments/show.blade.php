@@ -17,12 +17,18 @@
                 <p><span class="font-semibold text-slate-900">Type:</span> {{ $payment->type?->label() }}</p>
                 <p><span class="font-semibold text-slate-900">Montant:</span> {{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</p>
                 <p><span class="font-semibold text-slate-900">Mode:</span> {{ $payment->method?->label() }}</p>
+                <p><span class="font-semibold text-slate-900">Reference:</span> {{ $payment->reference ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Compte ou transaction:</span> {{ $payment->account_reference ?: '-' }}</p>
                 <p><span class="font-semibold text-slate-900">Statut:</span> {{ $payment->status?->label() }}</p>
+                <p><span class="font-semibold text-slate-900">Enregistre par:</span> {{ $payment->receivedBy?->name ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Valide par:</span> {{ $payment->validatedBy?->name ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Date de validation:</span> {{ $payment->validated_at?->format('d/m/Y H:i') ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Notes:</span> {{ $payment->notes ?: '-' }}</p>
             </div>
 
             <div class="mt-6 flex gap-3">
                 <a href="{{ route('payments.index') }}" class="btn-secondary">Retour</a>
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
                     <a href="{{ route('payments.edit', $payment) }}" class="btn-primary">Modifier</a>
                 @endif
             </div>

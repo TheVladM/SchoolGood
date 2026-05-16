@@ -9,10 +9,15 @@
             ['title' => 'Voir les eleves', 'text' => 'Consulter les fiches et les affectations.', 'url' => route('students.index')],
             ['title' => 'Parcourir les classes', 'text' => 'Verifier les sections, salles et effectifs.', 'url' => route('classrooms.index')],
             ['title' => 'Suivre les cours', 'text' => 'Retrouver le planning et les contenus.', 'url' => route('courses.index')],
+            ['title' => 'Voir les emplois du temps', 'text' => 'Retrouver les plages horaires par niveau.', 'url' => route('timetable-entries.index')],
         ];
 
-        if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
+        if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
             $actions[] = ['title' => 'Verifier les paiements', 'text' => 'Suivre les tranches reglees et en attente.', 'url' => route('payments.index')];
+        }
+
+        if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
+            $actions[] = ['title' => 'Messages aux parents', 'text' => 'Rediger, approuver ou consulter les messages.', 'url' => route('announcements.index')];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin])) {

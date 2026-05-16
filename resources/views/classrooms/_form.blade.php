@@ -7,6 +7,7 @@
     <div>
         <label for="level" class="label">Niveau</label>
         <input id="level" name="level" type="text" required value="{{ old('level', $classroom->level ?? '') }}" class="field">
+        <p class="mt-2 text-xs text-slate-500">Exemples: CM1, CM2, SIL, Class 1, Nursery 2.</p>
     </div>
 
     <div>
@@ -32,7 +33,7 @@
     </div>
 
     <div>
-        <label for="main_teacher_id" class="label">Enseignant principal</label>
+        <label for="main_teacher_id" class="label">Enseignant titulaire</label>
         <select id="main_teacher_id" name="main_teacher_id" class="field">
             <option value="">Aucun</option>
             @foreach ($teachers as $teacher)
@@ -53,5 +54,8 @@
                 </option>
             @endforeach
         </select>
+        <p class="mt-2 text-xs text-slate-500">
+            Pour les classes primaires francophones ou anglophones, la plateforme demande deux enseignants differents.
+        </p>
     </div>
 </div>

@@ -47,6 +47,29 @@
     </div>
 
     <div>
+        <label for="department" class="label">Service</label>
+        <select id="department" name="department" class="field">
+            <option value="">Selectionner</option>
+            @foreach ($departments as $value => $label)
+                <option value="{{ $value }}" @selected(old('department', $managedUser->department?->value ?? '') === $value)>
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label for="job_title" class="label">Fonction</label>
+        <input
+            id="job_title"
+            name="job_title"
+            type="text"
+            value="{{ old('job_title', $managedUser->job_title ?? '') }}"
+            class="field"
+        >
+    </div>
+
+    <div>
         <label for="password" class="label">Mot de passe</label>
         <input id="password" name="password" type="password" class="field">
     </div>

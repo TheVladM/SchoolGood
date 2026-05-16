@@ -68,6 +68,7 @@
 
                     <div class="mobile-record__meta">
                         <p><span class="font-semibold text-slate-900">Telephone:</span> {{ $managedUser->phone ?: '-' }}</p>
+                        <p><span class="font-semibold text-slate-900">Service:</span> {{ $managedUser->department?->label() ?: '-' }}</p>
                     </div>
 
                     <div class="record-actions">
@@ -92,6 +93,7 @@
                         <th>Nom</th>
                         <th>Email</th>
                         <th>Telephone</th>
+                        <th>Service</th>
                         <th>Role</th>
                         <th class="text-right">Actions</th>
                     </tr>
@@ -102,6 +104,7 @@
                             <td class="font-semibold text-slate-900">{{ $managedUser->name }}</td>
                             <td>{{ $managedUser->email }}</td>
                             <td>{{ $managedUser->phone ?: '-' }}</td>
+                            <td>{{ $managedUser->department?->label() ?: '-' }}</td>
                             <td><span class="badge">{{ $managedUser->role?->label() }}</span></td>
                             <td>
                                 <div class="record-actions justify-end">

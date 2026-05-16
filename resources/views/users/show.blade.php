@@ -8,6 +8,8 @@
             <div class="mt-6 space-y-3 text-sm text-slate-600">
                 <p><span class="font-semibold text-slate-900">Email:</span> {{ $managedUser->email }}</p>
                 <p><span class="font-semibold text-slate-900">Telephone:</span> {{ $managedUser->phone ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Service:</span> {{ $managedUser->department?->label() ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Fonction:</span> {{ $managedUser->job_title ?: '-' }}</p>
             </div>
         </article>
 
