@@ -19,7 +19,15 @@ class PaymentController extends Controller
 {
     public function index(Request $request): View
     {
-        $this->authorizePaymentAccess($request->user());
+        // Seul les rôles autorisés peuvent voir les paiements
+        abort_unless(
+            in_array($request->user()->role->value, [
+                UserRole::Founder->value,
+                UserRole::Scolarite->value,
+                UserRole::Parent->value,
+            ]),
+            403
+        );
 
         $payments = $this->visiblePaymentsQuery($request->user())
             ->with(['student.classroom'])
@@ -31,7 +39,7 @@ class PaymentController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizePaymentManagement($request->user());
+        $this->authorize('create', Payment::class);
 
         return view('payments.create', [
             'students' => Student::with('classroom')->orderBy('last_name')->get(),
@@ -43,7 +51,7 @@ class PaymentController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizePaymentManagement($request->user());
+        $this->authorize('create', Payment::class);
 
         Payment::create($this->normalizedPaymentData($request->user(), $this->validatedData($request)));
 
@@ -54,8 +62,7 @@ class PaymentController extends Controller
 
     public function show(Request $request, Payment $payment): View
     {
-        $this->authorizePaymentAccess($request->user());
-        $this->ensurePaymentVisible($request->user(), $payment);
+        $this->authorize('view', $payment);
         $payment->load(['student.classroom', 'student.parent', 'receivedBy', 'validatedBy']);
 
         return view('payments.show', ['payment' => $payment]);
@@ -63,7 +70,7 @@ class PaymentController extends Controller
 
     public function edit(Request $request, Payment $payment): View
     {
-        $this->authorizePaymentManagement($request->user());
+        $this->authorize('update', $payment);
 
         return view('payments.edit', [
             'payment' => $payment,
@@ -76,7 +83,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment): RedirectResponse
     {
-        $this->authorizePaymentManagement($request->user());
+        $this->authorize('update', $payment);
 
         $payment->update($this->normalizedPaymentData($request->user(), $this->validatedData($request), $payment));
 
@@ -87,7 +94,7 @@ class PaymentController extends Controller
 
     public function destroy(Request $request, Payment $payment): RedirectResponse
     {
-        $this->authorizePaymentManagement($request->user());
+        $this->authorize('delete', $payment);
 
         $payment->delete();
 

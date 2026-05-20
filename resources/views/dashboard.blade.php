@@ -17,6 +17,10 @@
             $actions[] = ['title' => 'Emprunts', 'text' => 'Voir les sorties, retours et retards.', 'url' => route('book-loans.index')];
         }
 
+        if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher])) {
+            $actions[] = ['title' => 'Devoirs', 'text' => 'Creer, consulter et suivre les devoirs.', 'url' => route('homeworks.index')];
+        }
+
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
             $actions[] = ['title' => 'Annees scolaires', 'text' => 'Piloter l historique et les promotions.', 'url' => route('school-years.index')];
         }
@@ -129,6 +133,27 @@
                             @endforelse
                         </div>
                     </div>
+
+                    @isset($recentHomeworks)
+                        <div class="helper-card">
+                            <p class="helper-card__title">Devoirs recents</p>
+                            <div class="timeline-list mt-4">
+                                @forelse ($recentHomeworks as $homework)
+                                    <article class="timeline-item">
+                                        <p class="timeline-item__title">{{ Str::limit($homework->title, 20) }}</p>
+                                        <p class="timeline-item__meta">
+                                            {{ $homework->classroom?->name }} 
+                                            @if ($homework->isOverdue())
+                                                <span class="text-red-600 ml-1">⚠️</span>
+                                            @endif
+                                        </p>
+                                    </article>
+                                @empty
+                                    <p class="text-fade text-sm">Aucun devoir a afficher pour ce profil.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endisset
                 </div>
             </article>
         </div>

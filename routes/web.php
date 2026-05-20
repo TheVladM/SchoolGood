@@ -7,10 +7,12 @@ use App\Http\Controllers\BookLoanController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SchoolYearController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TimetableEntryController;
+use App\Http\Controllers\TuitionFeeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +48,8 @@ Route::middleware('auth')->group(function (): void {
     Route::resource('book-loans', BookLoanController::class);
     Route::post('/book-loans/{bookLoan}/return', [BookLoanController::class, 'returnLoan'])
         ->name('book-loans.return');
+    Route::resource('tuition-fees', TuitionFeeController::class)->middleware('role:fondateur');
+    Route::resource('homeworks', HomeworkController::class);
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

@@ -32,6 +32,8 @@ class UserController extends Controller
 
     public function create(Request $request): View
     {
+        $this->authorize('create', User::class);
+
         return view('users.create', [
             'roles' => $this->availableRoles($request->user()),
             'departments' => UserDepartment::options(),
@@ -40,6 +42,8 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', User::class);
+
         $data = $this->normalizedUserData($this->validatedData($request));
         $this->guardFounderRole($request->user(), $data['role']);
 
@@ -52,6 +56,8 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
+        $this->authorize('view', $user);
+
         $user->loadCount(['children', 'courses', 'mainClassrooms']);
 
         return view('users.show', ['managedUser' => $user]);
@@ -59,7 +65,7 @@ class UserController extends Controller
 
     public function edit(Request $request, User $user): View
     {
-        $this->guardProtectedFounder($request->user(), $user);
+        $this->authorize('update', $user);
 
         return view('users.edit', [
             'managedUser' => $user,
@@ -70,7 +76,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        $this->guardProtectedFounder($request->user(), $user);
+        $this->authorize('update', $user);
 
         $data = $this->normalizedUserData($this->validatedData($request, $user));
         $this->guardFounderRole($request->user(), $data['role'], $user);
@@ -94,7 +100,7 @@ class UserController extends Controller
             'Vous ne pouvez pas supprimer votre propre compte.'
         );
 
-        $this->guardProtectedFounder($request->user(), $user);
+        $this->authorize('delete', $user);
 
         $user->delete();
 

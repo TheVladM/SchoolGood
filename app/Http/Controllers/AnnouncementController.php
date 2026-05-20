@@ -32,11 +32,7 @@ class AnnouncementController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Announcement::class);
 
         return view('announcements.create', [
             'audiences' => AnnouncementAudience::options(),
@@ -46,11 +42,7 @@ class AnnouncementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Announcement::class);
 
         $data = $this->validatedData($request);
         $data['author_id'] = $request->user()->id;
@@ -74,7 +66,7 @@ class AnnouncementController extends Controller
 
     public function edit(Request $request, Announcement $announcement): View
     {
-        $this->ensureAnnouncementEditable($request->user(), $announcement);
+        $this->authorize('update', $announcement);
 
         return view('announcements.edit', [
             'announcement' => $announcement,
@@ -85,7 +77,7 @@ class AnnouncementController extends Controller
 
     public function update(Request $request, Announcement $announcement): RedirectResponse
     {
-        $this->ensureAnnouncementEditable($request->user(), $announcement);
+        $this->authorize('update', $announcement);
 
         $data = $this->validatedData($request);
         $data = $this->applyApprovalWorkflow($request->user(), $data, $announcement);
@@ -99,7 +91,7 @@ class AnnouncementController extends Controller
 
     public function destroy(Request $request, Announcement $announcement): RedirectResponse
     {
-        $this->ensureAnnouncementEditable($request->user(), $announcement);
+        $this->authorize('delete', $announcement);
 
         $announcement->delete();
 
@@ -110,7 +102,7 @@ class AnnouncementController extends Controller
 
     public function approve(Request $request, Announcement $announcement): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [UserRole::Founder]);
+        $this->authorize('approve', $announcement);
 
         $announcement->update([
             'status' => AnnouncementStatus::Approved,
@@ -123,7 +115,7 @@ class AnnouncementController extends Controller
 
     public function reject(Request $request, Announcement $announcement): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [UserRole::Founder]);
+        $this->authorize('reject', $announcement);
 
         $announcement->update([
             'status' => AnnouncementStatus::Rejected,

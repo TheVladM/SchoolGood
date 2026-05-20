@@ -19,8 +19,6 @@ class BookLoanController extends Controller
 {
     public function index(Request $request): View
     {
-        $this->authorizeBookLoanAccess($request->user());
-
         $loans = $this->visibleLoansQuery($request->user())
             ->with(['book', 'student', 'user', 'issuedBy', 'returnedBy'])
             ->latest()
@@ -31,7 +29,7 @@ class BookLoanController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('create', BookLoan::class);
 
         return view('book_loans.create', [
             'books' => Book::orderBy('title')->get(),
@@ -42,7 +40,7 @@ class BookLoanController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('create', BookLoan::class);
 
         $data = $this->normalizedData($request, $this->validatedData($request));
 
@@ -57,8 +55,7 @@ class BookLoanController extends Controller
 
     public function show(Request $request, BookLoan $bookLoan): View
     {
-        $this->authorizeBookLoanAccess($request->user());
-        $this->ensureBookLoanVisible($request->user(), $bookLoan);
+        $this->authorize('view', $bookLoan);
 
         $bookLoan->load(['book', 'student', 'user', 'issuedBy', 'returnedBy']);
 
@@ -67,7 +64,7 @@ class BookLoanController extends Controller
 
     public function edit(Request $request, BookLoan $bookLoan): View
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('update', $bookLoan);
 
         return view('book_loans.edit', [
             'loan' => $bookLoan,
@@ -79,7 +76,7 @@ class BookLoanController extends Controller
 
     public function update(Request $request, BookLoan $bookLoan): RedirectResponse
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('update', $bookLoan);
 
         $bookLoan->update($this->normalizedData($request, $this->validatedData($request), $bookLoan));
 
@@ -90,7 +87,7 @@ class BookLoanController extends Controller
 
     public function destroy(Request $request, BookLoan $bookLoan): RedirectResponse
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('delete', $bookLoan);
 
         abort_if(
             blank($bookLoan->returned_at),
@@ -107,7 +104,7 @@ class BookLoanController extends Controller
 
     public function returnLoan(Request $request, BookLoan $bookLoan): RedirectResponse
     {
-        $this->authorizeBookLoanManagement($request->user());
+        $this->authorize('return', $bookLoan);
 
         abort_if(
             filled($bookLoan->returned_at),

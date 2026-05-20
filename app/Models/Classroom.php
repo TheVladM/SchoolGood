@@ -71,4 +71,37 @@ class Classroom extends Model
             ")
             ->orderBy('start_time');
     }
+
+    /**
+     * Check if the classroom has a valid teacher configuration.
+     * For levels SIL to CM2, there should be both main and language teachers.
+     */
+    public function hasValidTeacherConfiguration(): bool
+    {
+        // Levels that require two teachers
+        $multiTeacherLevels = ['SIL', 'CP', 'CE1', 'CE2', 'CM1', 'CM2'];
+
+        if (in_array($this->level, $multiTeacherLevels)) {
+            return $this->main_teacher_id && $this->language_teacher_id && 
+                   $this->main_teacher_id !== $this->language_teacher_id;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the related classroom with opposite language (francophone <-> anglophone)
+     */
+    public function getRelatedLanguageClassroom(): ?self
+    {
+        // For a francophone classroom teaching anglais, find the corresponding anglophone class
+        // or vice versa
+        $oppositeSection = $this->section === ClassroomSection::Francophone 
+            ? ClassroomSection::Anglophone 
+            : ClassroomSection::Francophone;
+
+        return static::where('level', $this->level)
+            ->where('section', $oppositeSection)
+            ->first();
+    }
 }

@@ -14,8 +14,6 @@ class BookController extends Controller
 {
     public function index(Request $request): View
     {
-        $this->authorizeBookAccess($request->user());
-
         $books = Book::query()
             ->with('managedBy')
             ->withCount(['activeLoans', 'loans'])
@@ -27,14 +25,14 @@ class BookController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeBookManagement($request->user());
+        $this->authorize('create', Book::class);
 
         return view('books.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeBookManagement($request->user());
+        $this->authorize('create', Book::class);
 
         $data = $this->validatedData($request);
         $data['managed_by_id'] = $request->user()->id;
@@ -48,7 +46,7 @@ class BookController extends Controller
 
     public function show(Request $request, Book $book): View
     {
-        $this->authorizeBookAccess($request->user());
+        $this->authorize('view', $book);
 
         $book->load([
             'managedBy',

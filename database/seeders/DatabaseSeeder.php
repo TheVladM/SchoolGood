@@ -18,11 +18,13 @@ use App\Models\Book;
 use App\Models\BookLoan;
 use App\Models\Classroom;
 use App\Models\Course;
+use App\Models\Homework;
 use App\Models\Payment;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Models\StudentSchoolYearRecord;
 use App\Models\TimetableEntry;
+use App\Models\TuitionFee;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -328,6 +330,92 @@ class DatabaseSeeder extends Seeder
                 'notes' => 'Preparation de sequence pedagogique.',
                 'issued_by_id' => $scolarite->id,
                 'returned_by_id' => $scolarite->id,
+            ]
+        );
+
+        // Frais de scolarité par niveau et section
+        TuitionFee::updateOrCreate(
+            ['level' => 'CM1', 'section' => ClassroomSection::Francophone],
+            [
+                'registration_fee' => 35000,
+                'first_installment' => 50000,
+                'second_installment' => 50000,
+                'third_installment' => 50000,
+                'notes' => 'Tarifs pour la classe CM1 francophone',
+                'managed_by_id' => $founder->id,
+            ]
+        );
+
+        TuitionFee::updateOrCreate(
+            ['level' => 'CM2', 'section' => ClassroomSection::Francophone],
+            [
+                'registration_fee' => 35000,
+                'first_installment' => 55000,
+                'second_installment' => 55000,
+                'third_installment' => 55000,
+                'notes' => 'Tarifs pour la classe CM2 francophone',
+                'managed_by_id' => $founder->id,
+            ]
+        );
+
+        TuitionFee::updateOrCreate(
+            ['level' => 'CM1', 'section' => ClassroomSection::Anglophone],
+            [
+                'registration_fee' => 40000,
+                'first_installment' => 55000,
+                'second_installment' => 55000,
+                'third_installment' => 55000,
+                'notes' => 'Tarifs pour la classe CM1 anglophone',
+                'managed_by_id' => $founder->id,
+            ]
+        );
+
+        TuitionFee::updateOrCreate(
+            ['level' => 'CM2', 'section' => ClassroomSection::Anglophone],
+            [
+                'registration_fee' => 40000,
+                'first_installment' => 60000,
+                'second_installment' => 60000,
+                'third_installment' => 60000,
+                'notes' => 'Tarifs pour la classe CM2 anglophone',
+                'managed_by_id' => $founder->id,
+            ]
+        );
+
+        // Devoirs pour les classes
+        Homework::updateOrCreate(
+            ['title' => 'Problemes de mathematiques'],
+            [
+                'description' => 'Resolver les 10 problemes pages 45-46 du cahier.',
+                'subject' => 'Mathematiques',
+                'teacher_id' => $mainTeacher->id,
+                'classroom_id' => $classroom->id,
+                'due_date' => now()->addDays(3),
+                'status' => 'assigned',
+            ]
+        );
+
+        Homework::updateOrCreate(
+            ['title' => 'Reading comprehension exercise'],
+            [
+                'description' => 'Read chapter 5 of "Young English Readers" and answer the questions.',
+                'subject' => 'English',
+                'teacher_id' => $languageTeacher->id,
+                'classroom_id' => $classroom->id,
+                'due_date' => now()->addDays(2),
+                'status' => 'assigned',
+            ]
+        );
+
+        Homework::updateOrCreate(
+            ['title' => 'Redaction sur les saisons'],
+            [
+                'description' => 'Ecrire une redaction de 10 lignes minimum sur la saison preferee.',
+                'subject' => 'Francais',
+                'teacher_id' => $mainTeacher->id,
+                'classroom_id' => $classroom->id,
+                'due_date' => now()->addDays(5),
+                'status' => 'assigned',
             ]
         );
     }

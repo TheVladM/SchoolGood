@@ -28,11 +28,7 @@ class ClassroomController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Classroom::class);
 
         return view('classrooms.create', [
             'teachers' => User::where('role', UserRole::Teacher->value)->orderBy('name')->get(),
@@ -42,11 +38,7 @@ class ClassroomController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Classroom::class);
 
         Classroom::create($this->validatedData($request));
 
@@ -80,11 +72,7 @@ class ClassroomController extends Controller
 
     public function update(Request $request, Classroom $classroom): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('update', $classroom);
 
         $classroom->update($this->validatedData($request, $classroom));
 
@@ -95,11 +83,7 @@ class ClassroomController extends Controller
 
     public function destroy(Request $request, Classroom $classroom): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('delete', $classroom);
 
         $classroom->delete();
 

@@ -6,6 +6,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Models\Classroom;
 use App\Models\Course;
+use App\Models\Homework;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\User;
@@ -49,12 +50,12 @@ class DashboardController extends Controller
 
             return [
                 'headline' => 'Vue parent',
-                'subheadline' => 'Suivez les inscriptions, les paiements et les classes de vos enfants.',
+                'subheadline' => 'Suivez les inscriptions, les paiements, les classes et les devoirs de vos enfants.',
                 'cards' => [
                     ['label' => 'Enfants', 'value' => $children->count()],
                     ['label' => 'Classes', 'value' => $classroomIds->count()],
                     ['label' => 'Paiements payes', 'value' => Payment::whereIn('student_id', $childIds)->where('status', PaymentStatus::Paid->value)->count()],
-                    ['label' => 'Paiements en attente', 'value' => Payment::whereIn('student_id', $childIds)->where('status', PaymentStatus::Pending->value)->count()],
+                    ['label' => 'Devoirs actifs', 'value' => Homework::whereIn('classroom_id', $classroomIds)->where('due_date', '>', now())->count()],
                 ],
                 'recentStudents' => $children,
                 'recentCourses' => Course::with(['classroom', 'teacher'])
@@ -63,6 +64,11 @@ class DashboardController extends Controller
                     ->take(5)
                     ->get(),
                 'recentPayments' => $payments,
+                'recentHomeworks' => Homework::with(['classroom', 'teacher'])
+                    ->whereIn('classroom_id', $classroomIds)
+                    ->orderBy('due_date', 'asc')
+                    ->take(5)
+                    ->get(),
             ];
         }
 
@@ -80,12 +86,12 @@ class DashboardController extends Controller
 
             return [
                 'headline' => 'Vue enseignant',
-                'subheadline' => 'Retrouvez vos classes attribuees, vos cours et les eleves associes.',
+                'subheadline' => 'Retrouvez vos classes attribuees, vos cours, vos devoirs et les eleves associes.',
                 'cards' => [
                     ['label' => 'Mes classes', 'value' => $classrooms->count()],
                     ['label' => 'Mes cours', 'value' => Course::where('teacher_id', $user->id)->count()],
+                    ['label' => 'Mes devoirs', 'value' => Homework::where('teacher_id', $user->id)->count()],
                     ['label' => 'Eleves suivis', 'value' => Student::whereIn('classroom_id', $classroomIds)->count()],
-                    ['label' => 'Parents relies', 'value' => Student::whereIn('classroom_id', $classroomIds)->distinct('parent_id')->count('parent_id')],
                 ],
                 'recentStudents' => Student::with(['classroom', 'parent'])
                     ->whereIn('classroom_id', $classroomIds)
@@ -97,21 +103,27 @@ class DashboardController extends Controller
                     ->latest()
                     ->take(5)
                     ->get(),
+                'recentHomeworks' => Homework::with(['classroom', 'teacher'])
+                    ->where('teacher_id', $user->id)
+                    ->orderBy('due_date', 'asc')
+                    ->take(5)
+                    ->get(),
                 'recentPayments' => collect(),
             ];
         }
 
         return [
             'headline' => 'Vue administration',
-            'subheadline' => 'Pilotez l\'etablissement, les affectations et les encaissements depuis un seul tableau de bord.',
+            'subheadline' => 'Pilotez l\'etablissement, les affectations, les devoirs et les encaissements depuis un seul tableau de bord.',
             'cards' => [
                 ['label' => 'Eleves', 'value' => Student::count()],
                 ['label' => 'Enseignants', 'value' => User::where('role', UserRole::Teacher->value)->count()],
                 ['label' => 'Classes', 'value' => Classroom::count()],
-                ['label' => 'Paiements payes', 'value' => Payment::where('status', PaymentStatus::Paid->value)->count()],
+                ['label' => 'Devoirs', 'value' => Homework::count()],
             ],
             'recentStudents' => Student::with(['classroom', 'parent'])->latest()->take(5)->get(),
             'recentCourses' => Course::with(['classroom', 'teacher'])->latest()->take(5)->get(),
+            'recentHomeworks' => Homework::with(['classroom', 'teacher'])->latest()->take(5)->get(),
             'recentPayments' => Payment::with('student')->latest()->take(5)->get(),
         ];
     }

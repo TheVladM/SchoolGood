@@ -1,128 +1,394 @@
-# schoolGood
+# SchoolGood - School Management System
 
-`schoolGood` est une application de gestion scolaire développée avec Laravel 13 et PHP 8.3.
+A comprehensive Laravel-based school management system for organizing students, classes, courses, payments, library management, and administrative operations.
 
-Elle permet de gérer :
-- les utilisateurs et rôles
-- les élèves et inscriptions scolaires
-- les cours, classes et emplois du temps
-- la bibliothèque et les emprunts de livres
-- les paiements et relevés financiers
-- les annonces internes
+## 📋 Features
 
-## Prérequis
+### Core Management
+- **Student Management**: Track students across classroom levels (CM1/CM2) and sections (Francophone/Anglophone)
+- **Classroom Management**: Organize classes with two-teacher configuration (main teacher + language teacher)
+- **Course Management**: Schedule courses by day with teacher assignments
+- **User Management**: Role-based access control with 5 user types (Founder, Admin, Scolarite, Teacher, Parent)
 
-- PHP 8.3+
+### Academic Features
+- **Homework System**: Teachers assign homework with due dates, students submit, teachers grade
+- **School Years**: Manage academic years with automatic student promotion and archiving
+- **Timetable**: Track course schedules organized by day
+
+### Financial Management
+- **Payment Tracking**: Multiple payment types (registration, installments) with validation workflow
+- **Tuition Fees**: Configurable fees by classroom level and section
+  - CM1 Francophone: 185,000 CFA (35K registration + 3 × 50K installments)
+  - CM2 Francophone: 200,000 CFA (35K registration + 3 × 55K installments)
+  - CM1 Anglophone: 205,000 CFA (40K registration + 3 × 55K installments)
+  - CM2 Anglophone: 220,000 CFA (40K registration + 3 × 60K installments)
+
+### Library Management
+- **Book Inventory**: Track books with ISBN, categories, languages, and availability
+- **Loan System**: Manage book loans with automatic penalty calculations for overdue returns
+- **Penalty Tracking**: Late fees calculated per day
+
+### Communications
+- **Announcements**: Internal messaging system with founder approval workflow
+- **Dashboard**: Role-personalized dashboards showing relevant statistics and activity
+
+### Authorization & Security
+- **Policies**: Fine-grained access control via 8 Laravel Policies
+- **Founder Protection**: Immutable founder user (cannot be modified or deleted)
+- **Two-Teacher Validation**: SIL-CM2 classrooms require two different teachers
+- **Role-Based Access**: Founder, Admin, Scolarite, Teacher, Parent with appropriate permissions
+
+## 🚀 Quick Start
+
+### Prerequisites
+- PHP 8.3.30+
+- MySQL or SQLite
 - Composer
-- Node.js + npm
-- SQLite (ou tout autre base de données prise en charge par Laravel)
+- Node.js 18+
+- Laragon (for Windows development)
 
-## Installation
+### Installation
 
-1. Cloner le dépôt
-
+1. **Clone and setup**
 ```bash
-git clone <url-du-repo> schoolGood
-cd schoolGood
-```
-
-2. Installer les dépendances PHP
-
-```bash
+cd c:\laragon\www\SchoolGood
 composer install
-```
-
-3. Copier le fichier de configuration d'environnement
-
-```bash
-copy .env.example .env
-```
-
-4. Générer la clé d'application
-
-```bash
-php artisan key:generate
-```
-
-5. Préparer la base de données SQLite
-
-```bash
-if not exist database\database.sqlite type nul > database\database.sqlite
-```
-
-6. Lancer les migrations
-
-```bash
-php artisan migrate --force
-```
-
-7. Installer les dépendances front-end
-
-```bash
 npm install
 ```
 
-8. Compiler les assets
+2. **Configure environment**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
+3. **Setup database**
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+4. **Build assets**
+```bash
+npm run build
+# or for development with watch:
+npm run dev
+```
+
+5. **Start server**
+```bash
+php artisan serve
+# Access at http://127.0.0.1:8000
+```
+
+### Test Users (From Seeder)
+
+| Email | Password | Role |
+|-------|----------|------|
+| founder@schoolgood.test | password | Founder |
+| admin@schoolgood.test | password | Admin |
+| scolarite@schoolgood.test | password | Scolarite |
+| teacher1@schoolgood.test | password | Teacher |
+| teacher2@schoolgood.test | password | Teacher |
+| parent@schoolgood.test | password | Parent |
+
+## 📁 Project Structure
+
+```
+app/
+  Enums/              # Enum definitions (UserRole, ClassroomSection, PaymentStatus, etc.)
+  Http/
+    Controllers/      # Web controllers for CRUD operations
+    Controllers/Api/  # RESTful API controllers
+    Resources/        # JSON serialization resources for API
+    Middleware/       # Request middleware
+  Models/             # Eloquent models (User, Student, Course, Payment, etc.)
+  Policies/           # Authorization policies (8 total)
+  Providers/          # Service providers (AuthServiceProvider registers all policies)
+
+database/
+  migrations/         # Database schema migrations (17 total)
+  seeders/            # Test data seeders
+  factories/          # Model factories for testing
+
+resources/views/      # Blade templates
+  homeworks/          # Homework CRUD views
+  dashboard.blade.php # Role-personalized dashboard
+
+routes/
+  web.php             # Web routes for all resources
+  api.php             # RESTful API routes (Sanctum authenticated)
+
+tests/
+  Feature/            # Feature tests (controller behavior)
+  Unit/               # Unit tests (policies, models)
+```
+
+## 🔒 Authorization Matrix
+
+### Policies (8 Total)
+
+| Resource | Founder | Admin | Scolarite | Teacher | Parent |
+|----------|---------|-------|-----------|---------|--------|
+| User | Manage all | Manage non-founder | None | None | View self |
+| Classroom | View all | View all | Manage | Teach | View children |
+| Course | View all | View all | Manage | Create/teach own | View |
+| Student | View all | View all | Manage | View in class | View own children |
+| Payment | Validate | Validate | Create/manage | None | View own |
+| Homework | Manage all | Manage all | None | Create/manage own | View children's |
+| Announcement | Approve all | Approve | Create | Create | View approved |
+| TuitionFee | Manage | View | View | View | View |
+
+### Founder Protection
+- Founder cannot be modified by any user
+- Founder role immutable
+- Founder cannot be soft-deleted
+- Enforced via `UserPolicy::update()` and `delete()`
+
+## 🛠️ API Documentation
+
+### Authentication
+
+All API endpoints require Sanctum token authentication:
+
+```bash
+Authorization: Bearer {token}
+```
+
+### API Endpoints
+
+#### Homeworks
+- `GET /api/homeworks` - List homeworks with filtering
+- `POST /api/homeworks` - Create homework (teachers only)
+- `GET /api/homeworks/{id}` - Get homework details
+- `PATCH /api/homeworks/{id}` - Update homework (creator/admin/founder)
+- `DELETE /api/homeworks/{id}` - Delete homework (creator/admin/founder)
+
+**Filters:**
+- `classroom_id` - Filter by classroom
+- `teacher_id` - Filter by teacher
+- `status` - Filter by status (assigned/submitted/graded)
+- `search` - Search by title
+- `per_page` - Pagination (default: 15)
+
+#### Classrooms
+- `GET /api/classrooms` - List classrooms
+- `GET /api/classrooms/{id}` - Get classroom details
+
+**Filters:**
+- `section` - Filter by section (Francophone/Anglophone)
+- `level` - Filter by level (CM1/CM2)
+- `search` - Search by name
+- `per_page` - Pagination (default: 15)
+
+#### Students
+- `GET /api/students` - List students with filtering
+- `GET /api/students/{id}` - Get student details
+
+**Filters:**
+- `classroom_id` - Filter by classroom
+- `parent_id` - Filter by parent
+- `is_active` - Filter active/inactive
+- `search` - Search by first/last name
+- `per_page` - Pagination (default: 15)
+
+#### Courses
+- `GET /api/courses` - List courses with filtering
+- `GET /api/courses/{id}` - Get course details
+
+**Filters:**
+- `classroom_id` - Filter by classroom
+- `teacher_id` - Filter by teacher
+- `day` - Filter by day (Monday-Saturday)
+- `search` - Search by title
+- `per_page` - Pagination (default: 15)
+
+### JSON Response Format
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Math Homework",
+      "subject": "Mathematics",
+      "status": "assigned",
+      "due_date": "2026-05-20T15:00:00Z",
+      "classroom": {
+        "id": 1,
+        "name": "CM1 A",
+        "level": "CM1",
+        "section": "Francophone"
+      },
+      "teacher": {
+        "id": 4,
+        "name": "Mr. Jean",
+        "email": "teacher1@schoolgood.test",
+        "role": "Teacher"
+      }
+    }
+  ],
+  "meta": {
+    "total": 15,
+    "per_page": 15,
+    "current_page": 1,
+    "last_page": 1
+  }
+}
+```
+
+## 📊 Database Schema (17 Migrations)
+
+### Core Tables
+- `users` - User accounts with roles and departments
+- `students` - Student records with parent relationships
+- `classrooms` - Classroom definitions with two-teacher configuration
+- `courses` - Course schedules with teacher assignments
+- `school_years` - Academic year tracking with promotion
+- `student_school_year_records` - Historical student enrollment
+
+### Financial Tables
+- `payments` - Payment tracking with validation workflow
+- `tuition_fees` - Fee rates by level and section
+
+### Academic Tables
+- `homeworks` - Teacher assignments with due dates
+- `timetable_entries` - Course schedule details
+- `books` - Library inventory
+- `book_loans` - Loan tracking with penalty calculations
+
+### Communication
+- `announcements` - Internal messages with approval workflow
+
+### System
+- `cache` - Cache storage
+- `jobs` - Background job queue
+
+## 🧪 Testing
+
+### Run All Tests
+```bash
+php artisan test
+```
+
+### Run Specific Test Suite
+```bash
+php artisan test --filter=HomeworkPolicyTest
+php artisan test tests/Feature/Http/Controllers/HomeworkControllerTest
+```
+
+### Test Database
+- Uses SQLite in-memory database
+- RefreshDatabase trait runs migrations before each test
+- Factories generate test data automatically
+
+## 📝 Models & Relationships
+
+### User
+- `hasMany` homeworks (as teacher)
+- `hasMany` courses (as teacher)
+- `hasMany` announcements (as author)
+- `hasMany` payments (as validator)
+- `hasMany` students (as parent)
+- `hasMany` tuitionFees (as manager)
+
+### Classroom
+- `belongsTo` User (main_teacher)
+- `belongsTo` User (language_teacher)
+- `hasMany` students
+- `hasMany` courses
+- `hasMany` homeworks
+
+### Student
+- `belongsTo` User (parent)
+- `belongsTo` Classroom
+- `hasMany` payments
+
+### Homework
+- `belongsTo` User (teacher)
+- `belongsTo` Classroom
+- `hasManyThrough` Students (via classroom)
+
+### Course
+- `belongsTo` User (teacher)
+- `belongsTo` Classroom
+
+### Payment
+- `belongsTo` Student
+- `belongsTo` User (validated_by)
+
+## 🔧 Configuration
+
+### Environment Variables (.env)
+```
+APP_NAME=SchoolGood
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=SchoolGood
+DB_USERNAME=root
+DB_PASSWORD=
+
+SANCTUM_STATEFUL_DOMAINS=localhost:8000
+```
+
+### Cache Configuration
+```bash
+php artisan config:cache
+php artisan config:clear
+```
+
+## 📱 Frontend
+
+- **Framework**: Laravel Blade templates
+- **Styling**: Tailwind CSS (resources/css/app.css)
+- **Build Tool**: Vite
+- **Responsiveness**: Mobile-first design with media breakpoints
+
+### Key Views
+- Homework management (index, create, edit, show)
+- Role-personalized dashboard
+- Student/classroom/course management
+- Payment tracking
+
+## 🚢 Deployment
+
+1. **Build for production**
 ```bash
 npm run build
 ```
 
-## Exécution en développement
-
-Lancer l'application avec Laravel et Vite :
-
+2. **Cache configuration**
 ```bash
-php artisan serve
-npm run dev
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
-Vous pouvez aussi utiliser le script npm suivant si vous souhaitez démarrer plusieurs services :
-
+3. **Database migrations**
 ```bash
-npm run dev
+php artisan migrate --force
 ```
 
-## Commandes utiles
-
-- `php artisan migrate` : exécuter les migrations
-- `php artisan db:seed` : exécuter les seeders
-- `php artisan test` : lancer les tests
-- `npm run build` : compiler les assets pour la production
-- `npm run dev` : démarrer Vite en mode développement
-
-## Structure du projet
-
-- `app/Models` : modèles Eloquent
-- `app/Http/Controllers` : contrôleurs de l'application
-- `database/migrations` : migrations de base de données
-- `resources/views` : vues Blade
-- `routes/web.php` : routes web
-- `vite.config.js` : configuration Vite
-
-## Fonctionnalités principales
-
-- Gestion des rôles utilisateurs (Fondateur, Administrateur, Scolarité, Enseignant, etc.)
-- Espace bibliothèque avec création, modification, suppression et emprunts
-- Gestion des élèves, des inscriptions et des années scolaires
-- Suivi des paiements et validation des transactions
-- Publication et affichage d'annonces internes
-
-## Tests
-
-Pour lancer le suite de tests :
-
+4. **Background jobs (if configured)**
 ```bash
-composer test
+php artisan queue:work
 ```
 
-## Contribution
+## 📞 Support
 
-1. Forkez le dépôt
-2. Créez une branche feature : `git checkout -b feature/ma-fonctionnalite`
-3. Faites vos modifications
-4. Soumettez une pull request
+For issues, features, or questions, contact the development team.
 
-## Licence
+## 📄 License
 
-Ce projet et developpe par des etudiants de la promo 2027 de cybersecurite de l'ecole nationale superieure polytechnique de yaounde.
+Ce projet est développé par des étudiants de la promo 2027 de cybersécurité de l'école nationale supérieure polytechnique de Yaoundé.
+
+---
+
+**Last Updated**: May 2026
+**Laravel Version**: 13
+**PHP Version**: 8.3.30
+**Database**: MySQL/SQLite
