@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
-abstract class Controller
+abstract class Controller extends BaseController
 {
+    use AuthorizesRequests;
     protected function authorizeRoles(User $user, array $roles): void
     {
         abort_unless(
