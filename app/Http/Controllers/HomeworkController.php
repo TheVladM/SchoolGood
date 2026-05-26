@@ -17,8 +17,18 @@ class HomeworkController extends Controller
     {
         $this->authorize('viewAny', Homework::class);
         
-        $homeworks = Homework::with(['teacher', 'classroom'])
-            ->orderBy('due_date', 'desc')
+        $query = Homework::with(['teacher', 'classroom']);
+        
+        // Parents only see homeworks for their children's classrooms
+        if (auth()->user()->role === \App\Enums\UserRole::Parent) {
+            $childrenClassroomIds = auth()->user()->children()
+                ->pluck('classroom_id')
+                ->toArray();
+            
+            $query->whereIn('classroom_id', $childrenClassroomIds);
+        }
+        
+        $homeworks = $query->orderBy('due_date', 'desc')
             ->paginate(15);
         
         return view('homeworks.index', compact('homeworks'));
@@ -32,7 +42,7 @@ class HomeworkController extends Controller
         $this->authorize('create', Homework::class);
         
         $classrooms = Classroom::all();
-        $teachers = User::where('role', 'teacher')->get();
+        $teachers = User::where('role', \App\Enums\UserRole::Teacher)->get();
         
         return view('homeworks.create', compact('classrooms', 'teachers'));
     }
@@ -69,7 +79,7 @@ class HomeworkController extends Controller
         $this->authorize('update', $homework);
         
         $classrooms = Classroom::all();
-        $teachers = User::where('role', 'teacher')->get();
+        $teachers = User::where('role', \App\Enums\UserRole::Teacher)->get();
         
         return view('homeworks.edit', compact('homework', 'classrooms', 'teachers'));
     }
@@ -108,8 +118,11 @@ class HomeworkController extends Controller
             'subject' => 'nullable|string|max:100',
             'teacher_id' => 'required|exists:users,id',
             'classroom_id' => 'required|exists:classrooms,id',
-            'due_date' => 'required|date_format:Y-m-d H:i|after:now',
+            'due_date' => 'required|date_format:Y-m-d\TH:i|after:now',
             'attachments' => 'nullable|array',
+        ], [
+            'due_date.date_format' => 'La date limite doit être au format YYYY-MM-DD HH:MM (ex: 2026-05-28 15:30)',
+            'due_date.after' => 'La date limite doit être dans le futur',
         ]);
     }
 }

@@ -14,6 +14,8 @@
             'homework' => null,
             'action' => route('homeworks.store'),
             'method' => 'POST',
+            'classrooms' => $classrooms,
+            'teachers' => $teachers,
         ])
     </section>
 @endsection

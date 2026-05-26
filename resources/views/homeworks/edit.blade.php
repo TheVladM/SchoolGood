@@ -14,6 +14,8 @@
             'homework' => $homework,
             'action' => route('homeworks.update', $homework),
             'method' => 'PATCH',
+            'classrooms' => $classrooms,
+            'teachers' => $teachers,
         ])
     </section>
 @endsection

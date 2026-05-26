@@ -11,8 +11,8 @@ class HomeworkPolicy
     public function viewAny(User $user): bool
     {
         // Founder, Admin, Scolarite, Teachers can view all homeworks
-        // Parents can only view their children's homeworks
-        return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite, UserRole::Teacher]);
+        // Parents can view their children's homeworks
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite, UserRole::Teacher, UserRole::Parent]);
     }
 
     public function view(User $user, Homework $homework): bool

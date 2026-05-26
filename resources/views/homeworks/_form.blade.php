@@ -64,9 +64,13 @@
             >
                 <option value="">-- Sélectionner un enseignant --</option>
                 @foreach ($teachers as $teacher)
+                    @php
+                        // Pré-sélectionner l'enseignant courant s'il est enseignant
+                        $selectedTeacherId = old('teacher_id', $homework?->teacher_id) ?? (auth()->user()->role === \App\Enums\UserRole::Teacher ? auth()->user()->id : null);
+                    @endphp
                     <option 
                         value="{{ $teacher->id }}"
-                        @selected(old('teacher_id', $homework?->teacher_id) == $teacher->id)
+                        @selected($selectedTeacherId == $teacher->id)
                     >
                         {{ $teacher->name }}
                     </option>

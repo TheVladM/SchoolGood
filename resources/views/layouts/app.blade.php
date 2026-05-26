@@ -41,13 +41,6 @@
                         'caption' => 'Planning et contenu',
                     ],
                     [
-                        'route' => 'homeworks.*',
-                        'url' => route('homeworks.index'),
-                        'label' => 'Devoirs',
-                        'eyebrow' => 'Pedagogie',
-                        'caption' => 'Travaux et echances',
-                    ],
-                    [
                         'route' => 'timetable-entries.*',
                         'url' => route('timetable-entries.index'),
                         'label' => 'Emplois du temps',
@@ -119,7 +112,6 @@
                     request()->routeIs('students.*') => 'Eleves',
                     request()->routeIs('classrooms.*') => 'Classes',
                     request()->routeIs('courses.*') => 'Cours',
-                    request()->routeIs('homeworks.*') => 'Devoirs',
                     request()->routeIs('timetable-entries.*') => 'Emplois du temps',
                     request()->routeIs('school-years.*') => 'Annees scolaires',
                     request()->routeIs('books.*') => 'Bibliotheque',
