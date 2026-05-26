@@ -31,7 +31,9 @@
             </div>
 
             <div class="mt-6 flex gap-3">
-                <a href="{{ route('users.edit', $managedUser) }}" class="btn-primary">Modifier</a>
+                @can('update', $managedUser)
+                    <a href="{{ route('users.edit', $managedUser) }}" class="btn-primary">Modifier</a>
+                @endcan
                 <a href="{{ route('users.index') }}" class="btn-secondary">Retour</a>
             </div>
         </article>

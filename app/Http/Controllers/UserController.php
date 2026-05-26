@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserDepartment;
 use App\Enums\UserRole;
+use App\Enums\TeacherLanguage;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -78,6 +79,12 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
+        abort_if(
+            $user->hasRole(UserRole::Founder) && ! $request->user()->hasRole(UserRole::Founder),
+            403,
+            'Seul le fondateur peut modifier le compte du fondateur.'
+        );
+
         $data = $this->normalizedUserData($this->validatedData($request, $user));
         $this->guardFounderRole($request->user(), $data['role'], $user);
 
@@ -98,6 +105,12 @@ class UserController extends Controller
             $request->user()->is($user),
             422,
             'Vous ne pouvez pas supprimer votre propre compte.'
+        );
+
+        abort_if(
+            $user->hasRole(UserRole::Founder),
+            403,
+            'Le compte du fondateur ne peut pas etre supprime.'
         );
 
         $this->authorize('delete', $user);
@@ -122,6 +135,7 @@ class UserController extends Controller
             'role' => ['required', Rule::enum(UserRole::class)],
             'department' => ['nullable', Rule::enum(UserDepartment::class)],
             'job_title' => ['nullable', 'string', 'max:255'],
+            'teaches_language' => ['nullable', Rule::enum(TeacherLanguage::class)],
             'password' => $passwordRules,
         ]);
     }
@@ -165,6 +179,16 @@ class UserController extends Controller
     {
         if ($data['role'] === UserRole::Teacher->value) {
             $data['department'] = UserDepartment::Teaching->value;
+            
+            // Ensure teacher has a language set
+            if (blank($data['teaches_language'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'teaches_language' => 'Veuillez renseigner la langue d\'enseignement du professeur.',
+                ]);
+            }
+        } else {
+            // Non-teachers should have null teaches_language
+            $data['teaches_language'] = null;
         }
 
         if ($data['role'] === UserRole::Scolarite->value && blank($data['department'] ?? null)) {

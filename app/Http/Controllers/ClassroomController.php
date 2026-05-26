@@ -134,6 +134,7 @@ class ClassroomController extends Controller
         }
 
         if (filled($data['main_teacher_id'] ?? null)) {
+            // Check if teacher already is titulaire in another class
             $alreadyTitular = Classroom::query()
                 ->where('main_teacher_id', $data['main_teacher_id'])
                 ->when($classroom, fn ($query) => $query->whereKeyNot($classroom->id))
@@ -142,6 +143,14 @@ class ClassroomController extends Controller
             if ($alreadyTitular) {
                 throw ValidationException::withMessages([
                     'main_teacher_id' => 'Un enseignant ne peut etre titulaire que d une seule classe.',
+                ]);
+            }
+
+            // Check if teacher language matches classroom section
+            $mainTeacher = User::find($data['main_teacher_id']);
+            if (!$this->isTeacherLanguageCompatible($mainTeacher, $data['section'])) {
+                throw ValidationException::withMessages([
+                    'main_teacher_id' => 'La langue d\'enseignement du titulaire ne correspond pas a la section de la classe.',
                 ]);
             }
         }
@@ -197,4 +206,36 @@ class ClassroomController extends Controller
             'class 6',
         ], true);
     }
+
+    private function isTeacherLanguageCompatible(User $teacher, string $classroomSection): bool
+    {
+        $teacherLanguage = $teacher->teaches_language?->value;
+        
+        // If teacher is bilingual, compatible with all sections
+        if ($teacherLanguage === 'bilingual') {
+            return true;
+        }
+
+        // Check language compatibility
+        if ($classroomSection === ClassroomSection::Francophone->value) {
+            return in_array($teacherLanguage, ['french', 'bilingual']);
+        }
+
+        if ($classroomSection === ClassroomSection::Anglophone->value) {
+            return in_array($teacherLanguage, ['english', 'bilingual']);
+        }
+
+        // Bilingue classrooms accept all teacher languages
+        return true;
+    }
+
+    private function authorizeRoles(User $user, array $allowedRoles): void
+    {
+        abort_unless(
+            in_array($user->role, $allowedRoles, true),
+            403,
+            'Vous n\'avez pas la permission d\'acceder a cette ressource.'
+        );
+    }
 }
+

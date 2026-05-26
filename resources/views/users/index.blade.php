@@ -73,14 +73,18 @@
 
                     <div class="record-actions">
                         <a href="{{ route('users.show', $managedUser) }}" class="btn-secondary">Voir</a>
-                        <a href="{{ route('users.edit', $managedUser) }}" class="btn-secondary">Modifier</a>
-                        <form method="POST" action="{{ route('users.destroy', $managedUser) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet utilisateur ?')">
-                                Supprimer
-                            </button>
-                        </form>
+                        @can('update', $managedUser)
+                            <a href="{{ route('users.edit', $managedUser) }}" class="btn-secondary">Modifier</a>
+                        @endcan
+                        @can('delete', $managedUser)
+                            <form method="POST" action="{{ route('users.destroy', $managedUser) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet utilisateur ?')">
+                                    Supprimer
+                                </button>
+                            </form>
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -109,14 +113,18 @@
                             <td>
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('users.show', $managedUser) }}" class="btn-secondary">Voir</a>
-                                    <a href="{{ route('users.edit', $managedUser) }}" class="btn-secondary">Modifier</a>
-                                    <form method="POST" action="{{ route('users.destroy', $managedUser) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet utilisateur ?')">
-                                            Supprimer
-                                        </button>
-                                    </form>
+                                    @can('update', $managedUser)
+                                        <a href="{{ route('users.edit', $managedUser) }}" class="btn-secondary">Modifier</a>
+                                    @endcan
+                                    @can('delete', $managedUser)
+                                        <form method="POST" action="{{ route('users.destroy', $managedUser) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet utilisateur ?')">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

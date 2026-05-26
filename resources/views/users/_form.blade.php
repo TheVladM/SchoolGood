@@ -47,8 +47,8 @@
     </div>
 
     <div>
-        <label for="department" class="label">Service</label>
-        <select id="department" name="department" class="field">
+        <label for="department" class="label" id="department_label">Service</label>
+        <select id="department" name="department" class="field transition-all" disabled>
             <option value="">Selectionner</option>
             @foreach ($departments as $value => $label)
                 <option value="{{ $value }}" @selected(old('department', $managedUser->department?->value ?? '') === $value)>
@@ -59,13 +59,24 @@
     </div>
 
     <div>
-        <label for="job_title" class="label">Fonction</label>
+        <label for="teaches_language" class="label" id="teaches_language_label">Langue d'enseignement</label>
+        <select id="teaches_language" name="teaches_language" class="field transition-all" style="display: none;">
+            <option value="">Selectionner</option>
+            <option value="french" @selected(old('teaches_language', $managedUser->teaches_language?->value ?? '') === 'french')>Français</option>
+            <option value="english" @selected(old('teaches_language', $managedUser->teaches_language?->value ?? '') === 'english')>Anglais</option>
+            <option value="bilingual" @selected(old('teaches_language', $managedUser->teaches_language?->value ?? '') === 'bilingual')>Bilingue</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="job_title" class="label" id="job_title_label">Fonction</label>
         <input
             id="job_title"
             name="job_title"
             type="text"
             value="{{ old('job_title', $managedUser->job_title ?? '') }}"
-            class="field"
+            class="field transition-all"
+            disabled
         >
     </div>
 
@@ -79,3 +90,81 @@
         <input id="password_confirmation" name="password_confirmation" type="password" class="field">
     </div>
 </div>
+
+<style>
+    /* Styles pour les champs disabled */
+    .field:disabled {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+        border-color: #e5e7eb;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    .field:disabled::placeholder {
+        color: #d1d5db;
+    }
+
+    .field:disabled:hover {
+        border-color: #e5e7eb;
+    }
+
+    /* Label pour les champs disabled */
+    label {
+        transition: color 0.2s ease;
+    }
+
+    .label.disabled-label {
+        color: #9ca3af;
+    }
+</style>
+
+<script>
+    // Gérer l'activation/désactivation des champs Service, Fonction et Langue
+    const roleSelect = document.getElementById('role');
+    const departmentSelect = document.getElementById('department');
+    const jobTitleInput = document.getElementById('job_title');
+    const teachesLanguageSelect = document.getElementById('teaches_language');
+    const departmentLabel = document.getElementById('department_label');
+    const jobTitleLabel = document.getElementById('job_title_label');
+    const teachesLanguageLabel = document.getElementById('teaches_language_label');
+
+    function updateFieldsState() {
+        const selectedRole = roleSelect.value;
+        const isParent = selectedRole === 'parent';
+        const isTeacher = selectedRole === 'teacher';
+
+        // Gérer la visibilité du champ langue d'enseignement (seulement pour les enseignants)
+        teachesLanguageSelect.style.display = isTeacher ? 'block' : 'none';
+        teachesLanguageLabel.style.display = isTeacher ? 'block' : 'none';
+
+        // Désactiver si Parent, activer sinon
+        departmentSelect.disabled = isParent;
+        jobTitleInput.disabled = isParent;
+
+        // Ajouter/Retirer la classe disabled-label
+        departmentLabel.classList.toggle('disabled-label', isParent);
+        jobTitleLabel.classList.toggle('disabled-label', isParent);
+
+        // Vider les champs si Parent et les désactiver
+        if (isParent) {
+            departmentSelect.value = '';
+            jobTitleInput.value = '';
+        }
+
+        // Si ce n'est pas un enseignant, vider le champ langue
+        if (!isTeacher) {
+            teachesLanguageSelect.value = '';
+        }
+    }
+
+    // Écouter les changements du rôle
+    roleSelect.addEventListener('change', updateFieldsState);
+    
+    // Initialiser l'état au chargement
+    updateFieldsState();
+
+
+    // Initialiser l'état au chargement
+    document.addEventListener('DOMContentLoaded', updateFieldsState);
+</script>

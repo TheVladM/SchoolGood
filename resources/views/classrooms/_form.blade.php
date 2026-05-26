@@ -34,10 +34,14 @@
 
     <div>
         <label for="main_teacher_id" class="label">Enseignant titulaire</label>
-        <select id="main_teacher_id" name="main_teacher_id" class="field">
+        <select id="main_teacher_id" name="main_teacher_id" class="field teacher-select">
             <option value="">Aucun</option>
             @foreach ($teachers as $teacher)
-                <option value="{{ $teacher->id }}" @selected(old('main_teacher_id', $classroom->main_teacher_id ?? '') == $teacher->id)>
+                <option 
+                    value="{{ $teacher->id }}" 
+                    data-language="{{ $teacher->teaches_language?->value ?? 'french' }}"
+                    @selected(old('main_teacher_id', $classroom->main_teacher_id ?? '') == $teacher->id)
+                >
                     {{ $teacher->name }}
                 </option>
             @endforeach
@@ -46,10 +50,14 @@
 
     <div class="md:col-span-2">
         <label for="language_teacher_id" class="label">Enseignant de langue</label>
-        <select id="language_teacher_id" name="language_teacher_id" class="field">
+        <select id="language_teacher_id" name="language_teacher_id" class="field teacher-select">
             <option value="">Aucun</option>
             @foreach ($teachers as $teacher)
-                <option value="{{ $teacher->id }}" @selected(old('language_teacher_id', $classroom->language_teacher_id ?? '') == $teacher->id)>
+                <option 
+                    value="{{ $teacher->id }}" 
+                    data-language="{{ $teacher->teaches_language?->value ?? 'french' }}"
+                    @selected(old('language_teacher_id', $classroom->language_teacher_id ?? '') == $teacher->id)
+                >
                     {{ $teacher->name }}
                 </option>
             @endforeach
@@ -59,3 +67,40 @@
         </p>
     </div>
 </div>
+
+<script>
+    // Filtrer les enseignants disponibles selon la section sélectionnée
+    const sectionSelect = document.getElementById('section');
+    const mainTeacherSelect = document.getElementById('main_teacher_id');
+    const languageTeacherSelect = document.getElementById('language_teacher_id');
+
+    function updateTeacherOptions() {
+        const selectedSection = sectionSelect.value;
+
+        // Parcourir les options des enseignants
+        [mainTeacherSelect, languageTeacherSelect].forEach(select => {
+            Array.from(select.options).forEach((option, index) => {
+                if (index === 0) return; // Skip "Aucun" option
+
+                const teacherLanguage = option.dataset.language;
+                let isVisible = true;
+
+                // Vérifier la compatibilité langue/section
+                if (selectedSection === 'francophone') {
+                    isVisible = ['french', 'bilingual'].includes(teacherLanguage);
+                } else if (selectedSection === 'anglophone') {
+                    isVisible = ['english', 'bilingual'].includes(teacherLanguage);
+                }
+
+                // Masquer ou afficher l'option
+                option.style.display = isVisible ? 'block' : 'none';
+            });
+        });
+    }
+
+    // Écouter les changements de section
+    sectionSelect.addEventListener('change', updateTeacherOptions);
+    
+    // Initialiser au chargement
+    updateTeacherOptions();
+

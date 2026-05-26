@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Enums\UserDepartment;
+use App\Enums\TeacherLanguage;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'role',
         'department',
         'job_title',
+        'teaches_language',
         'password',
     ];
 
@@ -41,6 +43,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'role' => UserRole::class,
             'department' => UserDepartment::class,
+            'teaches_language' => TeacherLanguage::class,
             'password' => 'hashed',
         ];
     }
