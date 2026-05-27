@@ -77,25 +77,45 @@
     function updateTeacherOptions() {
         const selectedSection = sectionSelect.value;
 
-        // Parcourir les options des enseignants
-        [mainTeacherSelect, languageTeacherSelect].forEach(select => {
-            Array.from(select.options).forEach((option, index) => {
+        // Pour le titulaire: montrer les enseignants avec la même langue que la section
+        if (mainTeacherSelect) {
+            Array.from(mainTeacherSelect.options).forEach((option, index) => {
                 if (index === 0) return; // Skip "Aucun" option
 
                 const teacherLanguage = option.dataset.language;
                 let isVisible = true;
 
-                // Vérifier la compatibilité langue/section
+                // Vérifier la compatibilité langue/section pour le TITULAIRE
                 if (selectedSection === 'francophone') {
                     isVisible = ['french', 'bilingual'].includes(teacherLanguage);
                 } else if (selectedSection === 'anglophone') {
                     isVisible = ['english', 'bilingual'].includes(teacherLanguage);
                 }
 
-                // Masquer ou afficher l'option
                 option.style.display = isVisible ? 'block' : 'none';
             });
-        });
+        }
+
+        // Pour l'enseignant de langue: montrer les enseignants avec la LANGUE OPPOSÉE à la section
+        if (languageTeacherSelect) {
+            Array.from(languageTeacherSelect.options).forEach((option, index) => {
+                if (index === 0) return; // Skip "Aucun" option
+
+                const teacherLanguage = option.dataset.language;
+                let isVisible = true;
+
+                // Vérifier la compatibilité inverse pour l'ENSEIGNANT DE LANGUE
+                // Si section = francophone, l'enseignant de langue doit être anglais/bilingue
+                // Si section = anglophone, l'enseignant de langue doit être français/bilingue
+                if (selectedSection === 'francophone') {
+                    isVisible = ['english', 'bilingual'].includes(teacherLanguage);
+                } else if (selectedSection === 'anglophone') {
+                    isVisible = ['french', 'bilingual'].includes(teacherLanguage);
+                }
+
+                option.style.display = isVisible ? 'block' : 'none';
+            });
+        }
     }
 
     // Écouter les changements de section
@@ -103,4 +123,4 @@
     
     // Initialiser au chargement
     updateTeacherOptions();
-
+</script>

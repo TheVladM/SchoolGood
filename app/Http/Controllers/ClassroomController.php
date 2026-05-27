@@ -229,7 +229,7 @@ class ClassroomController extends Controller
         return true;
     }
 
-    private function authorizeRoles(User $user, array $allowedRoles): void
+    protected function authorizeRoles(User $user, array $allowedRoles): void
     {
         abort_unless(
             in_array($user->role, $allowedRoles, true),
@@ -238,4 +238,3 @@ class ClassroomController extends Controller
         );
     }
 }
-
