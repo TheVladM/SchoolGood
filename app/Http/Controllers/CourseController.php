@@ -27,12 +27,7 @@ class CourseController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-            UserRole::Teacher,
-        ]);
+        $this->authorize('create', Course::class);
 
         return view('courses.create', [
             'classrooms' => $this->availableClassrooms($request->user()),
@@ -43,12 +38,7 @@ class CourseController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-            UserRole::Teacher,
-        ]);
+        $this->authorize('create', Course::class);
 
         $data = $this->validatedData($request);
 
@@ -65,7 +55,7 @@ class CourseController extends Controller
 
     public function show(Request $request, Course $course): View
     {
-        $this->ensureCourseVisible($request->user(), $course);
+        $this->authorize('view', $course);
         $course->load(['teacher', 'classroom']);
 
         return view('courses.show', ['course' => $course]);
@@ -73,7 +63,7 @@ class CourseController extends Controller
 
     public function edit(Request $request, Course $course): View
     {
-        $this->ensureCourseEditable($request->user(), $course);
+        $this->authorize('update', $course);
 
         return view('courses.edit', [
             'course' => $course,
@@ -85,7 +75,7 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course): RedirectResponse
     {
-        $this->ensureCourseEditable($request->user(), $course);
+        $this->authorize('update', $course);
 
         $data = $this->validatedData($request);
 
@@ -102,7 +92,7 @@ class CourseController extends Controller
 
     public function destroy(Request $request, Course $course): RedirectResponse
     {
-        $this->ensureCourseEditable($request->user(), $course);
+        $this->authorize('delete', $course);
 
         $course->delete();
 
@@ -145,21 +135,6 @@ class CourseController extends Controller
             403,
             'Vous ne pouvez pas consulter ce cours.'
         );
-    }
-
-    private function ensureCourseEditable(User $user, Course $course): void
-    {
-        if ($user->hasRole(UserRole::Teacher)) {
-            abort_unless($course->teacher_id === $user->id, 403, 'Vous ne pouvez modifier que vos propres cours.');
-
-            return;
-        }
-
-        $this->authorizeRoles($user, [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
     }
 
     private function availableTeachers(User $user)

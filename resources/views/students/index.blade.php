@@ -4,36 +4,16 @@
 @section('topbar_title', 'Eleves')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Vie scolaire</span>
-            <h2 class="page-hero__title">Reperer rapidement les eleves, leurs classes et leurs responsables.</h2>
-            <p class="page-hero__description">
-                Parcourez les inscriptions avec une lecture plus nette, une recherche locale instantanee
-                et des actions plus visibles.
-            </p>
-        </div>
+    @include('partials.page-header', [
+        'title' => 'Eleves',
+        'description' => 'Liste des inscriptions, classes et parents.',
+        'statLabel' => 'Total',
+        'statValue' => $students->total(),
+    ])
 
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Elements charges</p>
-                <p class="hero-stat__value">{{ $students->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Vue</p>
-                <p class="hero-stat__value">Eleves</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
-        <div class="toolbar">
-            <div>
-                <h2 class="section-title">Annuaire des eleves</h2>
-                <p class="section-subtitle">Recherchez par nom, parent, classe ou annee scolaire sans recharger la page.</p>
-            </div>
-
-            <div class="flex flex-wrap items-end gap-3">
+    <x-content-panel class="mt-1" data-filter-scope title="Annuaire" subtitle="Filtrez et recherchez sans recharger la page.">
+        <x-slot:toolbar>
+            <div class="content-panel__toolbar">
                 <form method="GET" class="flex flex-wrap items-end gap-3">
                     <label class="search-shell">
                         <span class="search-shell__label">Statut</span>
@@ -62,11 +42,11 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Nom, parent, classe ou statut" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\Student::class)
                     <a href="{{ route('students.create') }}" class="btn-primary self-end">Nouvel eleve</a>
-                @endif
+                @endcan
             </div>
-        </div>
+        </x-slot:toolbar>
 
         <div class="grid gap-4 md:hidden">
             @foreach ($students as $student)
@@ -87,8 +67,10 @@
                     <div class="record-actions">
                         <a href="{{ route('students.show', $student) }}" class="btn-secondary">Voir</a>
 
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                        @can('update', $student)
                             <a href="{{ route('students.edit', $student) }}" class="btn-secondary">Modifier</a>
+                        @endcan
+                        @can('delete', $student)
                             <form method="POST" action="{{ route('students.destroy', $student) }}">
                                 @csrf
                                 @method('DELETE')
@@ -96,7 +78,7 @@
                                     Supprimer
                                 </button>
                             </form>
-                        @endif
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -126,8 +108,10 @@
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('students.show', $student) }}" class="btn-secondary">Voir</a>
 
-                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                                    @can('update', $student)
                                         <a href="{{ route('students.edit', $student) }}" class="btn-secondary">Modifier</a>
+                                    @endcan
+                                    @can('delete', $student)
                                         <form method="POST" action="{{ route('students.destroy', $student) }}">
                                             @csrf
                                             @method('DELETE')
@@ -135,7 +119,7 @@
                                                 Supprimer
                                             </button>
                                         </form>
-                                    @endif
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -148,8 +132,8 @@
             Aucun eleve ne correspond a cette recherche.
         </div>
 
-        <div class="mt-6">
+        <div class="mt-6 pagination-wrap">
             {{ $students->links() }}
         </div>
-    </section>
+    </x-content-panel>
 @endsection

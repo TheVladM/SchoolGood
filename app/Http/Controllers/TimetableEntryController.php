@@ -29,7 +29,7 @@ class TimetableEntryController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeScheduleManagement($request->user());
+        $this->authorize('create', TimetableEntry::class);
 
         return view('timetable_entries.create', [
             'sections' => ClassroomSection::options(),
@@ -40,7 +40,7 @@ class TimetableEntryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeScheduleManagement($request->user());
+        $this->authorize('create', TimetableEntry::class);
 
         TimetableEntry::create($this->validatedData($request));
 
@@ -51,6 +51,7 @@ class TimetableEntryController extends Controller
 
     public function show(Request $request, TimetableEntry $timetableEntry): View
     {
+        $this->authorize('view', $timetableEntry);
         $this->ensureTimetableEntryVisible($request->user(), $timetableEntry);
 
         return view('timetable_entries.show', ['entry' => $timetableEntry]);
@@ -58,7 +59,7 @@ class TimetableEntryController extends Controller
 
     public function edit(Request $request, TimetableEntry $timetableEntry): View
     {
-        $this->authorizeScheduleManagement($request->user());
+        $this->authorize('update', $timetableEntry);
 
         return view('timetable_entries.edit', [
             'entry' => $timetableEntry,
@@ -70,7 +71,7 @@ class TimetableEntryController extends Controller
 
     public function update(Request $request, TimetableEntry $timetableEntry): RedirectResponse
     {
-        $this->authorizeScheduleManagement($request->user());
+        $this->authorize('update', $timetableEntry);
 
         $timetableEntry->update($this->validatedData($request));
 
@@ -81,7 +82,7 @@ class TimetableEntryController extends Controller
 
     public function destroy(Request $request, TimetableEntry $timetableEntry): RedirectResponse
     {
-        $this->authorizeScheduleManagement($request->user());
+        $this->authorize('delete', $timetableEntry);
 
         $timetableEntry->delete();
 
@@ -193,12 +194,4 @@ class TimetableEntryController extends Controller
         );
     }
 
-    private function authorizeScheduleManagement(User $user): void
-    {
-        $this->authorizeRoles($user, [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
-    }
 }

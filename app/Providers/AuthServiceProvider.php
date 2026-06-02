@@ -6,16 +6,22 @@ use App\Models\Announcement;
 use App\Models\Book;
 use App\Models\BookLoan;
 use App\Models\Classroom;
+use App\Models\Course;
 use App\Models\Homework;
 use App\Models\Payment;
+use App\Models\Student;
+use App\Models\TimetableEntry;
 use App\Models\TuitionFee;
 use App\Models\User;
 use App\Policies\AnnouncementPolicy;
 use App\Policies\BookLoanPolicy;
 use App\Policies\BookPolicy;
 use App\Policies\ClassroomPolicy;
+use App\Policies\CoursePolicy;
 use App\Policies\HomeworkPolicy;
 use App\Policies\PaymentPolicy;
+use App\Policies\StudentPolicy;
+use App\Policies\TimetableEntryPolicy;
 use App\Policies\TuitionFeePolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -34,6 +40,9 @@ class AuthServiceProvider extends ServiceProvider
         Book::class => BookPolicy::class,
         BookLoan::class => BookLoanPolicy::class,
         Classroom::class => ClassroomPolicy::class,
+        Student::class => StudentPolicy::class,
+        Course::class => CoursePolicy::class,
+        TimetableEntry::class => TimetableEntryPolicy::class,
         TuitionFee::class => TuitionFeePolicy::class,
         Homework::class => HomeworkPolicy::class,
     ];

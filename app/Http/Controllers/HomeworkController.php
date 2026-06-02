@@ -2,117 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Homework;
+use App\Enums\UserRole;
 use App\Models\Classroom;
+use App\Models\Homework;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class HomeworkController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $this->authorize('viewAny', Homework::class);
-        
+
+        $user = auth()->user();
         $query = Homework::with(['teacher', 'classroom']);
-        
-        // Parents only see homeworks for their children's classrooms
-        if (auth()->user()->role === \App\Enums\UserRole::Parent) {
-            $childrenClassroomIds = auth()->user()->children()
+
+        if ($user->role === UserRole::Parent) {
+            $childrenClassroomIds = $user->children()
                 ->pluck('classroom_id')
                 ->toArray();
-            
+
             $query->whereIn('classroom_id', $childrenClassroomIds);
         }
-        
+
+        if ($user->role === UserRole::Teacher) {
+            $query->where('teacher_id', $user->id);
+        }
+
         $homeworks = $query->orderBy('due_date', 'desc')
             ->paginate(15);
-        
+
         return view('homeworks.index', compact('homeworks'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $this->authorize('create', Homework::class);
-        
-        $classrooms = Classroom::all();
-        $teachers = User::where('role', \App\Enums\UserRole::Teacher)->get();
-        
-        return view('homeworks.create', compact('classrooms', 'teachers'));
+
+        return view('homeworks.create', [
+            'classrooms' => $this->availableClassrooms(),
+            'teachers' => $this->availableTeachers(),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         $this->authorize('create', Homework::class);
-        
+
         $data = $this->validatedData($request);
-        
+        $this->guardTeacherClassroom($request, $data);
+
         Homework::create($data);
-        
+
         return redirect()->route('homeworks.index')->with('success', 'Devoir créé avec succès');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Homework $homework)
     {
         $this->authorize('view', $homework);
-        
+
         return view('homeworks.show', compact('homework'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Homework $homework)
     {
         $this->authorize('update', $homework);
-        
-        $classrooms = Classroom::all();
-        $teachers = User::where('role', \App\Enums\UserRole::Teacher)->get();
-        
-        return view('homeworks.edit', compact('homework', 'classrooms', 'teachers'));
+
+        return view('homeworks.edit', [
+            'homework' => $homework,
+            'classrooms' => $this->availableClassrooms(),
+            'teachers' => $this->availableTeachers(),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Homework $homework): RedirectResponse
     {
         $this->authorize('update', $homework);
-        
+
         $data = $this->validatedData($request);
-        
+        $this->guardTeacherClassroom($request, $data);
+
         $homework->update($data);
-        
+
         return redirect()->route('homeworks.show', $homework)->with('success', 'Devoir mis à jour avec succès');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Homework $homework): RedirectResponse
     {
         $this->authorize('delete', $homework);
-        
+
         $homework->delete();
-        
+
         return redirect()->route('homeworks.index')->with('success', 'Devoir supprimé avec succès');
     }
 
     private function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'subject' => 'nullable|string|max:100',
@@ -124,5 +112,46 @@ class HomeworkController extends Controller
             'due_date.date_format' => 'La date limite doit être au format YYYY-MM-DD HH:MM (ex: 2026-05-28 15:30)',
             'due_date.after' => 'La date limite doit être dans le futur',
         ]);
+
+        if ($request->user()->hasRole(UserRole::Teacher)) {
+            $data['teacher_id'] = $request->user()->id;
+        }
+
+        return $data;
+    }
+
+    private function guardTeacherClassroom(Request $request, array $data): void
+    {
+        if (! $request->user()->hasRole(UserRole::Teacher)) {
+            return;
+        }
+
+        if (! $request->user()->teachesInClassroom((int) $data['classroom_id'])) {
+            throw ValidationException::withMessages([
+                'classroom_id' => 'Vous ne pouvez creer un devoir que pour une classe ou vous enseignez.',
+            ]);
+        }
+    }
+
+    private function availableClassrooms()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole(UserRole::Teacher)) {
+            return $user->assignedClassroomsQuery()->get();
+        }
+
+        return Classroom::orderBy('name')->get();
+    }
+
+    private function availableTeachers()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole(UserRole::Teacher)) {
+            return User::whereKey($user->id)->get();
+        }
+
+        return User::where('role', UserRole::Teacher)->orderBy('name')->get();
     }
 }

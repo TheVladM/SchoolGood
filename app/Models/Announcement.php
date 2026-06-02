@@ -18,6 +18,7 @@ class Announcement extends Model
         'audience',
         'status',
         'classroom_id',
+        'parent_id',
         'author_id',
         'approved_by_id',
         'approved_at',
@@ -35,6 +36,11 @@ class Announcement extends Model
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'parent_id');
     }
 
     public function author(): BelongsTo

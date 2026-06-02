@@ -1,199 +1,159 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard | schoolGood')
-@section('topbar_title', 'Dashboard')
+@section('title', 'Tableau de bord | SchoolGood')
+@section('topbar_title', 'Tableau de bord')
 
 @section('content')
     @php
         $actions = [
-            ['title' => 'Voir les eleves', 'text' => 'Consulter les fiches et les affectations.', 'url' => route('students.index')],
-            ['title' => 'Parcourir les classes', 'text' => 'Verifier les sections, salles et effectifs.', 'url' => route('classrooms.index')],
-            ['title' => 'Suivre les cours', 'text' => 'Retrouver le planning et les contenus.', 'url' => route('courses.index')],
-            ['title' => 'Voir les emplois du temps', 'text' => 'Retrouver les plages horaires par niveau.', 'url' => route('timetable-entries.index')],
+            ['title' => 'Eleves', 'url' => route('students.index'), 'icon' => 'users'],
+            ['title' => 'Classes', 'url' => route('classrooms.index'), 'icon' => 'building'],
+            ['title' => 'Cours', 'url' => route('courses.index'), 'icon' => 'book'],
+            ['title' => 'Emploi du temps', 'url' => route('timetable-entries.index'), 'icon' => 'calendar'],
         ];
 
         if (! auth()->user()->hasRole(\App\Enums\UserRole::Parent)) {
-            $actions[] = ['title' => 'Bibliotheque', 'text' => 'Suivre les livres et leur disponibilite.', 'url' => route('books.index')];
-            $actions[] = ['title' => 'Emprunts', 'text' => 'Voir les sorties, retours et retards.', 'url' => route('book-loans.index')];
+            $actions[] = ['title' => 'Bibliotheque', 'url' => route('books.index'), 'icon' => 'library'];
+            $actions[] = ['title' => 'Emprunts', 'url' => route('book-loans.index'), 'icon' => 'loan'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher])) {
-            $actions[] = ['title' => 'Devoirs', 'text' => 'Creer, consulter et suivre les devoirs.', 'url' => route('homeworks.index')];
+            $actions[] = ['title' => 'Devoirs', 'url' => route('homeworks.index'), 'icon' => 'clipboard'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
-            $actions[] = ['title' => 'Annees scolaires', 'text' => 'Piloter l historique et les promotions.', 'url' => route('school-years.index')];
+            $actions[] = ['title' => 'Annees scolaires', 'url' => route('school-years.index'), 'icon' => 'academic'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
-            $actions[] = ['title' => 'Verifier les paiements', 'text' => 'Suivre les tranches reglees et en attente.', 'url' => route('payments.index')];
+            $actions[] = ['title' => 'Paiements', 'url' => route('payments.index'), 'icon' => 'payment'];
         }
 
         if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
-            $actions[] = ['title' => 'Messages aux parents', 'text' => 'Rediger, approuver ou consulter les messages.', 'url' => route('announcements.index')];
+            $actions[] = ['title' => 'Messages', 'url' => route('announcements.index'), 'icon' => 'chat'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin])) {
-            $actions[] = ['title' => 'Gerer les utilisateurs', 'text' => 'Ajuster les profils et les roles.', 'url' => route('users.index')];
+            $actions[] = ['title' => 'Utilisateurs', 'url' => route('users.index'), 'icon' => 'user-group'];
         }
+
+        $statIcons = ['users', 'building', 'payment', 'clipboard'];
     @endphp
 
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">{{ auth()->user()->role?->label() }}</span>
-            <h2 class="page-hero__title">{{ $headline }}</h2>
-            <p class="page-hero__description">{{ $subheadline }}</p>
-
-            <div class="quick-grid mt-6">
-                @foreach (collect($actions)->take(4) as $action)
-                    <a href="{{ $action['url'] }}" class="quick-card">
-                        <p class="quick-card__title">{{ $action['title'] }}</p>
-                        <p class="quick-card__text">{{ $action['text'] }}</p>
-                    </a>
-                @endforeach
-            </div>
+    <section class="dash-hero" data-reveal>
+        <div class="dash-hero__copy">
+            <p class="dash-hero__greeting">Bonjour, {{ strtok(auth()->user()->name, ' ') }}</p>
+            <h2 class="dash-hero__title">{{ $headline }}</h2>
+            <p class="dash-hero__sub">{{ $subheadline }}</p>
         </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Aujourd hui</p>
-                <p class="hero-stat__value">{{ now()->format('d/m/Y') }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Session</p>
-                <p class="hero-stat__value">{{ auth()->user()->name }}</p>
-            </div>
-        </div>
+        <div class="dash-hero__orb" aria-hidden="true"></div>
     </section>
 
-    <section class="metric-grid mt-6" data-reveal>
-        @foreach ($stats['cards'] as $card)
-            <article class="metric-card">
-                <p class="metric-card__label">{{ $card['label'] }}</p>
-                <p class="metric-card__value" data-counter="{{ $card['value'] }}">0</p>
-                <div class="metric-card__accent"></div>
+    <section class="stat-grid" data-reveal>
+        @foreach ($stats['cards'] as $index => $card)
+            <article class="stat-card stat-card--{{ ($index % 4) + 1 }}">
+                <div class="stat-card__icon">
+                    <x-icon :name="$statIcons[$index % count($statIcons)]" class="icon icon--lg" />
+                </div>
+                <div>
+                    <p class="stat-card__label">{{ $card['label'] }}</p>
+                    <p class="stat-card__value" data-counter="{{ $card['value'] }}">0</p>
+                </div>
             </article>
         @endforeach
     </section>
 
-    <section class="mt-6 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
-        <div class="grid gap-6" data-reveal>
-            <article class="surface-card p-6">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 class="section-title">Flux d activite</h2>
-                        <p class="section-subtitle">Les informations les plus recentes pour garder le bon tempo.</p>
-                    </div>
-                    <span class="info-chip">Vue metier</span>
+    <div class="dash-layout">
+        <section class="content-panel" data-reveal>
+            <div class="content-panel__head">
+                <div>
+                    <h2 class="content-panel__title">Activite recente</h2>
+                    <p class="content-panel__subtitle">Dernieres mises a jour de votre espace</p>
                 </div>
-
-                <div class="mt-6 grid gap-4 lg:grid-cols-3">
-                    <div class="helper-card">
-                        <p class="helper-card__title">Eleves recents</p>
-                        <div class="timeline-list mt-4">
+            </div>
+            <div class="content-panel__body">
+                <div class="activity-grid">
+                    <div class="activity-block">
+                        <h3 class="activity-block__title">Eleves</h3>
+                        <ul class="activity-list">
                             @forelse ($recentStudents as $student)
-                                <article class="timeline-item">
-                                    <p class="timeline-item__title">{{ $student->full_name }}</p>
-                                    <p class="timeline-item__meta">{{ $student->classroom?->name ?? 'Classe non assignee' }}</p>
-                                </article>
+                                <li>
+                                    <span class="activity-list__dot"></span>
+                                    <span class="activity-list__main">{{ $student->full_name }}</span>
+                                    <span class="activity-list__meta">{{ $student->classroom?->name ?? '—' }}</span>
+                                </li>
                             @empty
-                                <p class="text-fade text-sm">Aucun eleve a afficher.</p>
+                                <li class="activity-list__empty">Rien a afficher</li>
                             @endforelse
-                        </div>
+                        </ul>
                     </div>
-
-                    <div class="helper-card">
-                        <p class="helper-card__title">Cours recents</p>
-                        <div class="timeline-list mt-4">
+                    <div class="activity-block">
+                        <h3 class="activity-block__title">Cours</h3>
+                        <ul class="activity-list">
                             @forelse ($recentCourses as $course)
-                                <article class="timeline-item">
-                                    <p class="timeline-item__title">{{ $course->title }}</p>
-                                    <p class="timeline-item__meta">
-                                        {{ $course->classroom?->name }} / {{ $course->teacher?->name }}
-                                    </p>
-                                </article>
+                                <li>
+                                    <span class="activity-list__dot activity-list__dot--violet"></span>
+                                    <span class="activity-list__main">{{ $course->title }}</span>
+                                    <span class="activity-list__meta">{{ $course->classroom?->name }}</span>
+                                </li>
                             @empty
-                                <p class="text-fade text-sm">Aucun cours a afficher.</p>
+                                <li class="activity-list__empty">Rien a afficher</li>
                             @endforelse
-                        </div>
+                        </ul>
                     </div>
-
-                    <div class="helper-card">
-                        <p class="helper-card__title">Paiements recents</p>
-                        <div class="timeline-list mt-4">
+                    <div class="activity-block">
+                        <h3 class="activity-block__title">Paiements</h3>
+                        <ul class="activity-list">
                             @forelse ($recentPayments as $payment)
-                                <article class="timeline-item">
-                                    <p class="timeline-item__title">{{ $payment->student?->full_name }}</p>
-                                    <p class="timeline-item__meta">
-                                        {{ $payment->type?->label() }} / {{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA
-                                    </p>
-                                </article>
+                                <li>
+                                    <span class="activity-list__dot activity-list__dot--amber"></span>
+                                    <span class="activity-list__main">{{ $payment->student?->full_name }}</span>
+                                    <span class="activity-list__meta">{{ number_format((float) $payment->amount, 0, ',', ' ') }} F</span>
+                                </li>
                             @empty
-                                <p class="text-fade text-sm">Aucun paiement a afficher pour ce profil.</p>
+                                <li class="activity-list__empty">Rien a afficher</li>
                             @endforelse
-                        </div>
+                        </ul>
                     </div>
-
                     @isset($recentHomeworks)
-                        <div class="helper-card">
-                            <p class="helper-card__title">Devoirs recents</p>
-                            <div class="timeline-list mt-4">
+                        <div class="activity-block">
+                            <h3 class="activity-block__title">Devoirs</h3>
+                            <ul class="activity-list">
                                 @forelse ($recentHomeworks as $homework)
-                                    <article class="timeline-item">
-                                        <p class="timeline-item__title">{{ Str::limit($homework->title, 20) }}</p>
-                                        <p class="timeline-item__meta">
-                                            {{ $homework->classroom?->name }} 
-                                            @if ($homework->isOverdue())
-                                                <span class="text-red-600 ml-1">⚠️</span>
-                                            @endif
-                                        </p>
-                                    </article>
+                                    <li>
+                                        <span class="activity-list__dot activity-list__dot--rose"></span>
+                                        <span class="activity-list__main">{{ Str::limit($homework->title, 24) }}</span>
+                                        <span class="activity-list__meta">{{ $homework->classroom?->name }}</span>
+                                    </li>
                                 @empty
-                                    <p class="text-fade text-sm">Aucun devoir a afficher pour ce profil.</p>
+                                    <li class="activity-list__empty">Rien a afficher</li>
                                 @endforelse
-                            </div>
+                            </ul>
                         </div>
                     @endisset
                 </div>
-            </article>
-        </div>
+            </div>
+        </section>
 
-        <aside class="grid gap-6" data-reveal>
-            <article class="surface-card p-6">
-                <h2 class="section-title">Acces rapides</h2>
-                <p class="section-subtitle">Les raccourcis utiles selon votre role actuel.</p>
-
-                <div class="mt-5 grid gap-3">
+        <aside class="content-panel" data-reveal>
+            <div class="content-panel__head">
+                <div>
+                    <h2 class="content-panel__title">Acces rapides</h2>
+                    <p class="content-panel__subtitle">Modules selon votre role</p>
+                </div>
+            </div>
+            <div class="content-panel__body">
+                <div class="shortcut-grid">
                     @foreach ($actions as $action)
-                        <a href="{{ $action['url'] }}" class="btn-secondary justify-between">
-                            <span>{{ $action['title'] }}</span>
-                            <span aria-hidden="true">+</span>
+                        <a href="{{ $action['url'] }}" class="shortcut-card">
+                            <span class="shortcut-card__icon">
+                                <x-icon :name="$action['icon']" class="icon" />
+                            </span>
+                            <span class="shortcut-card__label">{{ $action['title'] }}</span>
                         </a>
                     @endforeach
                 </div>
-            </article>
-
-            <article class="surface-card p-6">
-                <h2 class="section-title">Cadre de pilotage</h2>
-                <p class="section-subtitle">
-                    Une interface plus claire, plus mobile et plus orientee action pour l equipe schoolGood.
-                </p>
-
-                <div class="mt-5 space-y-4">
-                    <div class="helper-card">
-                        <p class="helper-card__title">Administration</p>
-                        <p class="helper-card__text">Centraliser les processus critiques dans des ecrans courts et lisibles.</p>
-                    </div>
-                    <div class="helper-card">
-                        <p class="helper-card__title">Navigation</p>
-                        <p class="helper-card__text">Passer d un module a l autre sans se perdre, meme sur mobile.</p>
-                    </div>
-                    <div class="helper-card">
-                        <p class="helper-card__title">Execution</p>
-                        <p class="helper-card__text">Aller plus vite sur les listes, les recherches locales et les formulaires.</p>
-                    </div>
-                </div>
-            </article>
+            </div>
         </aside>
-    </section>
+    </div>
 @endsection

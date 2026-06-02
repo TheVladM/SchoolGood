@@ -49,11 +49,7 @@ class StudentController extends Controller
 
     public function create(Request $request): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Student::class);
 
         return view('students.create', [
             'classrooms' => Classroom::orderBy('name')->get(),
@@ -65,11 +61,7 @@ class StudentController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('create', Student::class);
 
         [$studentData, $recordData] = $this->validatedData($request);
         $student = Student::create($studentData);
@@ -82,7 +74,7 @@ class StudentController extends Controller
 
     public function show(Request $request, Student $student): View
     {
-        $this->ensureStudentVisible($request->user(), $student);
+        $this->authorize('view', $student);
         $student->load(['classroom', 'parent', 'payments', 'schoolYearRecords.schoolYear', 'schoolYearRecords.classroom', 'bookLoans.book']);
 
         return view('students.show', ['student' => $student]);
@@ -90,11 +82,7 @@ class StudentController extends Controller
 
     public function edit(Request $request, Student $student): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('update', $student);
 
         return view('students.edit', [
             'student' => $student,
@@ -107,11 +95,7 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('update', $student);
 
         [$studentData, $recordData] = $this->validatedData($request);
         $student->update($studentData);
@@ -124,11 +108,7 @@ class StudentController extends Controller
 
     public function destroy(Request $request, Student $student): RedirectResponse
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('delete', $student);
 
         $currentRecord = $student->schoolYearRecords()->first();
 

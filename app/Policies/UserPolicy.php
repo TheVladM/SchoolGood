@@ -50,11 +50,6 @@ class UserPolicy
             return true;
         }
 
-        // Admin peut modifier tous les utilisateurs SAUF le fondateur
-        if ($user->role === UserRole::Admin) {
-            return $model->role !== UserRole::Founder;
-        }
-
         // Les utilisateurs ne peuvent se modifier que eux-mêmes
         return $user->is($model);
     }
@@ -72,11 +67,6 @@ class UserPolicy
         // Seul le fondateur peut supprimer des utilisateurs
         if ($user->role === UserRole::Founder) {
             return true;
-        }
-
-        // Admin ne peut supprimer que les non-fondateurs
-        if ($user->role === UserRole::Admin) {
-            return $model->role !== UserRole::Founder;
         }
 
         return false;

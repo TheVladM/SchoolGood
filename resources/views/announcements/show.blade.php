@@ -7,7 +7,8 @@
             <h1 class="mt-4 text-3xl font-black text-slate-900">{{ $announcement->title }}</h1>
             <div class="mt-6 space-y-3 text-sm text-slate-600">
                 <p><span class="font-semibold text-slate-900">Audience:</span> {{ $announcement->audience?->label() }}</p>
-                <p><span class="font-semibold text-slate-900">Classe:</span> {{ $announcement->classroom?->name ?: 'Toutes les familles' }}</p>
+                <p><span class="font-semibold text-slate-900">Classe:</span> {{ $announcement->classroom?->name ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Parent:</span> {{ $announcement->parent?->name ?: '-' }}</p>
                 <p><span class="font-semibold text-slate-900">Auteur:</span> {{ $announcement->author?->name ?: '-' }}</p>
                 <p><span class="font-semibold text-slate-900">Approuve par:</span> {{ $announcement->approver?->name ?: '-' }}</p>
                 <p><span class="font-semibold text-slate-900">Date d approbation:</span> {{ $announcement->approved_at?->format('d/m/Y H:i') ?: '-' }}</p>
@@ -30,19 +31,19 @@
                     <a href="{{ route('announcements.edit', $announcement) }}" class="btn-primary">Modifier</a>
                 @endif
 
-                @if (auth()->user()->hasRole(\App\Enums\UserRole::Founder) && $announcement->status !== \App\Enums\AnnouncementStatus::Approved)
+                @can('approve', $announcement)
                     <form method="POST" action="{{ route('announcements.approve', $announcement) }}">
                         @csrf
                         <button type="submit" class="btn-primary">Approuver</button>
                     </form>
-                @endif
+                @endcan
 
-                @if (auth()->user()->hasRole(\App\Enums\UserRole::Founder) && $announcement->status !== \App\Enums\AnnouncementStatus::Rejected)
+                @can('reject', $announcement)
                     <form method="POST" action="{{ route('announcements.reject', $announcement) }}">
                         @csrf
-                        <button type="submit" class="btn-danger">Invalider</button>
+                        <button type="submit" class="btn-danger">Refuser</button>
                     </form>
-                @endif
+                @endcan
             </div>
         </article>
     </section>

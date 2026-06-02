@@ -383,7 +383,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Devoirs pour les classes
-        Homework::updateOrCreate(
+        Homework::query()->from('homeworks')->updateOrCreate(
             ['title' => 'Problemes de mathematiques'],
             [
                 'description' => 'Resolver les 10 problemes pages 45-46 du cahier.',
@@ -395,7 +395,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Homework::updateOrCreate(
+        Homework::query()->from('homeworks')->updateOrCreate(
             ['title' => 'Reading comprehension exercise'],
             [
                 'description' => 'Read chapter 5 of "Young English Readers" and answer the questions.',
@@ -407,7 +407,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Homework::updateOrCreate(
+        Homework::query()->from('homeworks')->updateOrCreate(
             ['title' => 'Redaction sur les saisons'],
             [
                 'description' => 'Ecrire une redaction de 10 lignes minimum sur la saison preferee.',

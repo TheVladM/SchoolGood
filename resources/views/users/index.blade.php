@@ -4,26 +4,12 @@
 @section('topbar_title', 'Utilisateurs')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Gestion des acces</span>
-            <h2 class="page-hero__title">Piloter les comptes et les roles sans alourdir l experience admin.</h2>
-            <p class="page-hero__description">
-                Le front met l accent sur la lisibilite des profils, le filtrage rapide et les actions d administration.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Comptes</p>
-                <p class="hero-stat__value">{{ $users->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Roles disponibles</p>
-                <p class="hero-stat__value">{{ count($roles) }}</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Utilisateurs',
+        'description' => 'Comptes et roles de l etablissement.',
+        'statLabel' => 'Comptes',
+        'statValue' => $users->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">

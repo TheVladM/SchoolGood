@@ -6,12 +6,14 @@ enum AnnouncementAudience: string
 {
     case AllParents = 'all_parents';
     case Classroom = 'classroom';
+    case Parent = 'parent';
 
     public function label(): string
     {
         return match ($this) {
             self::AllParents => 'Tous les parents',
             self::Classroom => 'Parents d une classe',
+            self::Parent => 'Parent d un eleve',
         };
     }
 

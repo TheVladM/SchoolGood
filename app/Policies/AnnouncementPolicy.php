@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\AnnouncementAudience;
 use App\Enums\AnnouncementStatus;
 use App\Enums\UserRole;
 use App\Models\Announcement;
@@ -14,13 +15,23 @@ class AnnouncementPolicy
      */
     public function view(User $user, Announcement $model): bool
     {
-        // Les annonces approuvées sont visibles à tous
-        if ($model->status === AnnouncementStatus::Approved) {
-            return true;
+        if ($user->role === UserRole::Parent) {
+            if ($model->status !== AnnouncementStatus::Approved) {
+                return false;
+            }
+
+            return $this->targetsParent($user, $model);
         }
 
-        // L'auteur et le fondateur peuvent voir les annonces non approuvées
-        if ($user->is($model->author) || $user->role === UserRole::Founder) {
+        if (in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true)) {
+            if ($model->status === AnnouncementStatus::Approved) {
+                return true;
+            }
+
+            if ($user->role === UserRole::Scolarite) {
+                return $user->is($model->author);
+            }
+
             return true;
         }
 
@@ -58,8 +69,8 @@ class AnnouncementPolicy
      */
     public function approve(User $user, Announcement $model): bool
     {
-        // Seul le fondateur peut approuver les annonces
-        return $user->role === UserRole::Founder;
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true)
+            && $model->status === AnnouncementStatus::PendingApproval;
     }
 
     /**
@@ -67,8 +78,8 @@ class AnnouncementPolicy
      */
     public function reject(User $user, Announcement $model): bool
     {
-        // Seul le fondateur peut rejeter les annonces
-        return $user->role === UserRole::Founder;
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true)
+            && $model->status === AnnouncementStatus::PendingApproval;
     }
 
     /**
@@ -81,7 +92,18 @@ class AnnouncementPolicy
             return true;
         }
 
-        // Le fondateur peut supprimer toutes les annonces
-        return $user->role === UserRole::Founder;
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
+    }
+
+    private function targetsParent(User $user, Announcement $model): bool
+    {
+        return match ($model->audience) {
+            AnnouncementAudience::AllParents => true,
+            AnnouncementAudience::Classroom => $user->children()
+                ->where('classroom_id', $model->classroom_id)
+                ->exists(),
+            AnnouncementAudience::Parent => $model->parent_id === $user->id,
+            default => false,
+        };
     }
 }

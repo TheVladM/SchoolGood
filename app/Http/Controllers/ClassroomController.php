@@ -57,11 +57,7 @@ class ClassroomController extends Controller
 
     public function edit(Request $request, Classroom $classroom): View
     {
-        $this->authorizeRoles($request->user(), [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        $this->authorize('update', $classroom);
 
         return view('classrooms.edit', [
             'classroom' => $classroom,

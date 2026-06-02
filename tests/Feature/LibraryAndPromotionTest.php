@@ -173,9 +173,10 @@ class LibraryAndPromotionTest extends TestCase
         ]);
     }
 
-    public function test_scolarite_can_register_and_return_a_book_loan(): void
+    public function test_scolarite_can_return_a_book_loan_but_not_create_one(): void
     {
         $scolarite = User::factory()->create(['role' => UserRole::Scolarite]);
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
         $parent = User::factory()->create(['role' => UserRole::Parent]);
         $classroom = Classroom::create([
             'name' => 'CM1 A',
@@ -199,6 +200,14 @@ class LibraryAndPromotionTest extends TestCase
         ]);
 
         $this->actingAs($scolarite)
+            ->post(route('book-loans.store'), [
+                'book_id' => $book->id,
+                'student_id' => $student->id,
+                'borrowed_at' => '2026-05-16',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($admin)
             ->post(route('book-loans.store'), [
                 'book_id' => $book->id,
                 'student_id' => $student->id,

@@ -4,26 +4,12 @@
 @section('topbar_title', 'Cours')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Pedagogie</span>
-            <h2 class="page-hero__title">Mieux visualiser le planning des cours, les classes et les enseignants rattaches.</h2>
-            <p class="page-hero__description">
-                Le module pedagogique gagne en lisibilite, avec des actions plus visibles et une recherche locale plus rapide.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Cours</p>
-                <p class="hero-stat__value">{{ $courses->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Vue</p>
-                <p class="hero-stat__value">Planning</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Cours',
+        'description' => 'Planning, classes et enseignants.',
+        'statLabel' => 'Total',
+        'statValue' => $courses->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Cours, enseignant ou jour" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Teacher]))
+                @can('create', \App\Models\Course::class)
                     <a href="{{ route('courses.create') }}" class="btn-primary self-end">Nouveau cours</a>
-                @endif
+                @endcan
             </div>
         </div>
 
@@ -62,11 +48,10 @@
                     <div class="record-actions">
                         <a href="{{ route('courses.show', $course) }}" class="btn-secondary">Voir</a>
 
-                        @if (
-                            auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]) ||
-                            (auth()->user()->hasRole(\App\Enums\UserRole::Teacher) && $course->teacher_id === auth()->id())
-                        )
+                        @can('update', $course)
                             <a href="{{ route('courses.edit', $course) }}" class="btn-secondary">Modifier</a>
+                        @endcan
+                        @can('delete', $course)
                             <form method="POST" action="{{ route('courses.destroy', $course) }}">
                                 @csrf
                                 @method('DELETE')
@@ -74,7 +59,7 @@
                                     Supprimer
                                 </button>
                             </form>
-                        @endif
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -102,11 +87,10 @@
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('courses.show', $course) }}" class="btn-secondary">Voir</a>
 
-                                    @if (
-                                        auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]) ||
-                                        (auth()->user()->hasRole(\App\Enums\UserRole::Teacher) && $course->teacher_id === auth()->id())
-                                    )
+                                    @can('update', $course)
                                         <a href="{{ route('courses.edit', $course) }}" class="btn-secondary">Modifier</a>
+                                    @endcan
+                                    @can('delete', $course)
                                         <form method="POST" action="{{ route('courses.destroy', $course) }}">
                                             @csrf
                                             @method('DELETE')
@@ -114,7 +98,7 @@
                                                 Supprimer
                                             </button>
                                         </form>
-                                    @endif
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

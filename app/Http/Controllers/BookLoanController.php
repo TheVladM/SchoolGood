@@ -195,6 +195,10 @@ class BookLoanController extends Controller
 
     private function visibleLoansQuery(User $user): Builder
     {
+        if ($user->hasRole(UserRole::Parent)) {
+            return BookLoan::query()->whereHas('student', fn ($query) => $query->where('parent_id', $user->id));
+        }
+
         if ($user->hasRole(UserRole::Teacher)) {
             return BookLoan::query()->where('user_id', $user->id);
         }

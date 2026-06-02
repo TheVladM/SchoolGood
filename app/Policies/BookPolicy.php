@@ -22,8 +22,7 @@ class BookPolicy
      */
     public function create(User $user): bool
     {
-        // Seul Admin et Scolarite peuvent ajouter des livres
-        return in_array($user->role, [UserRole::Admin, UserRole::Scolarite]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 
     /**
@@ -31,8 +30,7 @@ class BookPolicy
      */
     public function update(User $user, Book $model): bool
     {
-        // Seul Admin et Scolarite peuvent modifier les livres
-        return in_array($user->role, [UserRole::Admin, UserRole::Scolarite]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 
     /**

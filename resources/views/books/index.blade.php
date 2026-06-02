@@ -4,26 +4,12 @@
 @section('topbar_title', 'Bibliotheque')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Ressources pedagogiques</span>
-            <h2 class="page-hero__title">Centraliser les livres physiques de l ecole et leur disponibilite en temps reel.</h2>
-            <p class="page-hero__description">
-                Le registre de bibliotheque facilite la tracabilite des exemplaires, des stocks et des emprunts encore ouverts.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Livres</p>
-                <p class="hero-stat__value">{{ $books->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Module</p>
-                <p class="hero-stat__value">Bibliotheque</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Bibliotheque',
+        'description' => 'Catalogue et disponibilite des ouvrages.',
+        'statLabel' => 'Livres',
+        'statValue' => $books->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Titre, auteur, categorie ou rayon" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\Book::class)
                     <a href="{{ route('books.create') }}" class="btn-primary self-end">Nouveau livre</a>
-                @endif
+                @endcan
             </div>
         </div>
 
@@ -62,9 +48,9 @@
 
                     <div class="record-actions">
                         <a href="{{ route('books.show', $book) }}" class="btn-secondary">Voir</a>
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                        @can('update', $book)
                             <a href="{{ route('books.edit', $book) }}" class="btn-secondary">Modifier</a>
-                        @endif
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -93,9 +79,9 @@
                             <td>
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('books.show', $book) }}" class="btn-secondary">Voir</a>
-                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                                    @can('update', $book)
                                         <a href="{{ route('books.edit', $book) }}" class="btn-secondary">Modifier</a>
-                                    @endif
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

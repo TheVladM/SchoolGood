@@ -22,12 +22,7 @@ class ClassroomPolicy
      */
     public function create(User $user): bool
     {
-        // Seul Admin, Fondateur et Scolarite peuvent créer les classes
-        return in_array($user->role, [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 
     /**
@@ -35,12 +30,7 @@ class ClassroomPolicy
      */
     public function update(User $user, Classroom $model): bool
     {
-        // Seul Admin, Fondateur et Scolarite peuvent modifier les classes
-        return in_array($user->role, [
-            UserRole::Founder,
-            UserRole::Admin,
-            UserRole::Scolarite,
-        ]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 
     /**

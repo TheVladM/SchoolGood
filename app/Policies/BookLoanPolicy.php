@@ -35,8 +35,7 @@ class BookLoanPolicy
      */
     public function create(User $user): bool
     {
-        // Seul Admin et Scolarite peuvent créer les emprunts
-        return in_array($user->role, [UserRole::Admin, UserRole::Scolarite]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 
     /**
@@ -44,8 +43,7 @@ class BookLoanPolicy
      */
     public function update(User $user, BookLoan $model): bool
     {
-        // Seul Admin et Scolarite peuvent modifier les emprunts
-        return in_array($user->role, [UserRole::Admin, UserRole::Scolarite]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true);
     }
 
     /**
@@ -53,8 +51,7 @@ class BookLoanPolicy
      */
     public function return(User $user, BookLoan $model): bool
     {
-        // Seul Admin et Scolarite peuvent traiter les retours
-        return in_array($user->role, [UserRole::Admin, UserRole::Scolarite]);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true);
     }
 
     /**

@@ -4,26 +4,12 @@
 @section('topbar_title', 'Emplois du temps')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Organisation des cours</span>
-            <h2 class="page-hero__title">Partager un meme emploi du temps a toutes les classes d un meme niveau.</h2>
-            <p class="page-hero__description">
-                Chaque plage horaire est definie par niveau et section pour eviter de ressaisir les memes horaires classe par classe.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Creneaux</p>
-                <p class="hero-stat__value">{{ $entries->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Vue</p>
-                <p class="hero-stat__value">Horaires</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Emploi du temps',
+        'description' => 'Creneaux par niveau et section.',
+        'statLabel' => 'Creneaux',
+        'statValue' => $entries->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Niveau, jour, section ou matiere" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\TimetableEntry::class)
                     <a href="{{ route('timetable-entries.create') }}" class="btn-primary self-end">Nouveau creneau</a>
-                @endif
+                @endcan
             </div>
         </div>
 
@@ -61,9 +47,9 @@
 
                     <div class="record-actions">
                         <a href="{{ route('timetable-entries.show', $entry) }}" class="btn-secondary">Voir</a>
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                        @can('update', $entry)
                             <a href="{{ route('timetable-entries.edit', $entry) }}" class="btn-secondary">Modifier</a>
-                        @endif
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -92,9 +78,9 @@
                             <td>
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('timetable-entries.show', $entry) }}" class="btn-secondary">Voir</a>
-                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                                    @can('update', $entry)
                                         <a href="{{ route('timetable-entries.edit', $entry) }}" class="btn-secondary">Modifier</a>
-                                    @endif
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

@@ -4,26 +4,12 @@
 @section('topbar_title', 'Paiements')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Finance scolaire</span>
-            <h2 class="page-hero__title">Suivre les paiements avec une lecture plus claire des montants, types et statuts.</h2>
-            <p class="page-hero__description">
-                Les encaissements sont plus faciles a parcourir et a filtrer, aussi bien pour l administration que pour les parents.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Paiements</p>
-                <p class="hero-stat__value">{{ $payments->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Lecture</p>
-                <p class="hero-stat__value">Finance</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Paiements',
+        'description' => 'Tranches, montants et statuts.',
+        'statLabel' => 'Operations',
+        'statValue' => $payments->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">

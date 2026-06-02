@@ -4,26 +4,12 @@
 @section('topbar_title', 'Emprunts')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Mouvements de bibliotheque</span>
-            <h2 class="page-hero__title">Suivre chaque sortie de livre, les retours attendus et les retards eventuels.</h2>
-            <p class="page-hero__description">
-                Chaque emprunt garde son emprunteur, sa date limite et la penalite journaliere applicable.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Emprunts</p>
-                <p class="hero-stat__value">{{ $loans->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Vue</p>
-                <p class="hero-stat__value">Tracabilite</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Emprunts',
+        'description' => 'Sorties, retours et penalites de retard.',
+        'statLabel' => 'Emprunts',
+        'statValue' => $loans->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Livre, eleve, enseignant ou statut" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\BookLoan::class)
                     <a href="{{ route('book-loans.create') }}" class="btn-primary self-end">Nouvel emprunt</a>
-                @endif
+                @endcan
             </div>
         </div>
 

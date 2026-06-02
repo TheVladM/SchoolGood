@@ -35,8 +35,12 @@ class AnnouncementController extends Controller
         $this->authorize('create', Announcement::class);
 
         return view('announcements.create', [
-            'audiences' => AnnouncementAudience::options(),
+            'audiences' => $this->audienceOptions($request->user()),
             'classrooms' => Classroom::orderBy('name')->get(),
+            'parents' => User::query()
+                ->where('role', UserRole::Parent->value)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -70,8 +74,12 @@ class AnnouncementController extends Controller
 
         return view('announcements.edit', [
             'announcement' => $announcement,
-            'audiences' => AnnouncementAudience::options(),
+            'audiences' => $this->audienceOptions($request->user()),
             'classrooms' => Classroom::orderBy('name')->get(),
+            'parents' => User::query()
+                ->where('role', UserRole::Parent->value)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -133,6 +141,10 @@ class AnnouncementController extends Controller
             'content' => ['required', 'string'],
             'audience' => ['required', Rule::enum(AnnouncementAudience::class)],
             'classroom_id' => ['nullable', 'exists:classrooms,id'],
+            'parent_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', UserRole::Parent->value)),
+            ],
         ]);
 
         if (
@@ -144,7 +156,25 @@ class AnnouncementController extends Controller
             ]);
         }
 
+        if (
+            $data['audience'] === AnnouncementAudience::Parent->value
+            && blank($data['parent_id'] ?? null)
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => 'Veuillez choisir le parent destinataire.',
+            ]);
+        }
+
         if ($data['audience'] === AnnouncementAudience::AllParents->value) {
+            $data['classroom_id'] = null;
+            $data['parent_id'] = null;
+        }
+
+        if ($data['audience'] === AnnouncementAudience::Classroom->value) {
+            $data['parent_id'] = null;
+        }
+
+        if ($data['audience'] === AnnouncementAudience::Parent->value) {
             $data['classroom_id'] = null;
         }
 
@@ -153,7 +183,7 @@ class AnnouncementController extends Controller
 
     private function applyApprovalWorkflow(User $user, array $data, ?Announcement $announcement = null): array
     {
-        if ($user->hasRole(UserRole::Founder)) {
+        if ($user->hasAnyRole([UserRole::Founder, UserRole::Admin])) {
             return array_merge($data, [
                 'status' => AnnouncementStatus::Approved,
                 'approved_by_id' => $user->id,
@@ -189,7 +219,7 @@ class AnnouncementController extends Controller
 
             return Announcement::query()
                 ->where('status', AnnouncementStatus::Approved->value)
-                ->where(function ($query) use ($classroomIds): void {
+                ->where(function ($query) use ($user, $classroomIds): void {
                     $query->where('audience', AnnouncementAudience::AllParents->value);
 
                     if ($classroomIds->isNotEmpty()) {
@@ -199,10 +229,39 @@ class AnnouncementController extends Controller
                                 ->whereIn('classroom_id', $classroomIds);
                         });
                     }
+
+                    $query->orWhere(function ($subQuery) use ($user): void {
+                        $subQuery
+                            ->where('audience', AnnouncementAudience::Parent->value)
+                            ->where('parent_id', $user->id);
+                    });
                 });
         }
 
+        if ($user->hasRole(UserRole::Scolarite)) {
+            return Announcement::query()->where('author_id', $user->id);
+        }
+
         return Announcement::query();
+    }
+
+    private function audienceOptions(User $user): array
+    {
+        $options = AnnouncementAudience::options();
+
+        if ($user->hasRole(UserRole::Scolarite)) {
+            return array_filter(
+                $options,
+                static fn (string $value) => in_array($value, [
+                    AnnouncementAudience::Parent->value,
+                    AnnouncementAudience::Classroom->value,
+                    AnnouncementAudience::AllParents->value,
+                ], true),
+                ARRAY_FILTER_USE_KEY
+            );
+        }
+
+        return $options;
     }
 
     private function ensureAnnouncementVisible(User $user, Announcement $announcement): void

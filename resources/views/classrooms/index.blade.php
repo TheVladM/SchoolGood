@@ -4,26 +4,12 @@
 @section('topbar_title', 'Classes')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Organisation pedagogique</span>
-            <h2 class="page-hero__title">Structurer les classes, sections, salles et titulaires dans une vue plus claire.</h2>
-            <p class="page-hero__description">
-                Cette interface facilite la lecture des effectifs et des affectations, avec une navigation plus lisible sur mobile.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Classes</p>
-                <p class="hero-stat__value">{{ $classrooms->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Module</p>
-                <p class="hero-stat__value">Classes</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Classes',
+        'description' => 'Sections, salles, effectifs et enseignants titulaires.',
+        'statLabel' => 'Total',
+        'statValue' => $classrooms->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Classe, niveau ou enseignant" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\Classroom::class)
                     <a href="{{ route('classrooms.create') }}" class="btn-primary self-end">Nouvelle classe</a>
-                @endif
+                @endcan
             </div>
         </div>
 
@@ -63,8 +49,10 @@
 
                     <div class="record-actions">
                         <a href="{{ route('classrooms.show', $classroom) }}" class="btn-secondary">Voir</a>
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                        @can('update', $classroom)
                             <a href="{{ route('classrooms.edit', $classroom) }}" class="btn-secondary">Modifier</a>
+                        @endcan
+                        @can('delete', $classroom)
                             <form method="POST" action="{{ route('classrooms.destroy', $classroom) }}">
                                 @csrf
                                 @method('DELETE')
@@ -72,7 +60,7 @@
                                     Supprimer
                                 </button>
                             </form>
-                        @endif
+                        @endcan
                     </div>
                 </article>
             @endforeach
@@ -103,8 +91,10 @@
                             <td>
                                 <div class="record-actions justify-end">
                                     <a href="{{ route('classrooms.show', $classroom) }}" class="btn-secondary">Voir</a>
-                                    @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                                    @can('update', $classroom)
                                         <a href="{{ route('classrooms.edit', $classroom) }}" class="btn-secondary">Modifier</a>
+                                    @endcan
+                                    @can('delete', $classroom)
                                         <form method="POST" action="{{ route('classrooms.destroy', $classroom) }}">
                                             @csrf
                                             @method('DELETE')
@@ -112,7 +102,7 @@
                                                 Supprimer
                                             </button>
                                         </form>
-                                    @endif
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

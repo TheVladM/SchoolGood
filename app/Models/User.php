@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
-use App\Enums\UserDepartment;
 use App\Enums\TeacherLanguage;
+use App\Enums\UserDepartment;
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -123,5 +123,30 @@ class User extends Authenticatable
         );
 
         return in_array($this->role?->value, $values, true);
+    }
+
+    public function teachesInClassroom(Classroom|int $classroom): bool
+    {
+        $classroomId = $classroom instanceof Classroom ? $classroom->id : $classroom;
+
+        return Classroom::query()
+            ->whereKey($classroomId)
+            ->where(function ($query): void {
+                $query
+                    ->where('main_teacher_id', $this->id)
+                    ->orWhere('language_teacher_id', $this->id);
+            })
+            ->exists();
+    }
+
+    public function assignedClassroomsQuery()
+    {
+        return Classroom::query()
+            ->where(function ($query): void {
+                $query
+                    ->where('main_teacher_id', $this->id)
+                    ->orWhere('language_teacher_id', $this->id);
+            })
+            ->orderBy('name');
     }
 }

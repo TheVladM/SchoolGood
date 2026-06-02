@@ -4,26 +4,12 @@
 @section('topbar_title', 'Messages')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Messages aux parents</span>
-            <h2 class="page-hero__title">Centraliser les annonces, leur validation et leur diffusion vers les familles.</h2>
-            <p class="page-hero__description">
-                Les messages de la scolarite et de l administration restent en attente tant que le fondateur ne les a pas approuves.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Messages</p>
-                <p class="hero-stat__value">{{ $announcements->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Module</p>
-                <p class="hero-stat__value">Parents</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Messages',
+        'description' => 'Communication avec les parents (validation requise pour la scolarite).',
+        'statLabel' => 'Messages',
+        'statValue' => $announcements->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">
@@ -38,9 +24,9 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Titre, auteur, classe ou statut" data-table-search>
                 </label>
 
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite]))
+                @can('create', \App\Models\Announcement::class)
                     <a href="{{ route('announcements.create') }}" class="btn-primary self-end">Nouveau message</a>
-                @endif
+                @endcan
             </div>
         </div>
 

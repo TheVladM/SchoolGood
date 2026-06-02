@@ -48,7 +48,7 @@ class SchoolAccessTest extends TestCase
             ->assertDontSee('Alice Nji');
     }
 
-    public function test_scolarite_can_create_a_student(): void
+    public function test_scolarite_cannot_create_a_student(): void
     {
         $scolarite = User::factory()->create(['role' => UserRole::Scolarite]);
         $parent = User::factory()->create(['role' => UserRole::Parent]);
@@ -74,9 +74,9 @@ class SchoolAccessTest extends TestCase
                 'parent_id' => $parent->id,
                 'school_year_id' => $schoolYear->id,
             ])
-            ->assertRedirect(route('students.index'));
+            ->assertForbidden();
 
-        $this->assertDatabaseHas('students', [
+        $this->assertDatabaseMissing('students', [
             'first_name' => 'Junior',
             'last_name' => 'Mbah',
         ]);

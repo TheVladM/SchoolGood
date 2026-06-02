@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Homework extends Model
 {
     use HasFactory;
+    protected $table = 'homeworks';
 
     protected $fillable = [
         'title',

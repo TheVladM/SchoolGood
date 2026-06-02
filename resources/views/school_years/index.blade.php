@@ -4,26 +4,12 @@
 @section('topbar_title', 'Annees scolaires')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Historique scolaire</span>
-            <h2 class="page-hero__title">Piloter les periodes scolaires, les clotures d annee et les promotions futures.</h2>
-            <p class="page-hero__description">
-                Chaque annee garde son historique eleves, pendant que la suivante peut etre preparee sans perdre les informations passees.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Annees</p>
-                <p class="hero-stat__value">{{ $schoolYears->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Module</p>
-                <p class="hero-stat__value">Promotions</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Annees scolaires',
+        'description' => 'Periodes, clotures et promotions.',
+        'statLabel' => 'Annees',
+        'statValue' => $schoolYears->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">

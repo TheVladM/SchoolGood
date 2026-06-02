@@ -4,26 +4,12 @@
 @section('topbar_title', 'Devoirs')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">Gestion des devoirs</span>
-            <h2 class="page-hero__title">Assignez et suivez les devoirs de vos classes.</h2>
-            <p class="page-hero__description">
-                Les enseignants peuvent assigner des devoirs à leurs classes. Les parents peuvent voir les devoirs de leurs enfants.
-            </p>
-        </div>
-
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Devoirs</p>
-                <p class="hero-stat__value">{{ $homeworks->total() }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Module</p>
-                <p class="hero-stat__value">Pédagogie</p>
-            </div>
-        </div>
-    </section>
+    @include('partials.page-header', [
+        'title' => 'Devoirs',
+        'description' => 'Assignation et suivi par classe.',
+        'statLabel' => 'Total',
+        'statValue' => $homeworks->total(),
+    ])
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">

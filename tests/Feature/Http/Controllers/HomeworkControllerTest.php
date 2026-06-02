@@ -25,7 +25,9 @@ class HomeworkControllerTest extends TestCase
         $this->teacher = User::factory()->create(['role' => UserRole::Teacher]);
         $this->admin = User::factory()->create(['role' => UserRole::Admin]);
         $this->founder = User::factory()->create(['role' => UserRole::Founder]);
-        $this->classroom = Classroom::factory()->create();
+        $this->classroom = Classroom::factory()->create([
+            'main_teacher_id' => $this->teacher->id,
+        ]);
     }
 
     public function test_teacher_can_view_homeworks_index(): void
@@ -58,7 +60,7 @@ class HomeworkControllerTest extends TestCase
             'subject' => 'Maths',
             'teacher_id' => $this->teacher->id,
             'classroom_id' => $this->classroom->id,
-            'due_date' => now()->addDays(3)->format('Y-m-d H:i'),
+            'due_date' => now()->addDays(3)->format('Y-m-d\TH:i'),
         ];
         
         $response = $this->post(route('homeworks.store'), $data);
@@ -118,7 +120,7 @@ class HomeworkControllerTest extends TestCase
             'subject' => 'English',
             'teacher_id' => $this->teacher->id,
             'classroom_id' => $this->classroom->id,
-            'due_date' => now()->addDays(5)->format('Y-m-d H:i'),
+            'due_date' => now()->addDays(5)->format('Y-m-d\TH:i'),
         ];
         
         $response = $this->patch(route('homeworks.update', $homework), $data);
