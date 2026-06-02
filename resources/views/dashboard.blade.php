@@ -114,7 +114,7 @@
                                 <li>
                                     <span class="activity-list__dot"></span>
                                     <span class="activity-list__main">{{ $student->full_name }}</span>
-                                    <span class="activity-list__meta">{{ $student->classroom?->name ?? '—' }}</span>
+                                    <span class="activity-list__meta">{{ $student->classroom?->name ?? '-' }}</span>
                                 </li>
                             @empty
                                 <li class="activity-list__empty">Rien à afficher</li>

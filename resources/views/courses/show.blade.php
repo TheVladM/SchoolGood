@@ -6,7 +6,7 @@
 @section('content')
     <x-show-shell
         :title="$course->title"
-        :description="$course->classroom?->name.' — '.$course->teacher?->name"
+        :description="$course->classroom?->name.' · '.$course->teacher?->name"
         :back-url="route('courses.index')"
     >
         <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">

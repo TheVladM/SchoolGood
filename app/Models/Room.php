@@ -24,6 +24,6 @@ class Room extends Model
     {
         $parts = array_filter([$this->name, $this->building, $this->floor]);
 
-        return implode(' — ', $parts);
+        return implode(' · ', $parts);
     }
 }

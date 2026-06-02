@@ -18,7 +18,7 @@
                 <select id="student_id" name="student_id" class="field" required>
                     @foreach ($children as $child)
                         <option value="{{ $child->id }}" @selected(old('student_id') == $child->id)>
-                            {{ $child->full_name }} — {{ $child->classroom?->name }}
+                            {{ $child->full_name }} · {{ $child->classroom?->name }}
                         </option>
                     @endforeach
                 </select>

@@ -38,7 +38,7 @@
     <div>
         <label for="room_id" class="label">Salle (référentiel)</label>
         <select id="room_id" name="room_id" class="field">
-            <option value="">— ou saisie libre —</option>
+            <option value="">ou saisie libre</option>
             @foreach ($rooms ?? [] as $room)
                 <option value="{{ $room->id }}" @selected(old('room_id', $classroom->room_id ?? '') == $room->id)>{{ $room->displayLabel() }}</option>
             @endforeach

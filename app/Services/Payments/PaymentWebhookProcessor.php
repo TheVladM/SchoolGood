@@ -164,7 +164,7 @@ class PaymentWebhookProcessor
                     'SchoolGood : paiement de %s FCFA confirmé (%s). Reçu : %s',
                     number_format((float) $payment->amount, 0, ',', ' '),
                     $payment->intent_reference,
-                    $payment->receipt_number ?? '—'
+                    $payment->receipt_number ?? '-'
                 )
             );
         }

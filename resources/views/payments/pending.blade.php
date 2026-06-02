@@ -14,7 +14,7 @@
             <div class="flex justify-between"><dt class="text-slate-500">Élève</dt><dd class="font-medium">{{ $payment->student?->full_name }}</dd></div>
             <div class="flex justify-between"><dt class="text-slate-500">Montant</dt><dd class="font-medium">{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</dd></div>
             <div class="flex justify-between"><dt class="text-slate-500">Opérateur</dt><dd class="font-medium">{{ $payment->method?->label() }}</dd></div>
-            <div class="flex justify-between"><dt class="text-slate-500">Statut</dt><dd class="font-medium">{{ $payment->status?->label() }} / {{ $payment->operator_status ?: '—' }}</dd></div>
+            <div class="flex justify-between"><dt class="text-slate-500">Statut</dt><dd class="font-medium">{{ $payment->status?->label() }} / {{ $payment->operator_status ?: '-' }}</dd></div>
         </dl>
 
         <p class="mt-6 text-sm text-slate-600">

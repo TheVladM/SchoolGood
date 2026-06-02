@@ -11,7 +11,7 @@
 
     <section class="surface-card mt-6 mx-auto max-w-4xl p-5 lg:p-6" data-reveal>
         <div id="tuition-summary" class="mb-6 hidden rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950">
-            <p><strong>Reste à payer (année) :</strong> <span data-balance>—</span> FCFA</p>
+            <p><strong>Reste à payer (année) :</strong> <span data-balance>-</span> FCFA</p>
             <ul class="mt-2 space-y-1" data-installments></ul>
         </div>
 
@@ -54,7 +54,7 @@
 
                     if (installmentsEl && Array.isArray(data.installments)) {
                         installmentsEl.innerHTML = data.installments.map(row =>
-                            `<li>${row.label} : dû ${row.due} F — payé ${row.paid} F — reste ${row.remaining} F</li>`
+                            `<li>${row.label} : dû ${row.due} F · payé ${row.paid} F · reste ${row.remaining} F</li>`
                         ).join('');
                     }
 

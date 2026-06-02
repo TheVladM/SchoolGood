@@ -68,7 +68,7 @@ class CourseTimetableSyncService
         }
 
         $content = trim(($entry->notes ?? '')."\n\n".
-            'Créneau : '.$entry->start_time.' — '.$entry->end_time);
+            'Créneau : '.$entry->start_time.' à '.$entry->end_time);
 
         Course::updateOrCreate(
             [

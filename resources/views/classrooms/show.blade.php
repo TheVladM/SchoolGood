@@ -14,7 +14,7 @@
 
     @include('partials.page-header', [
         'title' => $classroom->name,
-        'description' => $classroom->section?->label().' — Niveau '.$classroom->level,
+        'description' => $classroom->section?->label().' · Niveau '.$classroom->level,
     ])
 
     <div class="mt-4 flex flex-wrap gap-3" data-reveal>
@@ -39,9 +39,9 @@
             <div class="mt-6 space-y-3 text-sm text-slate-600">
                 <p><span class="font-semibold text-slate-900">Niveau :</span> {{ $classroom->level }}</p>
                 <p><span class="font-semibold text-slate-900">Salle :</span> {{ $classroom->room }}</p>
-                <p><span class="font-semibold text-slate-900">Localisation :</span> {{ $classroom->location ?: '—' }}</p>
-                <p><span class="font-semibold text-slate-900">Titulaire :</span> {{ $classroom->mainTeacher?->name ?: '—' }}</p>
-                <p><span class="font-semibold text-slate-900">{{ $languageLabel }} :</span> {{ $classroom->languageTeacher?->name ?: '—' }}</p>
+                <p><span class="font-semibold text-slate-900">Localisation :</span> {{ $classroom->location ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">Titulaire :</span> {{ $classroom->mainTeacher?->name ?: '-' }}</p>
+                <p><span class="font-semibold text-slate-900">{{ $languageLabel }} :</span> {{ $classroom->languageTeacher?->name ?: '-' }}</p>
             </div>
         </article>
 

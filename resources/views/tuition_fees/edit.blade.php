@@ -5,7 +5,7 @@
 
 @section('content')
     <x-form-shell
-        :title="'Modifier la grille — '.$fee->level"
+        :title="'Modifier la grille · '.$fee->level"
         :action="route('tuition-fees.update', $fee)"
         method="PUT"
         :cancel-url="route('tuition-fees.index')"

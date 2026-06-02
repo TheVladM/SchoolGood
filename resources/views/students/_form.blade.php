@@ -20,7 +20,7 @@
             <option value="">Sélectionner</option>
             @foreach ($classrooms as $classroom)
                 <option value="{{ $classroom->id }}" @selected(old('classroom_id', $student->classroom_id ?? '') == $classroom->id)>
-                    {{ $classroom->name }} — {{ $classroom->level }}
+                    {{ $classroom->name }} · {{ $classroom->level }}
                 </option>
             @endforeach
         </select>
@@ -32,7 +32,7 @@
             <option value="">Sélectionner</option>
             @foreach ($schoolYears as $schoolYear)
                 <option value="{{ $schoolYear->id }}" @selected(old('school_year_id', $selectedSchoolYearId ?? '') == $schoolYear->id)>
-                    {{ $schoolYear->name }} — {{ $schoolYear->status?->label() }}
+                    {{ $schoolYear->name }} · {{ $schoolYear->status?->label() }}
                 </option>
             @endforeach
         </select>
@@ -51,7 +51,7 @@
             <option value="">Sélectionner</option>
             @foreach ($parents as $parent)
                 <option value="{{ $parent->id }}" @selected(old('parent_id', $student->parent_id ?? '') == $parent->id)>
-                    {{ $parent->name }} — {{ $parent->email }}
+                    {{ $parent->name }} · {{ $parent->email }}
                 </option>
             @endforeach
         </select>

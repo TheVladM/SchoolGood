@@ -6,7 +6,7 @@
 @section('content')
     <x-show-shell
         :title="$entry->subject"
-        :description="$entry->level.' — '.$entry->section?->label()"
+        :description="$entry->level.' · '.$entry->section?->label()"
         :back-url="route('timetable-entries.index')"
     >
         <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">

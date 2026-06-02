@@ -25,11 +25,11 @@
         <tr><th>Type</th><td>{{ $payment->type?->label() }}</td></tr>
         <tr><th>Montant</th><td>{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</td></tr>
         <tr><th>Mode</th><td>{{ $payment->method?->label() }} ({{ $payment->channel?->label() }})</td></tr>
-        <tr><th>Référence</th><td>{{ $payment->intent_reference ?? $payment->reference ?? '—' }}</td></tr>
-        <tr><th>Transaction opérateur</th><td>{{ $payment->operator_transaction_id ?? '—' }}</td></tr>
+        <tr><th>Référence</th><td>{{ $payment->intent_reference ?? $payment->reference ?? '-' }}</td></tr>
+        <tr><th>Transaction opérateur</th><td>{{ $payment->operator_transaction_id ?? '-' }}</td></tr>
         <tr><th>Validé par</th><td>{{ $payment->validatedBy?->name ?? 'Automatique (webhook)' }}</td></tr>
     </table>
 
-    <p class="footer">Document généré par SchoolGood — {{ now()->format('d/m/Y H:i') }}</p>
+    <p class="footer">Document généré par SchoolGood · {{ now()->format('d/m/Y H:i') }}</p>
 </body>
 </html>

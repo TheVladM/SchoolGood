@@ -6,7 +6,7 @@
 @section('content')
     @include('partials.page-header', [
         'title' => $payment->student?->full_name ?? 'Paiement',
-        'description' => $payment->type?->label() . ' — ' . number_format((float) $payment->amount, 0, ',', ' ') . ' FCFA',
+        'description' => $payment->type?->label() . ' · ' . number_format((float) $payment->amount, 0, ',', ' ') . ' FCFA',
     ])
 
     <div class="mt-6 grid gap-6 lg:grid-cols-2" data-reveal>
@@ -16,13 +16,13 @@
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Classe</dt><dd class="font-medium">{{ $payment->student?->classroom?->name }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Parent</dt><dd class="font-medium">{{ $payment->student?->parent?->name }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="text-slate-500">Mode</dt><dd class="font-medium">{{ $payment->method?->label() }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Référence</dt><dd class="font-medium">{{ $payment->intent_reference ?? ($payment->reference ?: '—') }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Référence</dt><dd class="font-medium">{{ $payment->intent_reference ?? ($payment->reference ?: '-') }}</dd></div>
                 @if ($payment->receipt_number)
                     <div class="flex justify-between gap-4"><dt class="text-slate-500">Reçu</dt><dd class="font-medium">{{ $payment->receipt_number }}</dd></div>
                 @endif
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Canal</dt><dd class="font-medium">{{ $payment->channel?->label() ?? '—' }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Enregistré par</dt><dd class="font-medium">{{ $payment->receivedBy?->name ?: '—' }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="text-slate-500">Validé par</dt><dd class="font-medium">{{ $payment->validatedBy?->name ?: '—' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Canal</dt><dd class="font-medium">{{ $payment->channel?->label() ?? '-' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Enregistré par</dt><dd class="font-medium">{{ $payment->receivedBy?->name ?: '-' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Validé par</dt><dd class="font-medium">{{ $payment->validatedBy?->name ?: '-' }}</dd></div>
             </dl>
 
             <div class="mt-6 flex flex-wrap gap-3">

@@ -53,7 +53,7 @@
                 class="field @error('teacher_id') border-red-500 @enderror"
                 required
             >
-                <option value="">— Sélectionner —</option>
+                <option value="">Sélectionner</option>
                 @foreach ($teachers as $teacher)
                     @php
                         $selectedTeacherId = old('teacher_id', $homework?->teacher_id)
@@ -77,7 +77,7 @@
                 class="field @error('classroom_id') border-red-500 @enderror"
                 required
             >
-                <option value="">— Sélectionner —</option>
+                <option value="">Sélectionner</option>
                 @foreach ($classrooms as $classroom)
                     <option value="{{ $classroom->id }}" @selected(old('classroom_id', $homework?->classroom_id) == $classroom->id)>
                         {{ $classroom->name }} ({{ $classroom->section?->label() }})

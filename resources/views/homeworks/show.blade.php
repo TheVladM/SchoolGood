@@ -6,7 +6,7 @@
 @section('content')
     @include('partials.page-header', [
         'title' => $homework->title,
-        'description' => ($homework->subject ?? 'Devoir') . ' — ' . $homework->classroom->name . ' — échéance ' . $homework->due_date->format('d/m/Y'),
+        'description' => ($homework->subject ?? 'Devoir') . ' · ' . $homework->classroom->name . ' · échéance ' . $homework->due_date->format('d/m/Y'),
     ])
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3" data-reveal>
@@ -42,7 +42,7 @@
                                 <tr>
                                     <td class="font-semibold text-slate-900">{{ $submission->student->full_name }}</td>
                                     <td><span class="badge">{{ $submission->status->label() }}</span></td>
-                                    <td>{{ $submission->grade !== null ? number_format((float) $submission->grade, 2, ',', ' ') . ' / 20' : '—' }}</td>
+                                    <td>{{ $submission->grade !== null ? number_format((float) $submission->grade, 2, ',', ' ') . ' / 20' : '-' }}</td>
                                     <td>
                                         <div class="record-actions justify-end">
                                             @if ($submission->file_path)

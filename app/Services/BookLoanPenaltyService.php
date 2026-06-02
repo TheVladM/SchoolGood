@@ -44,7 +44,7 @@ class BookLoanPenaltyService
             'method' => PaymentMethod::OrangeMoney,
             'status' => PaymentStatus::Pending,
             'reference' => 'PENALITE-BIB-'.$loan->id,
-            'notes' => 'Pénalité bibliothèque — '.$loan->overdue_days_logged.' jour(s) de retard',
+            'notes' => 'Pénalité bibliothèque · '.$loan->overdue_days_logged.' jour(s) de retard',
             'received_by_id' => $issuer->id,
             'declared_by_parent' => false,
         ]);

@@ -4,7 +4,7 @@
 @section('topbar_title', 'Frais de scolarité')
 
 @section('content')
-    @include('partials.page-header', ['title' => $fee->level.' — '.$fee->section?->label()])
+    @include('partials.page-header', ['title' => $fee->level.' · '.$fee->section?->label()])
 
     <section class="surface-card mt-6 max-w-xl p-5 lg:p-6 space-y-3 text-sm">
         <p><strong>Inscription :</strong> {{ number_format((float) $fee->registration_fee, 0, ',', ' ') }} FCFA</p>

@@ -16,8 +16,8 @@
                 @foreach ($rooms as $room)
                     <tr>
                         <td>{{ $room->name }}</td>
-                        <td>{{ $room->building ?: '—' }}</td>
-                        <td>{{ $room->floor ?: '—' }}</td>
+                        <td>{{ $room->building ?: '-' }}</td>
+                        <td>{{ $room->floor ?: '-' }}</td>
                         <td>{{ $room->classrooms_count }}</td>
                         <td><a href="{{ route('rooms.edit', $room) }}" class="btn-secondary">Modifier</a></td>
                     </tr>

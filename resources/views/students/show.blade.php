@@ -79,7 +79,7 @@
             <div class="mt-4 space-y-2">
                 @forelse ($student->schoolGrades as $grade)
                     <div class="flex justify-between rounded-xl border border-slate-100 p-3 text-sm">
-                        <span>{{ $grade->schoolYear?->name }} — {{ $grade->subject }} ({{ $grade->term }}) : <strong>{{ $grade->grade }}/20</strong></span>
+                        <span>{{ $grade->schoolYear?->name }} · {{ $grade->subject }} ({{ $grade->term }}) : <strong>{{ $grade->grade }}/20</strong></span>
                         @can('delete', $grade)
                             <form method="POST" action="{{ route('students.grades.destroy', [$student, $grade]) }}">
                                 @csrf @method('DELETE')

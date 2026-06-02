@@ -9,7 +9,7 @@
                 <x-app-logo size="lg" variant="light" tagline="Gestion scolaire" class="login-page__brand-logo mb-6" />
                 <h1 class="login-page__headline">La gestion scolaire,<br>simplifiée.</h1>
                 <p class="login-page__text">
-                    Eleves, classes, paiements, bibliotheque et messages parents — un seul espace pour toute l equipe.
+                    Eleves, classes, paiements, bibliotheque et messages parents, un seul espace pour toute l equipe.
                 </p>
                 <ul class="login-page__list">
                     <li>Suivi pedagogique en temps reel</li>

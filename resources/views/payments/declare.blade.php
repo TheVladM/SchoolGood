@@ -37,7 +37,7 @@
                 <label class="label" for="student_id">Enfant</label>
                 <select id="student_id" name="student_id" class="field" required>
                     @foreach ($children as $child)
-                        <option value="{{ $child->id }}">{{ $child->full_name }} — {{ $child->classroom?->name }}</option>
+                        <option value="{{ $child->id }}">{{ $child->full_name }} · {{ $child->classroom?->name }}</option>
                     @endforeach
                 </select>
             </div>

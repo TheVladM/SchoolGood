@@ -56,7 +56,7 @@ class ClassroomTitularCourseService
 
             Course::create([
                 'title' => $config['title'],
-                'content' => 'Programme titulaire — '.$classroom->name,
+                'content' => 'Programme titulaire · '.$classroom->name,
                 'teacher_id' => $teacherId,
                 'classroom_id' => $classroom->id,
                 'day' => $day,
