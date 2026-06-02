@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ClassroomCycleType;
 use App\Enums\ClassroomSection;
+use App\Enums\SchoolLevel;
 use App\Enums\UserRole;
 use App\Models\Classroom;
+use App\Models\Room;
 use App\Models\User;
+use App\Services\ClassroomAssignmentValidator;
+use App\Services\ClassroomTitularCourseService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +20,11 @@ use Illuminate\Validation\ValidationException;
 
 class ClassroomController extends Controller
 {
+    public function __construct(
+        private ClassroomAssignmentValidator $assignmentValidator,
+        private ClassroomTitularCourseService $titularCourseService,
+    ) {}
+
     public function index(Request $request): View
     {
         $classrooms = $this->visibleClassroomsQuery($request->user())
@@ -33,6 +43,13 @@ class ClassroomController extends Controller
         return view('classrooms.create', [
             'teachers' => User::where('role', UserRole::Teacher->value)->orderBy('name')->get(),
             'sections' => ClassroomSection::options(),
+            'cycleTypes' => ClassroomCycleType::options(),
+            'rooms' => Room::orderBy('name')->get(),
+            'levelsBySection' => [
+                'francophone' => SchoolLevel::optionsForSection(ClassroomSection::Francophone),
+                'anglophone' => SchoolLevel::optionsForSection(ClassroomSection::Anglophone),
+                'bilingue' => SchoolLevel::optionsForSection(ClassroomSection::Bilingue),
+            ],
         ]);
     }
 
@@ -50,7 +67,7 @@ class ClassroomController extends Controller
     public function show(Request $request, Classroom $classroom): View
     {
         $this->ensureClassroomVisible($request->user(), $classroom);
-        $classroom->load(['mainTeacher', 'languageTeacher', 'students.parent', 'courses.teacher']);
+        $classroom->load(['mainTeacher', 'languageTeacher', 'students.parent', 'courses.teacher', 'timetableEntries']);
 
         return view('classrooms.show', ['classroom' => $classroom]);
     }
@@ -63,6 +80,13 @@ class ClassroomController extends Controller
             'classroom' => $classroom,
             'teachers' => User::where('role', UserRole::Teacher->value)->orderBy('name')->get(),
             'sections' => ClassroomSection::options(),
+            'cycleTypes' => ClassroomCycleType::options(),
+            'rooms' => Room::orderBy('name')->get(),
+            'levelsBySection' => [
+                'francophone' => SchoolLevel::optionsForSection(ClassroomSection::Francophone),
+                'anglophone' => SchoolLevel::optionsForSection(ClassroomSection::Anglophone),
+                'bilingue' => SchoolLevel::optionsForSection(ClassroomSection::Bilingue),
+            ],
         ]);
     }
 
@@ -75,6 +99,18 @@ class ClassroomController extends Controller
         return redirect()
             ->route('classrooms.index')
             ->with('success', 'Classe mise a jour avec succes.');
+    }
+
+    public function setupTitularCourses(Request $request, Classroom $classroom): RedirectResponse
+    {
+        $this->authorize('update', $classroom);
+
+        $result = $this->titularCourseService->setup($classroom);
+
+        return back()->with(
+            'success',
+            "Programme titulaire : {$result['timetable']} créneau(x) d'emploi du temps et {$result['subjects']} matière(s) ajoutée(s)."
+        );
     }
 
     public function destroy(Request $request, Classroom $classroom): RedirectResponse
@@ -94,7 +130,9 @@ class ClassroomController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string', 'max:255'],
             'section' => ['required', Rule::enum(ClassroomSection::class)],
-            'room' => ['required', 'string', 'max:255'],
+            'cycle_type' => ['required', Rule::enum(ClassroomCycleType::class)],
+            'room_id' => ['nullable', 'exists:rooms,id'],
+            'room' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'main_teacher_id' => [
                 'nullable',
@@ -130,26 +168,23 @@ class ClassroomController extends Controller
         }
 
         if (filled($data['main_teacher_id'] ?? null)) {
-            // Check if teacher already is titulaire in another class
-            $alreadyTitular = Classroom::query()
-                ->where('main_teacher_id', $data['main_teacher_id'])
-                ->when($classroom, fn ($query) => $query->whereKeyNot($classroom->id))
-                ->exists();
-
-            if ($alreadyTitular) {
-                throw ValidationException::withMessages([
-                    'main_teacher_id' => 'Un enseignant ne peut etre titulaire que d une seule classe.',
-                ]);
-            }
-
-            // Check if teacher language matches classroom section
             $mainTeacher = User::find($data['main_teacher_id']);
-            if (!$this->isTeacherLanguageCompatible($mainTeacher, $data['section'])) {
+            if ($mainTeacher && ! $this->isTeacherLanguageCompatible($mainTeacher, $data['section'])) {
                 throw ValidationException::withMessages([
-                    'main_teacher_id' => 'La langue d\'enseignement du titulaire ne correspond pas a la section de la classe.',
+                    'main_teacher_id' => 'La langue d\'enseignement du titulaire ne correspond pas à la section de la classe.',
                 ]);
             }
         }
+
+        $this->assignmentValidator->validate($data, $classroom);
+
+        if (filled($data['room_id'] ?? null)) {
+            $room = Room::find($data['room_id']);
+            $data['room'] = $room?->name ?? $data['room'];
+            $data['location'] = trim(($room?->building ?? '').' '.($room?->floor ?? '')) ?: $data['location'];
+        }
+
+        abort_if(blank($data['room'] ?? null) && blank($data['room_id'] ?? null), 422, 'Veuillez sélectionner ou saisir une salle.');
 
         return $data;
     }

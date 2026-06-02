@@ -131,44 +131,328 @@
     }
 
     .sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.85rem;
-        padding: 1.35rem 1.25rem 1rem;
+        display: block;
+        padding: 1rem 1rem 0.75rem;
         text-decoration: none;
         color: inherit;
     }
 
-    .sidebar-brand__mark {
-        display: grid;
-        place-items: center;
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--sg-accent), var(--sg-accent-2));
-        color: #fff;
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+    .sidebar-brand__logo.app-logo--on-dark .app-logo__name {
+        color: #f8fafc;
     }
 
-    .sidebar-brand__text {
+    .sidebar-brand__logo.app-logo--on-dark .app-logo__tagline {
+        color: #94a3b8;
+    }
+
+    /* —— Logo SchoolGood (remplace le libellé « Plateforme scolaire » de l’image) —— */
+    .app-logo {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.35rem;
     }
 
-    .sidebar-brand__title {
+    .app-logo__emblem {
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        line-height: 0;
+    }
+
+    .app-logo__emblem img {
+        width: auto;
+        object-fit: cover;
+        object-position: top center;
+    }
+
+    .app-logo--sm .app-logo__emblem {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+    }
+
+    .app-logo--sm .app-logo__emblem img {
+        height: 4.25rem;
+        margin-top: -0.15rem;
+    }
+
+    .app-logo__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.05rem;
+    }
+
+    .app-logo--sm {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        gap: 0.65rem;
+    }
+
+    .app-logo--sm .app-logo__text {
+        align-items: flex-start;
+    }
+
+    .app-logo--sm .app-logo__name {
         font-size: 1.05rem;
-        font-weight: 700;
-        color: #f8fafc;
-        letter-spacing: -0.02em;
     }
 
-    .sidebar-brand__tag {
+    .app-logo--sm .app-logo__tagline {
         font-size: 0.68rem;
-        color: #94a3b8;
-        margin-top: 0.1rem;
+    }
+
+    .app-logo--md .app-logo__emblem {
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .app-logo--md .app-logo__emblem img {
+        height: 6.5rem;
+    }
+
+    .app-logo--lg .app-logo__emblem {
+        width: 6.5rem;
+        height: 6.5rem;
+    }
+
+    .app-logo--lg .app-logo__emblem img {
+        height: 9rem;
+    }
+
+    .app-logo--xl .app-logo__emblem {
+        width: 8.5rem;
+        height: 8.5rem;
+    }
+
+    .app-logo--xl .app-logo__emblem img {
+        height: 11.5rem;
+    }
+
+    .app-logo__name {
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #1e3a8a;
+        line-height: 1.1;
+    }
+
+    .app-logo__tagline {
+        font-size: 0.8rem;
+        color: var(--sg-muted);
+        font-weight: 500;
+    }
+
+    .app-logo--light .app-logo__name {
+        color: #fff;
+    }
+
+    .app-logo--light .app-logo__tagline {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .app-logo--light .app-logo__emblem {
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+    }
+
+    .login-page__card-logo {
+        margin: 0 auto;
+    }
+
+    /* —— Splash à l’ouverture —— */
+    .splash-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: grid;
+        place-items: center;
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+    }
+
+    .splash-screen.is-done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .splash-screen__backdrop {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 45%, #0f766e 100%);
+    }
+
+    .splash-screen__glow {
+        position: absolute;
+        width:  min(90vw, 28rem);
+        height: min(90vw, 28rem);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+        animation: splashGlow 2.4s ease-in-out infinite;
+    }
+
+    .splash-screen__content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+    }
+
+    .splash-screen__logo-wrap {
+        position: relative;
+        display: grid;
+        place-items: center;
+    }
+
+    .splash-screen__ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        animation: splashRing 1.8s ease-out infinite;
+    }
+
+    .splash-screen__ring--1 {
+        width: 10rem;
+        height: 10rem;
+    }
+
+    .splash-screen__ring--2 {
+        width: 12rem;
+        height: 12rem;
+        animation-delay: 0.35s;
+    }
+
+    .splash-screen__logo {
+        animation: splashLogoIn 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+    }
+
+    .splash-screen__logo .app-logo__emblem {
+        background: #fff;
+        border-radius: 1.25rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .splash-screen__title {
+        margin: 1.25rem 0 0;
+        font-size: clamp(1.75rem, 5vw, 2.35rem);
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.04em;
+        animation: splashTitleIn 0.7s ease 0.45s both;
+    }
+
+    .splash-screen__subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.75);
+        animation: splashTitleIn 0.7s ease 0.6s both;
+    }
+
+    .splash-screen__loader {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 1.75rem;
+        animation: splashTitleIn 0.5s ease 0.75s both;
+    }
+
+    .splash-screen__loader span {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        animation: splashDot 1s ease-in-out infinite;
+    }
+
+    .splash-screen__loader span:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .splash-screen__loader span:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    @keyframes splashLogoIn {
+        from {
+            opacity: 0;
+            transform: scale(0.55) rotate(-8deg);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) rotate(0);
+        }
+    }
+
+    @keyframes splashTitleIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes splashRing {
+        from {
+            opacity: 0.7;
+            transform: scale(0.85);
+        }
+
+        to {
+            opacity: 0;
+            transform: scale(1.15);
+        }
+    }
+
+    @keyframes splashGlow {
+        0%,
+        100% {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes splashDot {
+        0%,
+        100% {
+            opacity: 0.35;
+            transform: translateY(0);
+        }
+
+        50% {
+            opacity: 1;
+            transform: translateY(-4px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .splash-screen__logo,
+        .splash-screen__title,
+        .splash-screen__subtitle,
+        .splash-screen__loader,
+        .splash-screen__ring,
+        .splash-screen__glow {
+            animation: none !important;
+        }
+
+        .splash-screen {
+            transition-duration: 0.2s;
+        }
     }
 
     .sidebar-profile {
@@ -777,6 +1061,14 @@
     }
 
     /* —— Forms —— */
+    .form-field__hint {
+        @apply mt-1 text-xs text-slate-500;
+    }
+
+    .form-field__error {
+        @apply mt-1 text-sm text-rose-600;
+    }
+
     .form-field {
         margin-bottom: 0.25rem;
     }
@@ -1148,17 +1440,8 @@
         max-width: 22rem;
     }
 
-    .login-page__logo {
-        display: grid;
-        place-items: center;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 14px;
-        background: linear-gradient(135deg, var(--sg-accent), var(--sg-accent-2));
-        color: #fff;
-        font-weight: 800;
-        font-size: 0.85rem;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+    .login-page__brand-logo {
+        align-self: flex-start;
     }
 
     .login-page__title {

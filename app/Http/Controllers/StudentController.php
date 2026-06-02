@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -63,7 +64,8 @@ class StudentController extends Controller
     {
         $this->authorize('create', Student::class);
 
-        [$studentData, $recordData] = $this->validatedData($request);
+        [$studentData, $recordData, $parentId] = $this->validatedData($request);
+        $studentData['parent_id'] = $this->resolveParentId($request, $parentId);
         $student = Student::create($studentData);
         $this->createSchoolYearRecord($student, $recordData);
 
@@ -75,9 +77,21 @@ class StudentController extends Controller
     public function show(Request $request, Student $student): View
     {
         $this->authorize('view', $student);
-        $student->load(['classroom', 'parent', 'payments', 'schoolYearRecords.schoolYear', 'schoolYearRecords.classroom', 'bookLoans.book']);
+        $student->load([
+            'classroom',
+            'parent',
+            'payments',
+            'schoolYearRecords.schoolYear',
+            'schoolYearRecords.classroom',
+            'bookLoans.book',
+            'schoolGrades.schoolYear',
+            'schoolGrades.recordedBy',
+        ]);
 
-        return view('students.show', ['student' => $student]);
+        return view('students.show', [
+            'student' => $student,
+            'schoolYears' => SchoolYear::orderByDesc('starts_on')->get(),
+        ]);
     }
 
     public function edit(Request $request, Student $student): View
@@ -137,17 +151,30 @@ class StudentController extends Controller
 
     private function validatedData(Request $request): array
     {
-        $data = $request->validate([
+        $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date', 'before:today'],
             'classroom_id' => ['required', 'exists:classrooms,id'],
+            'school_year_id' => ['required', 'exists:school_years,id'],
+            'create_new_parent' => ['sometimes', 'boolean'],
             'parent_id' => [
-                'required',
+                'nullable',
                 Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', UserRole::Parent->value)),
             ],
-            'school_year_id' => ['required', 'exists:school_years,id'],
-        ]);
+            'parent_name' => ['required_if:create_new_parent,1', 'nullable', 'string', 'max:255'],
+            'parent_email' => ['required_if:create_new_parent,1', 'nullable', 'email', 'unique:users,email'],
+            'parent_phone' => ['nullable', 'string', 'max:30'],
+            'parent_password' => ['required_if:create_new_parent,1', 'nullable', 'string', 'min:8'],
+        ];
+
+        $data = $request->validate($rules);
+
+        if (! $request->boolean('create_new_parent') && blank($data['parent_id'] ?? null)) {
+            throw ValidationException::withMessages([
+                'parent_id' => 'Sélectionnez un parent ou créez-en un nouveau.',
+            ]);
+        }
 
         return [
             [
@@ -155,7 +182,6 @@ class StudentController extends Controller
                 'last_name' => $data['last_name'],
                 'birth_date' => $data['birth_date'],
                 'classroom_id' => $data['classroom_id'],
-                'parent_id' => $data['parent_id'],
                 'is_active' => true,
                 'left_at' => null,
             ],
@@ -163,6 +189,7 @@ class StudentController extends Controller
                 'school_year_id' => $data['school_year_id'],
                 'classroom_id' => $data['classroom_id'],
             ],
+            $data['parent_id'] ?? null,
         ];
     }
 
@@ -245,6 +272,23 @@ class StudentController extends Controller
                 : StudentSchoolYearStatus::Active,
             'withdrawn_at' => null,
         ]);
+    }
+
+    private function resolveParentId(Request $request, ?int $parentId): int
+    {
+        if ($request->boolean('create_new_parent')) {
+            $parent = User::create([
+                'name' => $request->string('parent_name'),
+                'email' => $request->string('parent_email'),
+                'phone' => $request->input('parent_phone'),
+                'role' => UserRole::Parent,
+                'password' => Hash::make($request->string('parent_password')),
+            ]);
+
+            return $parent->id;
+        }
+
+        return (int) $parentId;
     }
 
     private function defaultSchoolYear(): ?SchoolYear

@@ -21,11 +21,13 @@ class SchoolYear extends Model
         'status',
         'next_school_year_id',
         'promoted_at',
+        'auto_promote_enabled',
     ];
 
     protected function casts(): array
     {
         return [
+            'auto_promote_enabled' => 'boolean',
             'starts_on' => 'date',
             'ends_on' => 'date',
             'diploma_awarded_on' => 'date',

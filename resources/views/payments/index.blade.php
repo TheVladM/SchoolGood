@@ -7,9 +7,15 @@
     @include('partials.page-header', [
         'title' => 'Paiements',
         'description' => 'Tranches, montants et statuts.',
-        'statLabel' => 'Operations',
+        'statLabel' => 'Opérations',
         'statValue' => $payments->total(),
     ])
+
+    @if (($pendingValidationCount ?? 0) > 0)
+        <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950" data-reveal>
+            <strong>{{ $pendingValidationCount }}</strong> paiement(s) en attente de validation.
+        </div>
+    @endif
 
     <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
         <div class="toolbar">

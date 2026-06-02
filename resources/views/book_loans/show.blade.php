@@ -1,8 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <article class="panel p-6">
+    @include('partials.page-header', ['title' => $loan->book?->title, 'description' => $loan->borrower_name])
+
+    <section class="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-reveal>
+        <article class="surface-card p-5 lg:p-6">
             <span class="badge">{{ $loan->returned_at ? 'Retourne' : 'En cours' }}</span>
             <h1 class="mt-4 text-3xl font-black text-slate-900">{{ $loan->book?->title }}</h1>
             <div class="mt-6 space-y-3 text-sm text-slate-600">
@@ -31,7 +33,7 @@
             </div>
         </article>
 
-        <article class="panel p-6">
+        <article class="surface-card p-5 lg:p-6">
             <h2 class="text-xl font-bold text-slate-900">Livre et suivi</h2>
             <div class="mt-5 space-y-4">
                 <div class="rounded-2xl border border-slate-100 p-4">

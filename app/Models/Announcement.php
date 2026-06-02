@@ -7,6 +7,7 @@ use App\Enums\AnnouncementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Announcement extends Model
 {
@@ -22,6 +23,9 @@ class Announcement extends Model
         'author_id',
         'approved_by_id',
         'approved_at',
+        'rejection_reason',
+        'attachments',
+        'read_at',
     ];
 
     protected function casts(): array
@@ -30,6 +34,8 @@ class Announcement extends Model
             'audience' => AnnouncementAudience::class,
             'status' => AnnouncementStatus::class,
             'approved_at' => 'datetime',
+            'read_at' => 'datetime',
+            'attachments' => 'array',
         ];
     }
 
@@ -51,5 +57,10 @@ class Announcement extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    public function reads(): HasMany
+    {
+        return $this->hasMany(AnnouncementRead::class);
     }
 }

@@ -20,7 +20,7 @@ class SchoolAccessTest extends TestCase
         $otherParent = User::factory()->create(['role' => UserRole::Parent]);
         $classroom = Classroom::create([
             'name' => '6e A',
-            'level' => 'College',
+            'level' => 'CM1',
             'section' => 'bilingue',
             'room' => 'A3',
         ]);
@@ -48,10 +48,9 @@ class SchoolAccessTest extends TestCase
             ->assertDontSee('Alice Nji');
     }
 
-    public function test_scolarite_cannot_create_a_student(): void
+    public function test_scolarite_can_create_a_student_with_new_parent(): void
     {
         $scolarite = User::factory()->create(['role' => UserRole::Scolarite]);
-        $parent = User::factory()->create(['role' => UserRole::Parent]);
         $schoolYear = SchoolYear::create([
             'name' => '2025-2026',
             'starts_on' => '2025-09-01',
@@ -60,7 +59,7 @@ class SchoolAccessTest extends TestCase
         ]);
         $classroom = Classroom::create([
             'name' => 'CM2 B',
-            'level' => 'Primaire',
+            'level' => 'CM2',
             'section' => 'francophone',
             'room' => 'B7',
         ]);
@@ -71,14 +70,22 @@ class SchoolAccessTest extends TestCase
                 'last_name' => 'Mbah',
                 'birth_date' => '2015-05-12',
                 'classroom_id' => $classroom->id,
-                'parent_id' => $parent->id,
                 'school_year_id' => $schoolYear->id,
+                'create_new_parent' => '1',
+                'parent_name' => 'Parent Mbah',
+                'parent_email' => 'parent.mbah@example.com',
+                'parent_password' => 'password123',
             ])
-            ->assertForbidden();
+            ->assertRedirect(route('students.index'));
 
-        $this->assertDatabaseMissing('students', [
+        $this->assertDatabaseHas('students', [
             'first_name' => 'Junior',
             'last_name' => 'Mbah',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'parent.mbah@example.com',
+            'role' => UserRole::Parent->value,
         ]);
     }
 }

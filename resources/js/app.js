@@ -205,6 +205,39 @@ const setupTableSearch = () => {
     });
 };
 
+const setupSplashScreen = () => {
+    const splash = document.getElementById('app-splash');
+
+    if (!splash) {
+        return;
+    }
+
+    const storageKey = 'schoolgood_splash_seen';
+    const seenThisSession = sessionStorage.getItem(storageKey) === '1';
+
+    if (seenThisSession) {
+        splash.remove();
+
+        return;
+    }
+
+    sessionStorage.setItem(storageKey, '1');
+
+    const finish = () => {
+        splash.classList.add('is-done');
+        splash.setAttribute('aria-hidden', 'true');
+
+        window.setTimeout(() => {
+            splash.remove();
+        }, 600);
+    };
+
+    const minDisplay = prefersReducedMotion ? 400 : 2200;
+
+    window.setTimeout(finish, minDisplay);
+};
+
+setupSplashScreen();
 setupSidebar();
 setupPasswordToggles();
 setupFlashDismiss();

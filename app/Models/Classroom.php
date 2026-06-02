@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ClassroomCycleType;
 use App\Enums\ClassroomSection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,8 @@ class Classroom extends Model
         'section',
         'room',
         'location',
+        'room_id',
+        'cycle_type',
         'main_teacher_id',
         'language_teacher_id',
     ];
@@ -26,7 +29,13 @@ class Classroom extends Model
     {
         return [
             'section' => ClassroomSection::class,
+            'cycle_type' => ClassroomCycleType::class,
         ];
+    }
+
+    public function schoolRoom(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
     public function students(): HasMany

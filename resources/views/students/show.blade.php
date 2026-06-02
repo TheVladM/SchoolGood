@@ -4,8 +4,13 @@
 @section('topbar_title', 'Fiche eleve')
 
 @section('content')
-    <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-reveal>
-        <article class="panel p-6">
+    @include('partials.page-header', [
+        'title' => $student->full_name,
+        'description' => $student->classroom?->name,
+    ])
+
+    <section class="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-reveal>
+        <article class="surface-card p-5 lg:p-6">
             <span class="badge">{{ $student->is_active ? 'Actif' : 'Archive' }}</span>
             <h2 class="mt-4 text-3xl font-black text-slate-900">{{ $student->full_name }}</h2>
 
@@ -17,7 +22,7 @@
             </div>
         </article>
 
-        <article class="panel p-6">
+        <article class="surface-card p-5 lg:p-6">
             <h2 class="text-xl font-bold text-slate-900">Paiements associes</h2>
 
             <div class="mt-5 space-y-4">
@@ -53,6 +58,37 @@
                     </div>
                 @empty
                     <p class="text-sm text-slate-500">Aucun historique scolaire disponible.</p>
+                @endforelse
+            </div>
+
+            <h2 class="mt-8 text-xl font-bold text-slate-900">Notes / résultats</h2>
+            @can('create', [\App\Models\StudentSchoolGrade::class, $student])
+                <form method="POST" action="{{ route('students.grades.store', $student) }}" class="mt-3 grid gap-2 md:grid-cols-5">
+                    @csrf
+                    <select name="school_year_id" class="field" required>
+                        @foreach ($schoolYears as $year)
+                            <option value="{{ $year->id }}">{{ $year->name }}</option>
+                        @endforeach
+                    </select>
+                    <input name="subject" class="field" placeholder="Matière" required>
+                    <input name="term" class="field" value="Annuel" required>
+                    <input name="grade" type="number" step="0.25" min="0" max="20" class="field" placeholder="Note" required>
+                    <button class="btn-primary">Ajouter</button>
+                </form>
+            @endcan
+            <div class="mt-4 space-y-2">
+                @forelse ($student->schoolGrades as $grade)
+                    <div class="flex justify-between rounded-xl border border-slate-100 p-3 text-sm">
+                        <span>{{ $grade->schoolYear?->name }} — {{ $grade->subject }} ({{ $grade->term }}) : <strong>{{ $grade->grade }}/20</strong></span>
+                        @can('delete', $grade)
+                            <form method="POST" action="{{ route('students.grades.destroy', [$student, $grade]) }}">
+                                @csrf @method('DELETE')
+                                <button class="text-rose-600 text-xs">Supprimer</button>
+                            </form>
+                        @endcan
+                    </div>
+                @empty
+                    <p class="text-sm text-slate-500">Aucune note enregistrée.</p>
                 @endforelse
             </div>
 

@@ -9,6 +9,10 @@ use App\Models\Announcement;
 use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\User;
+use App\Notifications\AnnouncementApprovedNotification;
+use App\Services\AnnouncementReadService;
+use App\Services\AnnouncementRecipientService;
+use App\Services\Sms\SmsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -18,16 +22,36 @@ use Illuminate\Validation\ValidationException;
 
 class AnnouncementController extends Controller
 {
+    public function __construct(
+        private AnnouncementReadService $readService,
+        private AnnouncementRecipientService $recipientService,
+        private SmsService $sms,
+    ) {}
+
     public function index(Request $request): View
     {
         $this->authorizeAnnouncementAccess($request->user());
 
-        $announcements = $this->visibleAnnouncementsQuery($request->user())
-            ->with(['author', 'approver', 'classroom'])
-            ->latest()
-            ->paginate(10);
+        $query = $this->visibleAnnouncementsQuery($request->user())
+            ->with(['author', 'approver', 'classroom']);
 
-        return view('announcements.index', ['announcements' => $announcements]);
+        if (
+            $request->user()->hasRole(UserRole::Founder)
+            && $request->query('filter') === 'pending'
+        ) {
+            $query->where('status', AnnouncementStatus::PendingApproval->value);
+        }
+
+        $announcements = $query->latest()->paginate(10)->withQueryString();
+
+        $pendingCount = $request->user()->hasRole(UserRole::Founder)
+            ? Announcement::where('status', AnnouncementStatus::PendingApproval->value)->count()
+            : 0;
+
+        return view('announcements.index', [
+            'announcements' => $announcements,
+            'pendingCount' => $pendingCount,
+        ]);
     }
 
     public function create(Request $request): View
@@ -52,6 +76,8 @@ class AnnouncementController extends Controller
         $data['author_id'] = $request->user()->id;
         $data = $this->applyApprovalWorkflow($request->user(), $data);
 
+        $data['attachments'] = $this->storeAttachments($request);
+
         Announcement::create($data);
 
         return redirect()
@@ -63,9 +89,26 @@ class AnnouncementController extends Controller
     {
         $this->authorizeAnnouncementAccess($request->user());
         $this->ensureAnnouncementVisible($request->user(), $announcement);
-        $announcement->load(['author', 'approver', 'classroom']);
+        $announcement->load(['author', 'approver', 'classroom', 'reads.user']);
 
-        return view('announcements.show', ['announcement' => $announcement]);
+        if ($request->user()->hasRole(UserRole::Parent)) {
+            $this->readService->record($announcement, $request->user());
+            $announcement->load('reads.user');
+        }
+
+        $recipients = $this->recipientService->parents($announcement);
+        $readUserIds = $announcement->reads->pluck('user_id');
+
+        return view('announcements.show', [
+            'announcement' => $announcement,
+            'recipients' => $recipients,
+            'readUserIds' => $readUserIds,
+            'canSeeReadReceipts' => $request->user()->hasAnyRole([
+                UserRole::Founder,
+                UserRole::Admin,
+                UserRole::Scolarite,
+            ]),
+        ]);
     }
 
     public function edit(Request $request, Announcement $announcement): View
@@ -118,20 +161,52 @@ class AnnouncementController extends Controller
             'approved_at' => now(),
         ]);
 
-        return back()->with('success', 'Message approuve et pret pour les parents.');
+        $announcement->load('author');
+        $announcement->author?->notify(new AnnouncementApprovedNotification($announcement));
+
+        foreach ($this->recipientService->parents($announcement) as $parent) {
+            $parent->notify(new AnnouncementApprovedNotification($announcement));
+            if ($parent->phone) {
+                $this->sms->send(
+                    $parent->phone,
+                    'SchoolGood : nouveau message « '.$announcement->title.' ». Connectez-vous pour le lire.'
+                );
+            }
+        }
+
+        return back()->with('success', 'Message approuvé et prêt pour les familles.');
     }
 
     public function reject(Request $request, Announcement $announcement): RedirectResponse
     {
         $this->authorize('reject', $announcement);
 
+        $data = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:2000'],
+        ]);
+
         $announcement->update([
             'status' => AnnouncementStatus::Rejected,
             'approved_by_id' => $request->user()->id,
             'approved_at' => now(),
+            'rejection_reason' => $data['rejection_reason'],
         ]);
 
-        return back()->with('success', 'Message invalide avec succes.');
+        return back()->with('success', 'Message refusé.');
+    }
+
+    private function storeAttachments(Request $request): ?array
+    {
+        if (! $request->hasFile('attachments')) {
+            return null;
+        }
+
+        $paths = [];
+        foreach ($request->file('attachments') as $file) {
+            $paths[] = $file->store('announcements', 'public');
+        }
+
+        return $paths;
     }
 
     private function validatedData(Request $request): array

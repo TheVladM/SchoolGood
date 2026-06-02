@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentChannel;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
@@ -25,6 +26,14 @@ class Payment extends Model
         'received_by_id',
         'validated_by_id',
         'validated_at',
+        'declared_by_parent',
+        'channel',
+        'intent_reference',
+        'operator_transaction_id',
+        'operator_status',
+        'payer_phone',
+        'receipt_number',
+        'paid_at',
     ];
 
     protected function casts(): array
@@ -32,9 +41,12 @@ class Payment extends Model
         return [
             'type' => PaymentType::class,
             'method' => PaymentMethod::class,
+            'channel' => PaymentChannel::class,
             'status' => PaymentStatus::class,
             'amount' => 'decimal:2',
             'validated_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'declared_by_parent' => 'boolean',
         ];
     }
 

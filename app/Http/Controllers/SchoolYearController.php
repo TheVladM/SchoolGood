@@ -5,19 +5,19 @@ namespace App\Http\Controllers;
 use App\Enums\SchoolYearStatus;
 use App\Enums\StudentSchoolYearStatus;
 use App\Enums\UserRole;
-use App\Models\Classroom;
 use App\Models\SchoolYear;
-use App\Models\StudentSchoolYearRecord;
 use App\Models\User;
+use App\Services\SchoolYearPromotionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class SchoolYearController extends Controller
 {
+    public function __construct(private SchoolYearPromotionService $promotionService) {}
+
     public function index(Request $request): View
     {
         $this->authorizeSchoolYearManagement($request->user());
@@ -129,80 +129,9 @@ class SchoolYearController extends Controller
             ]);
         }
 
-        [$preparedCount, $skippedCount] = DB::transaction(function () use ($schoolYear, $nextSchoolYear): array {
-            $prepared = 0;
-            $skipped = 0;
-
-            $records = $schoolYear->studentRecords()
-                ->with(['student', 'classroom'])
-                ->where('status', StudentSchoolYearStatus::Active->value)
-                ->get();
-
-            foreach ($records as $record) {
-                if (! $record->student?->is_active || ! $record->classroom) {
-                    $skipped++;
-
-                    continue;
-                }
-
-                $nextLevel = $this->resolveNextLevel($record->level_snapshot);
-
-                if (! $nextLevel) {
-                    $skipped++;
-
-                    continue;
-                }
-
-                $targetClassroom = $this->resolvePromotedClassroom($record->classroom, $nextLevel);
-
-                if (! $targetClassroom) {
-                    $skipped++;
-
-                    continue;
-                }
-
-                $alreadyPrepared = StudentSchoolYearRecord::query()
-                    ->where('student_id', $record->student_id)
-                    ->where('school_year_id', $nextSchoolYear->id)
-                    ->exists();
-
-                if ($alreadyPrepared) {
-                    $skipped++;
-
-                    continue;
-                }
-
-                StudentSchoolYearRecord::create([
-                    'student_id' => $record->student_id,
-                    'school_year_id' => $nextSchoolYear->id,
-                    'classroom_id' => $targetClassroom->id,
-                    'classroom_name_snapshot' => $targetClassroom->name,
-                    'level_snapshot' => $targetClassroom->level,
-                    'section_snapshot' => $targetClassroom->section?->value,
-                    'status' => StudentSchoolYearStatus::PreRegistered,
-                    'promoted_from_id' => $record->id,
-                    'promoted_at' => now(),
-                ]);
-
-                $record->update([
-                    'status' => StudentSchoolYearStatus::Promoted,
-                    'promoted_at' => now(),
-                ]);
-
-                $record->student->update([
-                    'classroom_id' => $targetClassroom->id,
-                ]);
-
-                $prepared++;
-            }
-
-            $schoolYear->update([
-                'status' => SchoolYearStatus::Closed,
-                'promoted_at' => now(),
-            ]);
-
-            return [$prepared, $skipped];
-        });
+        $result = $this->promotionService->preparePromotions($schoolYear);
+        $preparedCount = $result['prepared'];
+        $skippedCount = $result['skipped'];
 
         return redirect()
             ->route('school-years.show', $schoolYear)
@@ -219,6 +148,7 @@ class SchoolYearController extends Controller
             'promotion_opens_on' => ['nullable', 'date'],
             'status' => ['required', Rule::enum(SchoolYearStatus::class)],
             'next_school_year_id' => ['nullable', 'exists:school_years,id'],
+            'auto_promote_enabled' => ['sometimes', 'boolean'],
         ]);
 
         if (filled($data['next_school_year_id'] ?? null) && $schoolYear && (int) $data['next_school_year_id'] === $schoolYear->id) {
@@ -269,61 +199,4 @@ class SchoolYearController extends Controller
         ]);
     }
 
-    private function resolveNextLevel(string $currentLevel): ?string
-    {
-        $map = [
-            'creche' => 'Petite Section',
-            'petite section' => 'Moyenne Section',
-            'moyenne section' => 'Grande Section',
-            'grande section' => 'SIL',
-            'sil' => 'CP',
-            'cp' => 'CE1',
-            'ce1' => 'CE2',
-            'ce2' => 'CM1',
-            'cm1' => 'CM2',
-            'kindergarden' => 'Nursery 1',
-            'kindergarten' => 'Nursery 1',
-            'nursery 1' => 'Nursery 2',
-            'nursery 2' => 'Nursery 3',
-            'nursery 3' => 'Class 1',
-            'class 1' => 'Class 2',
-            'class 2' => 'Class 3',
-            'class 3' => 'Class 4',
-            'class 4' => 'Class 5',
-            'class 5' => 'Class 6',
-        ];
-
-        return $map[strtolower(trim($currentLevel))] ?? null;
-    }
-
-    private function resolvePromotedClassroom(Classroom $currentClassroom, string $nextLevel): ?Classroom
-    {
-        $candidates = Classroom::query()
-            ->where('level', $nextLevel)
-            ->where('section', $currentClassroom->section?->value)
-            ->orderBy('name')
-            ->get();
-
-        if ($candidates->isEmpty()) {
-            return null;
-        }
-
-        if ($candidates->count() === 1) {
-            return $candidates->first();
-        }
-
-        $suffix = trim(str_ireplace($currentClassroom->level, '', $currentClassroom->name));
-
-        if (filled($suffix)) {
-            $matched = $candidates->first(function (Classroom $candidate) use ($suffix): bool {
-                return str_ends_with(strtolower($candidate->name), strtolower($suffix));
-            });
-
-            if ($matched) {
-                return $matched;
-            }
-        }
-
-        return $candidates->first();
-    }
 }

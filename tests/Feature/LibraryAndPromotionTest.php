@@ -205,14 +205,6 @@ class LibraryAndPromotionTest extends TestCase
                 'student_id' => $student->id,
                 'borrowed_at' => '2026-05-16',
             ])
-            ->assertForbidden();
-
-        $this->actingAs($admin)
-            ->post(route('book-loans.store'), [
-                'book_id' => $book->id,
-                'student_id' => $student->id,
-                'borrowed_at' => '2026-05-16',
-            ])
             ->assertRedirect(route('book-loans.index'));
 
         $loan = BookLoan::firstOrFail();

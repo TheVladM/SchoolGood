@@ -22,6 +22,8 @@ class BookLoan extends Model
         'notes',
         'issued_by_id',
         'returned_by_id',
+        'overdue_days_logged',
+        'penalty_payment_id',
     ];
 
     protected function casts(): array
@@ -57,6 +59,11 @@ class BookLoan extends Model
     public function returnedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'returned_by_id');
+    }
+
+    public function penaltyPayment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class, 'penalty_payment_id');
     }
 
     protected function borrowerName(): Attribute

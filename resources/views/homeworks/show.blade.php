@@ -1,148 +1,108 @@
 @extends('layouts.app')
 
 @section('title', $homework->title . ' | SchoolGood')
-@section('topbar_title', $homework->title)
+@section('topbar_title', 'Détail du devoir')
 
 @section('content')
-    <section class="page-hero" data-reveal>
-        <div>
-            <span class="page-hero__eyebrow">{{ $homework->subject ?? 'Devoir' }}</span>
-            <h2 class="page-hero__title">{{ $homework->title }}</h2>
-            <p class="page-hero__description">
-                Assigné à la classe <strong>{{ $homework->classroom->name }}</strong> par <strong>{{ $homework->teacher->name }}</strong>
-            </p>
-        </div>
+    @include('partials.page-header', [
+        'title' => $homework->title,
+        'description' => ($homework->subject ?? 'Devoir') . ' — ' . $homework->classroom->name . ' — échéance ' . $homework->due_date->format('d/m/Y'),
+    ])
 
-        <div class="page-hero__aside">
-            <div class="hero-stat">
-                <p class="hero-stat__label">Date limite</p>
-                <p class="hero-stat__value">{{ $homework->due_date->format('d/m/Y') }}</p>
-            </div>
-            <div class="hero-stat">
-                <p class="hero-stat__label">Statut</p>
-                <p class="hero-stat__value">
-                    @if ($homework->status === 'assigned')
-                        Assigné
-                    @elseif ($homework->status === 'submitted')
-                        Soumis
-                    @else
-                        Noté
-                    @endif
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="mt-6 grid lg:grid-cols-3 gap-6" data-reveal>
-        <!-- Détails -->
+    <div class="mt-6 grid gap-6 lg:grid-cols-3" data-reveal>
         <div class="lg:col-span-2 space-y-6">
-            <div class="surface-card p-5 lg:p-6">
-                <h2 class="section-title mb-4">Détails du devoir</h2>
-                
-                <div class="space-y-4">
-                    @if ($homework->description)
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-2">Description</p>
-                            <div class="p-3 bg-gray-50 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap">
-                                {{ $homework->description }}
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Matière</p>
-                            <p class="text-gray-800">{{ $homework->subject ?? 'Non spécifiée' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Classe</p>
-                            <p class="text-gray-800">{{ $homework->classroom->name }}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Enseignant</p>
-                            <p class="text-gray-800">{{ $homework->teacher->name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Email enseignant</p>
-                            <p class="text-blue-600">
-                                <a href="mailto:{{ $homework->teacher->email }}">{{ $homework->teacher->email }}</a>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-4 pt-4 border-t">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Date d'assignation</p>
-                            <p class="text-gray-800">{{ $homework->created_at->format('d/m/Y à H:i') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-600 mb-1">Date limite</p>
-                            <p class="font-semibold @if ($homework->isOverdue()) text-red-600 @else text-green-600 @endif">
-                                {{ $homework->due_date->format('d/m/Y à H:i') }}
-                                @if ($homework->isOverdue())
-                                    <span class="ml-2">⚠️ En retard</span>
-                                @else
-                                    <span class="ml-2">✓ {{ $homework->daysUntilDue() }} jours restants</span>
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex gap-3">
-                @can('update', $homework)
-                    <a href="{{ route('homeworks.edit', $homework) }}" class="btn-primary">Éditer</a>
-                @endcan
-                @can('delete', $homework)
-                    <form action="{{ route('homeworks.destroy', $homework) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce devoir?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn-danger">Supprimer</button>
-                    </form>
-                @endcan
-                <a href="{{ route('homeworks.index') }}" class="btn-secondary">Retour à la liste</a>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="lg:col-span-1">
-            <div class="surface-card p-5 rounded-lg sticky top-6">
-                <h3 class="font-semibold text-gray-900 mb-4">Informations</h3>
-                
-                <div class="space-y-3 text-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Statut:</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @if ($homework->status === 'assigned') bg-yellow-100 text-yellow-800 @elseif ($homework->status === 'submitted') bg-blue-100 text-blue-800 @else bg-green-100 text-green-800 @endif">
-                            {{ ucfirst($homework->status) }}
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Section:</span>
-                        <span class="font-medium">{{ $homework->classroom->section?->value }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-gray-600">Niveau:</span>
-                        <span class="font-medium">{{ $homework->classroom->level }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t">
-                    <p class="text-xs text-gray-500 mb-2">Créé le</p>
-                    <p class="text-sm font-medium text-gray-800">{{ $homework->created_at->format('d/m/Y H:i') }}</p>
-                </div>
-
-                @if ($homework->updated_at->notEqualTo($homework->created_at))
-                    <div class="mt-3 pt-3 border-t">
-                        <p class="text-xs text-gray-500 mb-2">Modifié le</p>
-                        <p class="text-sm font-medium text-gray-800">{{ $homework->updated_at->format('d/m/Y H:i') }}</p>
-                    </div>
+            <x-content-panel title="Consignes" subtitle="Description et pièces jointes">
+                @if ($homework->description)
+                    <div class="prose prose-slate max-w-none whitespace-pre-wrap text-slate-700">{{ $homework->description }}</div>
+                @else
+                    <p class="text-slate-500">Aucune description.</p>
                 @endif
-            </div>
+
+                <div class="mt-4 flex flex-wrap gap-3">
+                    @can('update', $homework)
+                        <a href="{{ route('homeworks.edit', $homework) }}" class="btn-primary">Modifier</a>
+                    @endcan
+                    <a href="{{ route('homeworks.index') }}" class="btn-secondary">Retour</a>
+                </div>
+            </x-content-panel>
+
+            <x-content-panel title="Suivi par élève" subtitle="Rendu et notation individuels">
+                <div class="table-shell">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Statut</th>
+                                <th>Note</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($homework->submissions as $submission)
+                                <tr>
+                                    <td class="font-semibold text-slate-900">{{ $submission->student->full_name }}</td>
+                                    <td><span class="badge">{{ $submission->status->label() }}</span></td>
+                                    <td>{{ $submission->grade !== null ? number_format((float) $submission->grade, 2, ',', ' ') . ' / 20' : '—' }}</td>
+                                    <td>
+                                        <div class="record-actions justify-end">
+                                            @if ($submission->file_path)
+                                                <a href="{{ asset('storage/' . $submission->file_path) }}" class="btn-secondary" target="_blank" rel="noopener">Fichier</a>
+                                            @endif
+
+                                            @can('update', $homework)
+                                                @if ($submission->status->value === 'submitted' || $submission->status->value === 'graded')
+                                                    <form method="POST" action="{{ route('homeworks.submissions.grade', [$homework, $submission]) }}" class="inline-flex flex-wrap items-center gap-2">
+                                                        @csrf
+                                                        <input type="number" name="grade" min="0" max="20" step="0.25" class="field w-20" placeholder="Note" value="{{ old('grade', $submission->grade) }}" required>
+                                                        <button type="submit" class="btn-primary">Noter</button>
+                                                    </form>
+                                                @endif
+                                            @endcan
+
+                                            @if (auth()->user()->hasRole(\App\Enums\UserRole::Parent) && $parentChildren->contains($submission->student_id) && $submission->status->value === 'pending')
+                                                <form method="POST" action="{{ route('homeworks.submissions.store', $homework) }}" enctype="multipart/form-data" class="inline-flex flex-wrap items-center gap-2">
+                                                    @csrf
+                                                    <input type="hidden" name="student_id" value="{{ $submission->student_id }}">
+                                                    <input type="file" name="file" class="field text-sm max-w-[12rem]">
+                                                    <button type="submit" class="btn-primary">Rendre</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </x-content-panel>
         </div>
-    </section>
+
+        <aside>
+            <x-content-panel title="Informations" subtitle="Enseignant et échéance">
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500">Enseignant</dt>
+                        <dd class="font-medium text-slate-900">{{ $homework->teacher->name }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500">Classe</dt>
+                        <dd class="font-medium text-slate-900">{{ $homework->classroom->name }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500">Date limite</dt>
+                        <dd class="font-medium @if($homework->isOverdue()) text-rose-600 @else text-emerald-700 @endif">
+                            {{ $homework->due_date->format('d/m/Y H:i') }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500">Rendus</dt>
+                        <dd class="font-medium text-slate-900">
+                            {{ $homework->submissions->whereIn('status', ['submitted', 'graded'])->count() }}
+                            / {{ $homework->submissions->count() }}
+                        </dd>
+                    </div>
+                </dl>
+            </x-content-panel>
+        </aside>
+    </div>
 @endsection

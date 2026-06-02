@@ -6,8 +6,8 @@
     <div class="login-page">
         <aside class="login-page__visual">
             <div class="login-page__visual-inner">
-                <span class="login-page__badge">SchoolGood</span>
-                <h1 class="login-page__headline">La gestion scolaire,<br>simplifiee.</h1>
+                <x-app-logo size="lg" variant="light" tagline="Gestion scolaire" class="login-page__brand-logo mb-6" />
+                <h1 class="login-page__headline">La gestion scolaire,<br>simplifiée.</h1>
                 <p class="login-page__text">
                     Eleves, classes, paiements, bibliotheque et messages parents — un seul espace pour toute l equipe.
                 </p>
@@ -22,7 +22,7 @@
 
         <section class="login-page__card">
             <div class="login-page__card-inner">
-                <div class="login-page__logo">SG</div>
+                <x-app-logo size="md" class="login-page__card-logo" />
                 <h2 class="login-page__title">Connexion</h2>
                 <p class="login-page__subtitle">Entrez vos identifiants pour continuer.</p>
 
@@ -51,8 +51,14 @@
                 </form>
 
                 <p class="login-page__hint">
-                    Compte demo : <code>founder@schoolgood.test</code> / <code>password</code>
+                    <a href="{{ route('password.request') }}" class="text-indigo-600 hover:underline">Mot de passe oublié ?</a>
                 </p>
+
+                @if (app()->environment('local'))
+                    <p class="login-page__hint mt-2 text-xs text-slate-500">
+                        Démo (local) : <code>founder@schoolgood.test</code> / <code>password</code>
+                    </p>
+                @endif
             </div>
         </section>
     </div>

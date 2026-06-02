@@ -1,20 +1,15 @@
 @extends('layouts.app')
 
+@section('title', 'Nouveau message | SchoolGood')
+@section('topbar_title', 'Nouveau message')
+
 @section('content')
-    <section class="panel mx-auto max-w-4xl p-6">
-        <div class="mb-6">
-            <h1 class="text-3xl font-black text-slate-900">Creer un message parent</h1>
-            <p class="mt-2 text-slate-600">Le fondateur approuve les messages avant diffusion, sauf lorsqu il les publie lui-meme.</p>
-        </div>
-
-        <form method="POST" action="{{ route('announcements.store') }}" class="space-y-6">
-            @csrf
-            @include('announcements._form')
-
-            <div class="flex gap-3">
-                <button type="submit" class="btn-primary">Enregistrer</button>
-                <a href="{{ route('announcements.index') }}" class="btn-secondary">Annuler</a>
-            </div>
-        </form>
-    </section>
+    <x-form-shell
+        title="Publier un message"
+        description="Annonce ou communication aux parents."
+        :action="route('announcements.store')"
+        :cancel-url="route('announcements.index')"
+    >
+        @include('announcements._form')
+    </x-form-shell>
 @endsection

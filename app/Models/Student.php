@@ -58,6 +58,16 @@ class Student extends Model
         return $this->hasMany(BookLoan::class);
     }
 
+    public function homeworkSubmissions(): HasMany
+    {
+        return $this->hasMany(HomeworkSubmission::class);
+    }
+
+    public function schoolGrades(): HasMany
+    {
+        return $this->hasMany(StudentSchoolGrade::class);
+    }
+
     protected function fullName(): Attribute
     {
         return Attribute::make(

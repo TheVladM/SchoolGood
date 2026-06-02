@@ -35,6 +35,6 @@ class AuthenticationTest extends TestCase
 
         $this->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Vue administration');
+            ->assertSee('Vue fondateur');
     }
 }

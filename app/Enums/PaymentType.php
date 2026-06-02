@@ -13,9 +13,9 @@ enum PaymentType: string
     {
         return match ($this) {
             self::Registration => 'Inscription',
-            self::FirstInstallment => '1ere tranche',
-            self::SecondInstallment => '2eme tranche',
-            self::ThirdInstallment => '3eme tranche',
+            self::FirstInstallment => '1ère tranche',
+            self::SecondInstallment => '2ème tranche',
+            self::ThirdInstallment => '3ème tranche',
         };
     }
 

@@ -94,6 +94,7 @@ class SchoolWorkflowTest extends TestCase
                 'name' => 'CM2 A',
                 'level' => 'CM2',
                 'section' => 'francophone',
+                'cycle_type' => 'standard',
                 'room' => 'A3',
                 'main_teacher_id' => $titularTeacher->id,
                 'language_teacher_id' => $languageTeacherTwo->id,

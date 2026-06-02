@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\HomeworkStatus;
+use App\Enums\HomeworkSubmissionStatus;
 use App\Enums\UserRole;
 use App\Models\Classroom;
 use App\Models\Homework;
+use App\Models\HomeworkSubmission;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +57,10 @@ class HomeworkController extends Controller
         $data = $this->validatedData($request);
         $this->guardTeacherClassroom($request, $data);
 
-        Homework::create($data);
+        $data['status'] = $data['status'] ?? HomeworkStatus::Assigned->value;
+
+        $homework = Homework::create($data);
+        $this->ensureSubmissions($homework);
 
         return redirect()->route('homeworks.index')->with('success', 'Devoir créé avec succès');
     }
@@ -63,7 +69,22 @@ class HomeworkController extends Controller
     {
         $this->authorize('view', $homework);
 
-        return view('homeworks.show', compact('homework'));
+        $this->ensureSubmissions($homework);
+
+        $homework->load([
+            'teacher',
+            'classroom.students.parent',
+            'submissions.student',
+        ]);
+
+        $parentChildren = auth()->user()->hasRole(UserRole::Parent)
+            ? auth()->user()->children()->pluck('id')
+            : collect();
+
+        return view('homeworks.show', [
+            'homework' => $homework,
+            'parentChildren' => $parentChildren,
+        ]);
     }
 
     public function edit(Homework $homework)
@@ -153,5 +174,22 @@ class HomeworkController extends Controller
         }
 
         return User::where('role', UserRole::Teacher)->orderBy('name')->get();
+    }
+
+    private function ensureSubmissions(Homework $homework): void
+    {
+        $homework->loadMissing('classroom.students');
+
+        foreach ($homework->classroom?->students ?? [] as $student) {
+            HomeworkSubmission::firstOrCreate(
+                [
+                    'homework_id' => $homework->id,
+                    'student_id' => $student->id,
+                ],
+                [
+                    'status' => HomeworkSubmissionStatus::Pending,
+                ]
+            );
+        }
     }
 }

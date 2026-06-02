@@ -1,8 +1,8 @@
 <div class="grid gap-6 md:grid-cols-2">
     <div class="md:col-span-2">
-        <label for="student_id" class="label">Eleve</label>
+        <label for="student_id" class="label">Élève</label>
         <select id="student_id" name="student_id" required class="field">
-            <option value="">Selectionner</option>
+            <option value="">Sélectionner</option>
             @foreach ($students as $student)
                 <option value="{{ $student->id }}" @selected(old('student_id', $payment->student_id ?? '') == $student->id)>
                     {{ $student->full_name }} - {{ $student->classroom?->name }}
@@ -14,7 +14,7 @@
     <div>
         <label for="type" class="label">Type de paiement</label>
         <select id="type" name="type" required class="field">
-            <option value="">Selectionner</option>
+            <option value="">Sélectionner</option>
             @foreach ($types as $value => $label)
                 <option value="{{ $value }}" @selected(old('type', $payment->type?->value ?? '') === $value)>
                     {{ $label }}

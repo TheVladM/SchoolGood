@@ -52,4 +52,22 @@
         <label for="notes" class="label">Notes</label>
         <textarea id="notes" name="notes" rows="4" class="field">{{ old('notes', $entry->notes ?? '') }}</textarea>
     </div>
+
+    <div class="md:col-span-2 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <input type="hidden" name="sync_courses" value="0">
+        <input
+            type="checkbox"
+            id="sync_courses"
+            name="sync_courses"
+            value="1"
+            class="mt-1"
+            @checked(old('sync_courses', '1') !== '0')
+        >
+        <label for="sync_courses" class="text-sm text-slate-700">
+            <span class="font-semibold text-slate-900">Synchroniser les cours des classes</span>
+            <span class="mt-1 block text-slate-500">
+                Crée ou met à jour automatiquement un cours par classe (même niveau et section), avec l’enseignant titulaire ou de langue selon la matière.
+            </span>
+        </label>
+    </div>
 </div>

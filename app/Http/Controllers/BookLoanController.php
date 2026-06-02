@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\BookLoan;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\BookLoanPenaltyService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,12 +18,18 @@ use Illuminate\Validation\ValidationException;
 
 class BookLoanController extends Controller
 {
+    public function __construct(private BookLoanPenaltyService $penaltyService) {}
+
     public function index(Request $request): View
     {
         $loans = $this->visibleLoansQuery($request->user())
-            ->with(['book', 'student', 'user', 'issuedBy', 'returnedBy'])
+            ->with(['book', 'student', 'user', 'issuedBy', 'returnedBy', 'penaltyPayment'])
             ->latest()
             ->paginate(10);
+
+        foreach ($loans as $loan) {
+            $this->penaltyService->syncOverdueDays($loan);
+        }
 
         return view('book_loans.index', ['loans' => $loans]);
     }
@@ -118,6 +125,19 @@ class BookLoanController extends Controller
         ]);
 
         return back()->with('success', 'Retour du livre enregistre avec succes.');
+    }
+
+    public function chargePenalty(Request $request, BookLoan $bookLoan): RedirectResponse
+    {
+        $this->authorize('chargePenalty', $bookLoan);
+
+        $payment = $this->penaltyService->createPenaltyPayment($bookLoan, $request->user());
+
+        if (! $payment) {
+            return back()->with('error', 'Aucune pénalité à facturer ou emprunteur non élève.');
+        }
+
+        return back()->with('success', 'Pénalité enregistrée comme paiement en attente.');
     }
 
     private function validatedData(Request $request): array

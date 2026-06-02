@@ -32,7 +32,7 @@ class StudentPolicy
 
     public function create(User $user): bool
     {
-        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true);
     }
 
     public function update(User $user, Student $model): bool
@@ -42,6 +42,6 @@ class StudentPolicy
 
     public function delete(User $user, Student $model): bool
     {
-        return $this->create($user);
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
     }
 }

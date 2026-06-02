@@ -11,7 +11,7 @@ enum PaymentStatus: string
     {
         return match ($this) {
             self::Pending => 'En attente',
-            self::Paid => 'Paye',
+            self::Paid => 'Payé',
         };
     }
 

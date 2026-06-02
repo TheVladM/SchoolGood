@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ClassroomSection;
-use App\Enums\UserRole;
+use App\Enums\SchoolLevel;
 use App\Models\TuitionFee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -15,8 +15,7 @@ class TuitionFeeController extends Controller
 {
     public function index(Request $request): View
     {
-        // Only founder can manage tuition fees
-        abort_unless($request->user()->role === UserRole::Founder, 403);
+        $this->authorize('viewAny', TuitionFee::class);
 
         $fees = TuitionFee::query()
             ->with('managedBy')
@@ -33,6 +32,11 @@ class TuitionFeeController extends Controller
 
         return view('tuition_fees.create', [
             'sections' => ClassroomSection::options(),
+            'levelsBySection' => [
+                'francophone' => SchoolLevel::optionsForSection(ClassroomSection::Francophone),
+                'anglophone' => SchoolLevel::optionsForSection(ClassroomSection::Anglophone),
+                'bilingue' => SchoolLevel::optionsForSection(ClassroomSection::Bilingue),
+            ],
         ]);
     }
 
@@ -64,6 +68,11 @@ class TuitionFeeController extends Controller
         return view('tuition_fees.edit', [
             'fee' => $fee,
             'sections' => ClassroomSection::options(),
+            'levelsBySection' => [
+                'francophone' => SchoolLevel::optionsForSection(ClassroomSection::Francophone),
+                'anglophone' => SchoolLevel::optionsForSection(ClassroomSection::Anglophone),
+                'bilingue' => SchoolLevel::optionsForSection(ClassroomSection::Bilingue),
+            ],
         ]);
     }
 
@@ -94,7 +103,7 @@ class TuitionFeeController extends Controller
 
     private function validatedData(Request $request, ?TuitionFee $fee = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'level' => [
                 'required',
                 'string',
@@ -110,5 +119,13 @@ class TuitionFeeController extends Controller
             'third_installment' => ['required', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        if (! SchoolLevel::isValidForSection($data['level'], $data['section'])) {
+            throw ValidationException::withMessages([
+                'level' => 'Niveau invalide pour cette section.',
+            ]);
+        }
+
+        return $data;
     }
 }

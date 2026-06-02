@@ -9,6 +9,7 @@ use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\TimetableEntry;
 use App\Models\User;
+use App\Services\CourseTimetableSyncService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +18,8 @@ use Illuminate\Validation\Rule;
 
 class TimetableEntryController extends Controller
 {
+    public function __construct(private CourseTimetableSyncService $courseSync) {}
+
     public function index(Request $request): View
     {
         $entries = $this->visibleTimetableEntriesQuery($request->user())
@@ -42,11 +45,16 @@ class TimetableEntryController extends Controller
     {
         $this->authorize('create', TimetableEntry::class);
 
-        TimetableEntry::create($this->validatedData($request));
+        $entry = TimetableEntry::create($this->validatedData($request));
+
+        $synced = 0;
+        if ($request->boolean('sync_courses', true)) {
+            $synced = $this->courseSync->syncEntry($entry);
+        }
 
         return redirect()
             ->route('timetable-entries.index')
-            ->with('success', 'Emploi du temps enregistre avec succes.');
+            ->with('success', "Emploi du temps enregistré. {$synced} cours synchronisé(s) dans les classes concernées.");
     }
 
     public function show(Request $request, TimetableEntry $timetableEntry): View
@@ -75,20 +83,26 @@ class TimetableEntryController extends Controller
 
         $timetableEntry->update($this->validatedData($request));
 
+        $synced = 0;
+        if ($request->boolean('sync_courses', true)) {
+            $synced = $this->courseSync->syncEntry($timetableEntry->fresh());
+        }
+
         return redirect()
             ->route('timetable-entries.index')
-            ->with('success', 'Emploi du temps mis a jour avec succes.');
+            ->with('success', "Emploi du temps mis à jour. {$synced} cours synchronisé(s).");
     }
 
     public function destroy(Request $request, TimetableEntry $timetableEntry): RedirectResponse
     {
         $this->authorize('delete', $timetableEntry);
 
+        $this->courseSync->removeCoursesForEntry($timetableEntry);
         $timetableEntry->delete();
 
         return redirect()
             ->route('timetable-entries.index')
-            ->with('success', 'Emploi du temps supprime avec succes.');
+            ->with('success', 'Emploi du temps supprimé (cours liés retirés).');
     }
 
     private function validatedData(Request $request): array

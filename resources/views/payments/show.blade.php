@@ -1,37 +1,74 @@
 @extends('layouts.app')
 
+@section('title', 'Paiement | SchoolGood')
+@section('topbar_title', 'Détail du paiement')
+
 @section('content')
-    <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <article class="panel p-6">
+    @include('partials.page-header', [
+        'title' => $payment->student?->full_name ?? 'Paiement',
+        'description' => $payment->type?->label() . ' — ' . number_format((float) $payment->amount, 0, ',', ' ') . ' FCFA',
+    ])
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-2" data-reveal>
+        <section class="surface-card p-5 lg:p-6">
             <span class="badge">{{ $payment->status?->label() }}</span>
-            <h1 class="mt-4 text-3xl font-black text-slate-900">{{ $payment->student?->full_name }}</h1>
-            <div class="mt-6 space-y-3 text-sm text-slate-600">
-                <p><span class="font-semibold text-slate-900">Classe:</span> {{ $payment->student?->classroom?->name }}</p>
-                <p><span class="font-semibold text-slate-900">Parent:</span> {{ $payment->student?->parent?->name }}</p>
-            </div>
-        </article>
-
-        <article class="panel p-6">
-            <h2 class="text-xl font-bold text-slate-900">Details du paiement</h2>
-            <div class="mt-5 space-y-3 text-sm text-slate-600">
-                <p><span class="font-semibold text-slate-900">Type:</span> {{ $payment->type?->label() }}</p>
-                <p><span class="font-semibold text-slate-900">Montant:</span> {{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</p>
-                <p><span class="font-semibold text-slate-900">Mode:</span> {{ $payment->method?->label() }}</p>
-                <p><span class="font-semibold text-slate-900">Reference:</span> {{ $payment->reference ?: '-' }}</p>
-                <p><span class="font-semibold text-slate-900">Compte ou transaction:</span> {{ $payment->account_reference ?: '-' }}</p>
-                <p><span class="font-semibold text-slate-900">Statut:</span> {{ $payment->status?->label() }}</p>
-                <p><span class="font-semibold text-slate-900">Enregistre par:</span> {{ $payment->receivedBy?->name ?: '-' }}</p>
-                <p><span class="font-semibold text-slate-900">Valide par:</span> {{ $payment->validatedBy?->name ?: '-' }}</p>
-                <p><span class="font-semibold text-slate-900">Date de validation:</span> {{ $payment->validated_at?->format('d/m/Y H:i') ?: '-' }}</p>
-                <p><span class="font-semibold text-slate-900">Notes:</span> {{ $payment->notes ?: '-' }}</p>
-            </div>
-
-            <div class="mt-6 flex gap-3">
-                <a href="{{ route('payments.index') }}" class="btn-secondary">Retour</a>
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
-                    <a href="{{ route('payments.edit', $payment) }}" class="btn-primary">Modifier</a>
+            <dl class="mt-4 space-y-3 text-sm">
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Classe</dt><dd class="font-medium">{{ $payment->student?->classroom?->name }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Parent</dt><dd class="font-medium">{{ $payment->student?->parent?->name }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Mode</dt><dd class="font-medium">{{ $payment->method?->label() }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Référence</dt><dd class="font-medium">{{ $payment->intent_reference ?? ($payment->reference ?: '—') }}</dd></div>
+                @if ($payment->receipt_number)
+                    <div class="flex justify-between gap-4"><dt class="text-slate-500">Reçu</dt><dd class="font-medium">{{ $payment->receipt_number }}</dd></div>
                 @endif
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Canal</dt><dd class="font-medium">{{ $payment->channel?->label() ?? '—' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Enregistré par</dt><dd class="font-medium">{{ $payment->receivedBy?->name ?: '—' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="text-slate-500">Validé par</dt><dd class="font-medium">{{ $payment->validatedBy?->name ?: '—' }}</dd></div>
+            </dl>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a href="{{ route('payments.index') }}" class="btn-secondary">Retour</a>
+                @if ($payment->status === \App\Enums\PaymentStatus::Paid)
+                    <a href="{{ route('payments.receipt', $payment) }}" class="btn-primary">Reçu PDF</a>
+                @endif
+                @can('update', $payment)
+                    <a href="{{ route('payments.edit', $payment) }}" class="btn-primary">Modifier</a>
+                @endcan
+                @can('validate', $payment)
+                    @if ($payment->status !== \App\Enums\PaymentStatus::Paid)
+                        <form method="POST" action="{{ route('payments.validate', $payment) }}">
+                            @csrf
+                            <button type="submit" class="btn-primary">Valider le paiement</button>
+                        </form>
+                    @endif
+                @endcan
             </div>
-        </article>
-    </section>
+        </section>
+
+        @if ($payment->student && count($installmentBreakdown) > 0)
+            <section class="surface-card p-5 lg:p-6">
+                <h2 class="section-title">Solde scolarité</h2>
+                <p class="mt-2 text-lg font-bold text-rose-700">Reste à payer : {{ number_format($balanceDue, 0, ',', ' ') }} FCFA</p>
+                <table class="data-table mt-4">
+                    <thead>
+                        <tr>
+                            <th>Tranche</th>
+                            <th>Dû</th>
+                            <th>Payé</th>
+                            <th>Reste</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($installmentBreakdown as $row)
+                            <tr>
+                                <td>{{ $row['label'] }}</td>
+                                <td>{{ number_format($row['due'], 0, ',', ' ') }}</td>
+                                <td>{{ number_format($row['paid'], 0, ',', ' ') }}</td>
+                                <td class="font-semibold">{{ number_format($row['remaining'], 0, ',', ' ') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </section>
+        @endif
+    </div>
 @endsection

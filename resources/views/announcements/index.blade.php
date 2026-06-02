@@ -24,6 +24,12 @@
                     <input type="search" class="field min-w-[18rem]" placeholder="Titre, auteur, classe ou statut" data-table-search>
                 </label>
 
+                @if (auth()->user()->hasRole(\App\Enums\UserRole::Founder) && ($pendingCount ?? 0) > 0)
+                    <a href="{{ route('announcements.index', ['filter' => 'pending']) }}" class="btn-secondary self-end">
+                        En attente ({{ $pendingCount }})
+                    </a>
+                @endif
+
                 @can('create', \App\Models\Announcement::class)
                     <a href="{{ route('announcements.create') }}" class="btn-primary self-end">Nouveau message</a>
                 @endcan

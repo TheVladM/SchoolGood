@@ -16,6 +16,7 @@ class Course extends Model
         'content',
         'teacher_id',
         'classroom_id',
+        'timetable_entry_id',
         'day',
     ];
 
@@ -34,5 +35,10 @@ class Course extends Model
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function timetableEntry(): BelongsTo
+    {
+        return $this->belongsTo(TimetableEntry::class);
     }
 }

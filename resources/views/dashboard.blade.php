@@ -6,23 +6,23 @@
 @section('content')
     @php
         $actions = [
-            ['title' => 'Eleves', 'url' => route('students.index'), 'icon' => 'users'],
+            ['title' => 'Élèves', 'url' => route('students.index'), 'icon' => 'users'],
             ['title' => 'Classes', 'url' => route('classrooms.index'), 'icon' => 'building'],
             ['title' => 'Cours', 'url' => route('courses.index'), 'icon' => 'book'],
             ['title' => 'Emploi du temps', 'url' => route('timetable-entries.index'), 'icon' => 'calendar'],
         ];
 
         if (! auth()->user()->hasRole(\App\Enums\UserRole::Parent)) {
-            $actions[] = ['title' => 'Bibliotheque', 'url' => route('books.index'), 'icon' => 'library'];
+            $actions[] = ['title' => 'Bibliothèque', 'url' => route('books.index'), 'icon' => 'library'];
             $actions[] = ['title' => 'Emprunts', 'url' => route('book-loans.index'), 'icon' => 'loan'];
         }
 
-        if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher])) {
+        if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher, \App\Enums\UserRole::Parent])) {
             $actions[] = ['title' => 'Devoirs', 'url' => route('homeworks.index'), 'icon' => 'clipboard'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
-            $actions[] = ['title' => 'Annees scolaires', 'url' => route('school-years.index'), 'icon' => 'academic'];
+            $actions[] = ['title' => 'Années scolaires', 'url' => route('school-years.index'), 'icon' => 'academic'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
@@ -49,7 +49,41 @@
         <div class="dash-hero__orb" aria-hidden="true"></div>
     </section>
 
-    <section class="stat-grid" data-reveal>
+    @if (! empty($pendingActions))
+        <section class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
+            @foreach ($pendingActions as $action)
+                <a href="{{ $action['url'] }}" class="surface-card flex items-center justify-between p-4 transition hover:border-indigo-300">
+                    <span class="font-semibold text-slate-900">{{ $action['label'] }}</span>
+                    @if (($action['count'] ?? null) !== null)
+                        <span class="badge">{{ $action['count'] }}</span>
+                    @else
+                        <x-icon name="payment" class="icon text-indigo-500" />
+                    @endif
+                </a>
+            @endforeach
+        </section>
+    @endif
+
+    @if (auth()->user()->hasRole(\App\Enums\UserRole::Parent) && $children->isNotEmpty())
+        <section class="mt-6 surface-card p-5 lg:p-6" data-reveal>
+            <h2 class="section-title">Mes enfants</h2>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                @foreach ($children as $child)
+                    <article class="rounded-xl border border-slate-200 p-4">
+                        <p class="font-bold text-slate-900">{{ $child->full_name }}</p>
+                        <p class="text-sm text-slate-500">{{ $child->classroom?->name ?? 'Sans classe' }}</p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a href="{{ route('homeworks.index') }}" class="btn-secondary text-sm">Devoirs</a>
+                            <a href="{{ route('payments.index') }}" class="btn-secondary text-sm">Paiements</a>
+                            <a href="{{ route('announcements.index') }}" class="btn-secondary text-sm">Messages</a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    <section class="stat-grid mt-6" data-reveal>
         @foreach ($stats['cards'] as $index => $card)
             <article class="stat-card stat-card--{{ ($index % 4) + 1 }}">
                 <div class="stat-card__icon">
@@ -63,18 +97,18 @@
         @endforeach
     </section>
 
-    <div class="dash-layout">
+    <div class="dash-layout mt-6">
         <section class="content-panel" data-reveal>
             <div class="content-panel__head">
                 <div>
-                    <h2 class="content-panel__title">Activite recente</h2>
-                    <p class="content-panel__subtitle">Dernieres mises a jour de votre espace</p>
+                    <h2 class="content-panel__title">Activité récente</h2>
+                    <p class="content-panel__subtitle">Dernières mises à jour de votre espace</p>
                 </div>
             </div>
             <div class="content-panel__body">
                 <div class="activity-grid">
                     <div class="activity-block">
-                        <h3 class="activity-block__title">Eleves</h3>
+                        <h3 class="activity-block__title">Élèves</h3>
                         <ul class="activity-list">
                             @forelse ($recentStudents as $student)
                                 <li>
@@ -83,7 +117,7 @@
                                     <span class="activity-list__meta">{{ $student->classroom?->name ?? '—' }}</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien a afficher</li>
+                                <li class="activity-list__empty">Rien à afficher</li>
                             @endforelse
                         </ul>
                     </div>
@@ -97,7 +131,7 @@
                                     <span class="activity-list__meta">{{ $course->classroom?->name }}</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien a afficher</li>
+                                <li class="activity-list__empty">Rien à afficher</li>
                             @endforelse
                         </ul>
                     </div>
@@ -111,26 +145,26 @@
                                     <span class="activity-list__meta">{{ number_format((float) $payment->amount, 0, ',', ' ') }} F</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien a afficher</li>
+                                <li class="activity-list__empty">Rien à afficher</li>
                             @endforelse
                         </ul>
                     </div>
-                    @isset($recentHomeworks)
-                        <div class="activity-block">
-                            <h3 class="activity-block__title">Devoirs</h3>
-                            <ul class="activity-list">
-                                @forelse ($recentHomeworks as $homework)
-                                    <li>
-                                        <span class="activity-list__dot activity-list__dot--rose"></span>
-                                        <span class="activity-list__main">{{ Str::limit($homework->title, 24) }}</span>
-                                        <span class="activity-list__meta">{{ $homework->classroom?->name }}</span>
-                                    </li>
-                                @empty
-                                    <li class="activity-list__empty">Rien a afficher</li>
-                                @endforelse
-                            </ul>
-                        </div>
-                    @endisset
+                    <div class="activity-block">
+                        <h3 class="activity-block__title">Devoirs</h3>
+                        <ul class="activity-list">
+                            @forelse ($recentHomeworks as $homework)
+                                <li>
+                                    <span class="activity-list__dot activity-list__dot--rose"></span>
+                                    <span class="activity-list__main">
+                                        <a href="{{ route('homeworks.show', $homework) }}" class="hover:text-indigo-600">{{ Str::limit($homework->title, 24) }}</a>
+                                    </span>
+                                    <span class="activity-list__meta">{{ $homework->classroom?->name }}</span>
+                                </li>
+                            @empty
+                                <li class="activity-list__empty">Rien à afficher</li>
+                            @endforelse
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
@@ -138,8 +172,8 @@
         <aside class="content-panel" data-reveal>
             <div class="content-panel__head">
                 <div>
-                    <h2 class="content-panel__title">Acces rapides</h2>
-                    <p class="content-panel__subtitle">Modules selon votre role</p>
+                    <h2 class="content-panel__title">Accès rapides</h2>
+                    <p class="content-panel__subtitle">Modules selon votre rôle</p>
                 </div>
             </div>
             <div class="content-panel__body">

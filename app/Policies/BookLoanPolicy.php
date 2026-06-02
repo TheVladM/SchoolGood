@@ -8,17 +8,12 @@ use App\Models\User;
 
 class BookLoanPolicy
 {
-    /**
-     * Determine if the user can view the model.
-     */
     public function view(User $user, BookLoan $model): bool
     {
-        // Fondateur et Admin peuvent voir tous les emprunts
-        if (in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite])) {
+        if (in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true)) {
             return true;
         }
 
-        // L'emprunteur et le parent de l'étudiant peuvent voir l'emprunt
         if ($user->is($model->user)) {
             return true;
         }
@@ -30,36 +25,28 @@ class BookLoanPolicy
         return false;
     }
 
-    /**
-     * Determine if the user can create models.
-     */
     public function create(User $user): bool
-    {
-        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
-    }
-
-    /**
-     * Determine if the user can update the model.
-     */
-    public function update(User $user, BookLoan $model): bool
     {
         return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true);
     }
 
-    /**
-     * Determine if the user can process the return.
-     */
+    public function update(User $user, BookLoan $model): bool
+    {
+        return $this->create($user);
+    }
+
+    public function delete(User $user, BookLoan $model): bool
+    {
+        return in_array($user->role, [UserRole::Founder, UserRole::Admin], true);
+    }
+
     public function return(User $user, BookLoan $model): bool
     {
         return in_array($user->role, [UserRole::Founder, UserRole::Admin, UserRole::Scolarite], true);
     }
 
-    /**
-     * Determine if the user can delete the model.
-     */
-    public function delete(User $user, BookLoan $model): bool
+    public function chargePenalty(User $user, BookLoan $model): bool
     {
-        // Seul Fondateur peut supprimer les emprunts
-        return $user->role === UserRole::Founder;
+        return in_array($user->role, [UserRole::Founder, UserRole::Scolarite], true);
     }
 }

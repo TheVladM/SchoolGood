@@ -5,17 +5,11 @@
     </div>
 
     <div>
-        <label for="level" class="label">Niveau</label>
-        <input id="level" name="level" type="text" required value="{{ old('level', $classroom->level ?? '') }}" class="field">
-        <p class="mt-2 text-xs text-slate-500">Exemples: CM1, CM2, SIL, Class 1, Nursery 2.</p>
-    </div>
-
-    <div>
         <label for="section" class="label">Section</label>
-        <select id="section" name="section" required class="field">
-            <option value="">Selectionner</option>
+        <select id="section" name="section" required class="field" data-classroom-section>
+            <option value="">Sélectionner</option>
             @foreach ($sections as $value => $label)
-                <option value="{{ $value }}" @selected(old('section', $classroom->section?->value ?? '') === $value)>
+                <option value="{{ $value }}" @selected(old('section', $classroom->section?->value ?? 'francophone') === $value)>
                     {{ $label }}
                 </option>
             @endforeach
@@ -23,8 +17,37 @@
     </div>
 
     <div>
-        <label for="room" class="label">Salle</label>
-        <input id="room" name="room" type="text" required value="{{ old('room', $classroom->room ?? '') }}" class="field">
+        <label for="cycle_type" class="label">Type de cycle</label>
+        <select id="cycle_type" name="cycle_type" required class="field">
+            @foreach ($cycleTypes ?? [] as $value => $label)
+                <option value="{{ $value }}" @selected(old('cycle_type', $classroom->cycle_type?->value ?? 'standard') === $value)>{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label for="level" class="label">Niveau</label>
+        <select id="level" name="level" required class="field">
+            @php $sec = old('section', $classroom->section?->value ?? 'francophone'); @endphp
+            @foreach (($levelsBySection[$sec] ?? []) as $value => $label)
+                <option value="{{ $value }}" @selected(old('level', $classroom->level ?? '') === $value)>{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label for="room_id" class="label">Salle (référentiel)</label>
+        <select id="room_id" name="room_id" class="field">
+            <option value="">— ou saisie libre —</option>
+            @foreach ($rooms ?? [] as $room)
+                <option value="{{ $room->id }}" @selected(old('room_id', $classroom->room_id ?? '') == $room->id)>{{ $room->displayLabel() }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label for="room" class="label">Nom de salle (affichage)</label>
+        <input id="room" name="room" type="text" value="{{ old('room', $classroom->room ?? '') }}" class="field">
     </div>
 
     <div>

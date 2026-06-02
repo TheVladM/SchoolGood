@@ -20,7 +20,7 @@ class HomeworkFactory extends Factory
             'teacher_id' => User::factory(),
             'classroom_id' => Classroom::factory(),
             'due_date' => fake()->dateTimeBetween('+1 day', '+7 days'),
-            'status' => fake()->randomElement(['assigned', 'submitted', 'graded']),
+            'status' => 'assigned',
             'attachments' => null,
         ];
     }
