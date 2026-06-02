@@ -22,13 +22,17 @@ class StudentSchoolGradeController extends Controller
             'comment' => ['nullable', 'string'],
         ]);
 
-        StudentSchoolGrade::create([
-            ...$data,
-            'student_id' => $student->id,
-            'recorded_by_id' => $request->user()->id,
-        ]);
+        try {
+            StudentSchoolGrade::create([
+                ...$data,
+                'student_id' => $student->id,
+                'recorded_by_id' => $request->user()->id,
+            ]);
 
-        return back()->with('success', 'Note enregistrée.');
+            return back()->with('success', 'Note enregistrée.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'enregistrement de la note. Veuillez réessayer.');
+        }
     }
 
     public function destroy(Request $request, Student $student, StudentSchoolGrade $grade): RedirectResponse
@@ -36,8 +40,11 @@ class StudentSchoolGradeController extends Controller
         abort_unless($grade->student_id === $student->id, 404);
         $this->authorize('delete', $grade);
 
-        $grade->delete();
-
-        return back()->with('success', 'Note supprimée.');
+        try {
+            $grade->delete();
+            return back()->with('success', 'Note supprimée.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la suppression de la note. Veuillez réessayer.');
+        }
     }
 }

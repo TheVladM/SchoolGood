@@ -46,11 +46,17 @@ class CourseController extends Controller
             $data['teacher_id'] = $request->user()->id;
         }
 
-        Course::create($data);
+        try {
+            Course::create($data);
 
-        return redirect()
-            ->route('courses.index')
-            ->with('success', 'Cours cree avec succes.');
+            return redirect()
+                ->route('courses.index')
+                ->with('success', 'Cours cree avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la création du cours. Veuillez réessayer.');
+        }
     }
 
     public function show(Request $request, Course $course): View
@@ -83,11 +89,17 @@ class CourseController extends Controller
             $data['teacher_id'] = $request->user()->id;
         }
 
-        $course->update($data);
+        try {
+            $course->update($data);
 
-        return redirect()
-            ->route('courses.index')
-            ->with('success', 'Cours mis a jour avec succes.');
+            return redirect()
+                ->route('courses.index')
+                ->with('success', 'Cours mis a jour avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la mise à jour du cours. Veuillez réessayer.');
+        }
     }
 
     public function destroy(Request $request, Course $course): RedirectResponse

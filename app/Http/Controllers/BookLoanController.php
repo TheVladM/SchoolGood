@@ -119,25 +119,33 @@ class BookLoanController extends Controller
             'Le retour a deja ete enregistre pour cet emprunt.'
         );
 
-        $bookLoan->update([
-            'returned_at' => now()->toDateString(),
-            'returned_by_id' => $request->user()->id,
-        ]);
+        try {
+            $bookLoan->update([
+                'returned_at' => now()->toDateString(),
+                'returned_by_id' => $request->user()->id,
+            ]);
 
-        return back()->with('success', 'Retour du livre enregistre avec succes.');
+            return back()->with('success', 'Retour du livre enregistre avec succes.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'enregistrement du retour. Veuillez réessayer.');
+        }
     }
 
     public function chargePenalty(Request $request, BookLoan $bookLoan): RedirectResponse
     {
         $this->authorize('chargePenalty', $bookLoan);
 
-        $payment = $this->penaltyService->createPenaltyPayment($bookLoan, $request->user());
+        try {
+            $payment = $this->penaltyService->createPenaltyPayment($bookLoan, $request->user());
 
-        if (! $payment) {
-            return back()->with('error', 'Aucune pénalité à facturer ou emprunteur non élève.');
+            if (! $payment) {
+                return back()->with('error', 'Aucune pénalité à facturer ou emprunteur non élève.');
+            }
+
+            return back()->with('success', 'Pénalité enregistrée comme paiement en attente.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'enregistrement de la pénalité. Veuillez réessayer.');
         }
-
-        return back()->with('success', 'Pénalité enregistrée comme paiement en attente.');
     }
 
     private function validatedData(Request $request): array
