@@ -30,33 +30,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($books as $book)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $book->title }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $book->author }}</p>
-                        </div>
-                        <span class="badge">{{ $book->active_loans_count }}/{{ $book->total_copies }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Disponibles:</span> {{ $book->availableCopies() }}</p>
-                        <p><span class="font-semibold text-slate-900">Rayon:</span> {{ $book->shelf_location ?: '-' }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('books.show', $book) }}" class="btn-secondary">Voir</a>
-                        @can('update', $book)
-                            <a href="{{ route('books.edit', $book) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

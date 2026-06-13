@@ -31,8 +31,7 @@
         </div>
 
         @if ($homeworks->count() > 0)
-            <!-- Desktop view -->
-            <div class="overflow-x-auto hidden md:block">
+            <div class="overflow-x-auto">
                 <table class="w-full border-collapse text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 bg-gray-50">
@@ -107,36 +106,6 @@
                 </table>
             </div>
 
-            <!-- Mobile view -->
-            <div class="grid gap-4 md:hidden">
-                @foreach ($homeworks as $homework)
-                    <article class="mobile-record" data-filterable-row>
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900">{{ $homework->title }}</h3>
-                                <p class="text-sm text-gray-600">{{ $homework->subject ?? 'N/A' }} • {{ $homework->classroom->name }}</p>
-                                <p class="text-xs text-gray-500 mt-2">Enseignant: {{ $homework->teacher->name }}</p>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
-                            <div class="text-sm">
-                                <span class="text-gray-500">Limite:</span>
-                                <span class="font-medium @if ($homework->isOverdue()) text-red-600 @endif">
-                                    {{ $homework->due_date->format('d/m H:i') }}
-                                </span>
-                            </div>
-                            <div class="flex gap-2">
-                                <a href="{{ route('homeworks.show', $homework) }}" class="btn-sm btn-secondary">Voir</a>
-                                @can('update', $homework)
-                                    <a href="{{ route('homeworks.edit', $homework) }}" class="btn-sm btn-secondary">Éditer</a>
-                                @endcan
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-
-            <!-- Pagination -->
             <div class="mt-6 flex justify-center">
                 {{ $homeworks->links() }}
             </div>

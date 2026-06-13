@@ -36,36 +36,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($announcements as $announcement)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $announcement->title }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $announcement->author?->name }}</p>
-                        </div>
-                        <span class="badge">{{ $announcement->status?->label() }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Audience:</span> {{ $announcement->audience?->label() }}</p>
-                        <p><span class="font-semibold text-slate-900">Classe:</span> {{ $announcement->classroom?->name ?: 'Toutes' }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('announcements.show', $announcement) }}" class="btn-secondary">Voir</a>
-                        @if (
-                            auth()->user()->hasRole(\App\Enums\UserRole::Founder) ||
-                            auth()->id() === $announcement->author_id
-                        )
-                            <a href="{{ route('announcements.edit', $announcement) }}" class="btn-secondary">Modifier</a>
-                        @endif
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

@@ -30,43 +30,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($classrooms as $classroom)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $classroom->name }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $classroom->level }}</p>
-                        </div>
-                        <span class="badge">{{ $classroom->section?->label() }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Titulaire:</span> {{ $classroom->mainTeacher?->name ?: '-' }}</p>
-                        <p><span class="font-semibold text-slate-900">Langue:</span> {{ $classroom->languageTeacher?->name ?: '-' }}</p>
-                        <p><span class="font-semibold text-slate-900">Effectif:</span> {{ $classroom->students_count }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('classrooms.show', $classroom) }}" class="btn-secondary">Voir</a>
-                        @can('update', $classroom)
-                            <a href="{{ route('classrooms.edit', $classroom) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                        @can('delete', $classroom)
-                            <form method="POST" action="{{ route('classrooms.destroy', $classroom) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cette classe ?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

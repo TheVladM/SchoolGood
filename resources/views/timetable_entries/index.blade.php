@@ -30,33 +30,8 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($entries as $entry)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $entry->subject }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $entry->level }} / {{ $entry->section?->label() }}</p>
-                        </div>
-                        <span class="badge">{{ $entry->day?->value }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Horaire:</span> {{ substr($entry->start_time, 0, 5) }} - {{ substr($entry->end_time, 0, 5) }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('timetable-entries.show', $entry) }}" class="btn-secondary">Voir</a>
-                        @can('update', $entry)
-                            <a href="{{ route('timetable-entries.edit', $entry) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
-            <table class="data-table">
+        <div class="overflow-x-auto">
+            <table class="data-table w-full">
                 <thead>
                     <tr>
                         <th>Niveau</th>
@@ -68,7 +43,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($entries as $entry)
+                    @forelse ($entries as $entry)
                         <tr data-filterable-row>
                             <td class="font-semibold text-slate-900">{{ $entry->level }}</td>
                             <td>{{ $entry->section?->label() }}</td>
@@ -84,7 +59,11 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-slate-500">Aucun créneau trouvé</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

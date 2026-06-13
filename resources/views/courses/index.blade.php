@@ -30,43 +30,8 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($courses as $course)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $course->title }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $course->classroom?->name }}</p>
-                        </div>
-                        <span class="badge">{{ $course->day?->value }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Enseignant:</span> {{ $course->teacher?->name }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('courses.show', $course) }}" class="btn-secondary">Voir</a>
-
-                        @can('update', $course)
-                            <a href="{{ route('courses.edit', $course) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                        @can('delete', $course)
-                            <form method="POST" action="{{ route('courses.destroy', $course) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce cours ?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
-            <table class="data-table">
+        <div class="overflow-x-auto">
+            <table class="data-table w-full">
                 <thead>
                     <tr>
                         <th>Cours</th>
@@ -77,7 +42,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($courses as $course)
+                    @forelse ($courses as $course)
                         <tr data-filterable-row>
                             <td class="font-semibold text-slate-900">{{ $course->title }}</td>
                             <td>{{ $course->classroom?->name }}</td>
@@ -102,7 +67,11 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-slate-500">Aucun cours trouvé</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

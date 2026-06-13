@@ -41,42 +41,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($users as $managedUser)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $managedUser->name }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $managedUser->email }}</p>
-                        </div>
-                        <span class="badge">{{ $managedUser->role?->label() }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Telephone:</span> {{ $managedUser->phone ?: '-' }}</p>
-                        <p><span class="font-semibold text-slate-900">Service:</span> {{ $managedUser->department?->label() ?: '-' }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('users.show', $managedUser) }}" class="btn-secondary">Voir</a>
-                        @can('update', $managedUser)
-                            <a href="{{ route('users.edit', $managedUser) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                        @can('delete', $managedUser)
-                            <form method="POST" action="{{ route('users.destroy', $managedUser) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet utilisateur ?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

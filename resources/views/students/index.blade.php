@@ -48,43 +48,7 @@
             </div>
         </x-slot:toolbar>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($students as $student)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $student->full_name }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $student->classroom?->name }}</p>
-                        </div>
-                        <span class="badge">{{ $student->is_active ? 'Actif' : 'Archive' }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Parent:</span> {{ $student->parent?->name }}</p>
-                        <p><span class="font-semibold text-slate-900">Naissance:</span> {{ $student->birth_date?->format('d/m/Y') }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('students.show', $student) }}" class="btn-secondary">Voir</a>
-
-                        @can('update', $student)
-                            <a href="{{ route('students.edit', $student) }}" class="btn-secondary">Modifier</a>
-                        @endcan
-                        @can('delete', $student)
-                            <form method="POST" action="{{ route('students.destroy', $student) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer cet eleve ?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        @endcan
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

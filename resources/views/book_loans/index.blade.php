@@ -30,30 +30,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($loans as $loan)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $loan->book?->title }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $loan->borrower_name }}</p>
-                        </div>
-                        <span class="badge">{{ $loan->returned_at ? 'Retourne' : 'En cours' }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Retour prevu:</span> {{ $loan->due_at?->format('d/m/Y') }}</p>
-                        <p><span class="font-semibold text-slate-900">Penalite actuelle:</span> {{ number_format($loan->penaltyAmount(), 0, ',', ' ') }} FCFA</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('book-loans.show', $loan) }}" class="btn-secondary">Voir</a>
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>

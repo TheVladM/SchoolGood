@@ -36,40 +36,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 md:hidden">
-            @foreach ($payments as $payment)
-                <article class="mobile-record" data-filterable-row>
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="mobile-record__title">{{ $payment->student?->full_name }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ $payment->type?->label() }}</p>
-                        </div>
-                        <span class="badge">{{ $payment->status?->label() }}</span>
-                    </div>
-
-                    <div class="mobile-record__meta">
-                        <p><span class="font-semibold text-slate-900">Montant:</span> {{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</p>
-                        <p><span class="font-semibold text-slate-900">Mode:</span> {{ $payment->method?->label() }}</p>
-                    </div>
-
-                    <div class="record-actions">
-                        <a href="{{ route('payments.show', $payment) }}" class="btn-secondary">Voir</a>
-                        @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
-                            <a href="{{ route('payments.edit', $payment) }}" class="btn-secondary">Modifier</a>
-                            <form method="POST" action="{{ route('payments.destroy', $payment) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce paiement ?')">
-                                    Supprimer
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                </article>
-            @endforeach
-        </div>
-
-        <div class="hidden md:block table-shell">
+        <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>
