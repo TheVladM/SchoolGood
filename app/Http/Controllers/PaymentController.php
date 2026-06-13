@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
@@ -135,31 +136,36 @@ class PaymentController extends Controller
     {
         $this->authorize('validate', $payment);
 
-        $payment->update([
-            'status' => PaymentStatus::Paid,
-            'validated_by_id' => $request->user()->id,
-            'validated_at' => now(),
-            'paid_at' => now(),
-        ]);
+        try {
+            $payment->update([
+                'status' => PaymentStatus::Paid,
+                'validated_by_id' => $request->user()->id,
+                'validated_at' => now(),
+                'paid_at' => now(),
+            ]);
 
-        $this->receipts->assignReceiptNumber($payment);
-        $payment->refresh()->load('student.parent');
+            $this->receipts->assignReceiptNumber($payment);
+            $payment->refresh()->load('student.parent');
 
-        if ($payment->student?->parent) {
-            $payment->student->parent->notify(new PaymentRecordedNotification($payment));
-            if ($payment->student->parent->phone) {
-                $this->sms->send(
-                    $payment->student->parent->phone,
-                    sprintf(
-                        'SchoolGood : paiement validé (%s FCFA). Reçu %s.',
-                        number_format((float) $payment->amount, 0, ',', ' '),
-                        $payment->receipt_number ?? ''
-                    )
-                );
+            if ($payment->student?->parent) {
+                $payment->student->parent->notify(new PaymentRecordedNotification($payment));
+                if ($payment->student->parent->phone) {
+                    $this->sms->send(
+                        $payment->student->parent->phone,
+                        sprintf(
+                            'SchoolGood : paiement validé (%s FCFA). Reçu %s.',
+                            number_format((float) $payment->amount, 0, ',', ' '),
+                            $payment->receipt_number ?? ''
+                        )
+                    );
+                }
             }
-        }
 
-        return back()->with('success', 'Paiement validé.');
+            return back()->with('success', 'Paiement validé.');
+        } catch (\Exception $e) {
+            Log::error('Payment validation failed: '.$e->getMessage());
+            return back()->with('error', 'Erreur lors de la validation du paiement. Veuillez réessayer.');
+        }
     }
 
     public function declareForm(Request $request): View

@@ -57,11 +57,17 @@ class ClassroomController extends Controller
     {
         $this->authorize('create', Classroom::class);
 
-        Classroom::create($this->validatedData($request));
+        try {
+            Classroom::create($this->validatedData($request));
 
-        return redirect()
-            ->route('classrooms.index')
-            ->with('success', 'Classe creee avec succes.');
+            return redirect()
+                ->route('classrooms.index')
+                ->with('success', 'Classe creee avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la création de la classe. Veuillez réessayer.');
+        }
     }
 
     public function show(Request $request, Classroom $classroom): View
@@ -94,11 +100,17 @@ class ClassroomController extends Controller
     {
         $this->authorize('update', $classroom);
 
-        $classroom->update($this->validatedData($request, $classroom));
+        try {
+            $classroom->update($this->validatedData($request, $classroom));
 
-        return redirect()
-            ->route('classrooms.index')
-            ->with('success', 'Classe mise a jour avec succes.');
+            return redirect()
+                ->route('classrooms.index')
+                ->with('success', 'Classe mise a jour avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la mise à jour de la classe. Veuillez réessayer.');
+        }
     }
 
     public function setupTitularCourses(Request $request, Classroom $classroom): RedirectResponse

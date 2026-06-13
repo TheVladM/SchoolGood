@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class PaymentReceiptService
 {
@@ -19,9 +20,14 @@ class PaymentReceiptService
             ->whereNotNull('receipt_number')
             ->count() + 1;
 
-        $payment->update([
-            'receipt_number' => sprintf('REC-%s-%05d', $year, $sequence),
-        ]);
+        try {
+            $payment->update([
+                'receipt_number' => sprintf('REC-%s-%05d', $year, $sequence),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to assign receipt number: '.$e->getMessage());
+            throw $e;
+        }
 
         return $payment->fresh();
     }
@@ -35,13 +41,18 @@ class PaymentReceiptService
             $payment->refresh();
         }
 
-        $pdf = Pdf::loadView('payments.receipt.pdf', [
-            'payment' => $payment,
-            'schoolName' => config('payments.school_name'),
-        ])->setPaper('a4');
+        try {
+            $pdf = Pdf::loadView('payments.receipt.pdf', [
+                'payment' => $payment,
+                'schoolName' => config('payments.school_name'),
+            ])->setPaper('a4');
 
-        $filename = 'recu-'.($payment->receipt_number ?? $payment->id).'.pdf';
+            $filename = 'recu-'.($payment->receipt_number ?? $payment->id).'.pdf';
 
-        return $pdf->download($filename);
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            Log::error('PDF generation failed: '.$e->getMessage());
+            abort(500, 'Erreur lors de la génération du reçu PDF.');
+        }
     }
 }

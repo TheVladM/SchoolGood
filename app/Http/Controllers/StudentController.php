@@ -64,14 +64,20 @@ class StudentController extends Controller
     {
         $this->authorize('create', Student::class);
 
-        [$studentData, $recordData, $parentId] = $this->validatedData($request);
-        $studentData['parent_id'] = $this->resolveParentId($request, $parentId);
-        $student = Student::create($studentData);
-        $this->createSchoolYearRecord($student, $recordData);
+        try {
+            [$studentData, $recordData, $parentId] = $this->validatedData($request);
+            $studentData['parent_id'] = $this->resolveParentId($request, $parentId);
+            $student = Student::create($studentData);
+            $this->createSchoolYearRecord($student, $recordData);
 
-        return redirect()
-            ->route('students.index')
-            ->with('success', 'Eleve cree avec succes.');
+            return redirect()
+                ->route('students.index')
+                ->with('success', 'Eleve cree avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la création de l\'élève. Veuillez réessayer.');
+        }
     }
 
     public function show(Request $request, Student $student): View
@@ -111,13 +117,19 @@ class StudentController extends Controller
     {
         $this->authorize('update', $student);
 
-        [$studentData, $recordData] = $this->validatedData($request);
-        $student->update($studentData);
-        $this->updateCurrentSchoolYearRecord($student, $recordData);
+        try {
+            [$studentData, $recordData] = $this->validatedData($request);
+            $student->update($studentData);
+            $this->updateCurrentSchoolYearRecord($student, $recordData);
 
-        return redirect()
-            ->route('students.index')
-            ->with('success', 'Eleve mis a jour avec succes.');
+            return redirect()
+                ->route('students.index')
+                ->with('success', 'Eleve mis a jour avec succes.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la mise à jour de l\'élève. Veuillez réessayer.');
+        }
     }
 
     public function destroy(Request $request, Student $student): RedirectResponse
