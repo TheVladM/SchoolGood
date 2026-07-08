@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouvel emprunt | SchoolGood')
-@section('topbar_title', 'Emprunt')
+@section('title', __('book_loans.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.book_loans'))
 
 @section('content')
     <x-form-shell
-        title="Enregistrer un emprunt"
+        :title="__('book_loans.create_title')"
+        :description="__('book_loans.create_desc')"
         :action="route('book-loans.store')"
         :cancel-url="route('book-loans.index')"
     >

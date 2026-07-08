@@ -1,90 +1,105 @@
 @extends('layouts.app')
 
-@section('title', 'Paiements | schoolGood')
-@section('topbar_title', 'Paiements')
+@section('title', __('payments.page_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.payments'))
 
 @section('content')
     @include('partials.page-header', [
-        'title' => 'Paiements',
-        'description' => 'Tranches, montants et statuts.',
-        'statLabel' => 'Opérations',
+        'title' => __('payments.page_title'),
+        'description' => __('payments.page_desc'),
+        'statLabel' => __('payments.stat_label'),
         'statValue' => $payments->total(),
     ])
 
     @if (($pendingValidationCount ?? 0) > 0)
-        <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950" data-reveal>
-            <strong>{{ $pendingValidationCount }}</strong> paiement(s) en attente de validation.
+        <div class="alert--warning mt-4" data-reveal>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:1.1rem;height:1.1rem;flex-shrink:0;" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+            <strong>{{ $pendingValidationCount }}</strong> {{ __('payments.pending_alert') }}
         </div>
     @endif
 
-    <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
-        <div class="toolbar">
-            <div>
-                <h2 class="section-title">Registre des paiements</h2>
-                <p class="section-subtitle">Recherchez un eleve, un type de paiement ou un mode d encaissement.</p>
-            </div>
-
-            <div class="flex flex-wrap gap-3">
+    <x-content-panel class="mt-6" data-filter-scope :title="__('payments.registry')" :subtitle="__('payments.registry_subtitle')">
+        <x-slot:toolbar>
+            <div class="content-panel__toolbar">
                 <label class="search-shell">
-                    <span class="search-shell__label">Recherche locale</span>
-                    <input type="search" class="field min-w-[18rem]" placeholder="Eleve, type, mode ou statut" data-table-search>
+                    <span class="search-shell__label">{{ __('payments.search_label') }}</span>
+                    <input type="search" class="field min-w-[18rem]" placeholder="{{ __('payments.search_placeholder') }}" data-table-search>
                 </label>
 
                 @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
-                    <a href="{{ route('payments.create') }}" class="btn-primary self-end">Nouveau paiement</a>
+                    <a href="{{ route('payments.create') }}" class="btn-primary self-end">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        {{ __('payments.new_payment') }}
+                    </a>
                 @endif
             </div>
-        </div>
+        </x-slot:toolbar>
 
         <div class="overflow-x-auto table-shell">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Eleve</th>
-                        <th>Type</th>
-                        <th>Montant</th>
-                        <th>Mode</th>
-                        <th>Reference</th>
-                        <th>Statut</th>
-                        <th class="text-right">Actions</th>
+                        <th>{{ __('payments.col_student') }}</th>
+                        <th>{{ __('payments.col_type') }}</th>
+                        <th>{{ __('payments.col_amount') }}</th>
+                        <th>{{ __('payments.col_method') }}</th>
+                        <th>{{ __('payments.col_reference') }}</th>
+                        <th>{{ __('ui.status_col') }}</th>
+                        <th class="text-right">{{ __('ui.actions_col') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($payments as $payment)
+                    @forelse ($payments as $payment)
                         <tr data-filterable-row>
                             <td class="font-semibold text-slate-900">{{ $payment->student?->full_name }}</td>
-                            <td>{{ $payment->type?->label() }}</td>
-                            <td>{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</td>
-                            <td>{{ $payment->method?->label() }}</td>
-                            <td>{{ $payment->reference ?: '-' }}</td>
-                            <td><span class="badge">{{ $payment->status?->label() }}</span></td>
+                            <td class="text-slate-600">{{ $payment->type?->label() }}</td>
+                            <td class="font-semibold text-slate-900">{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</td>
+                            <td class="text-slate-600">{{ $payment->method?->label() }}</td>
+                            <td class="text-slate-500 text-sm font-mono">{{ $payment->reference ?: '—' }}</td>
+                            <td>
+                                <span class="badge {{ $payment->status?->value === 'paid' ? 'badge--success' : 'badge--warning' }}">
+                                    {{ $payment->status?->label() }}
+                                </span>
+                            </td>
                             <td>
                                 <div class="record-actions justify-end">
-                                    <a href="{{ route('payments.show', $payment) }}" class="btn-secondary">Voir</a>
+                                    <a href="{{ route('payments.show', $payment) }}" class="btn-secondary">{{ __('ui.view') }}</a>
                                     @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite]))
-                                        <a href="{{ route('payments.edit', $payment) }}" class="btn-secondary">Modifier</a>
+                                        <a href="{{ route('payments.edit', $payment) }}" class="btn-secondary">{{ __('ui.edit') }}</a>
                                         <form method="POST" action="{{ route('payments.destroy', $payment) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-danger" onclick="return confirm('Supprimer ce paiement ?')">
-                                                Supprimer
+                                            <button type="submit" class="btn-danger" onclick="return confirm(&quot;{{ __('payments.delete_confirm') }}&quot;)">
+                                                {{ __('ui.delete') }}
                                             </button>
                                         </form>
                                     @endif
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/></svg>
+                                    <p class="empty-state__title">{{ __('payments.empty_title') }}</p>
+                                    <p class="empty-state__desc">{{ __('payments.empty_desc') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
         <div class="empty-state mt-4" data-filter-empty hidden>
-            Aucun paiement ne correspond a cette recherche.
+            <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <p class="empty-state__title">{{ __('ui.empty_title') }}</p>
+            <p class="empty-state__desc">{{ __('payments.no_match_desc') }}</p>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-6 pagination-wrap">
             {{ $payments->links() }}
         </div>
-    </section>
+    </x-content-panel>
 @endsection

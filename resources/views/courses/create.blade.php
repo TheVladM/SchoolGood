@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouveau cours | SchoolGood')
-@section('topbar_title', 'Nouveau cours')
+@section('title', __('courses.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.courses'))
 
 @section('content')
     <x-form-shell
-        title="Créer un cours"
-        description="Affectez le cours à une classe, un enseignant et un jour."
+        :title="__('courses.create_title')"
+        :description="__('courses.create_desc')"
         :action="route('courses.store')"
         :cancel-url="route('courses.index')"
     >

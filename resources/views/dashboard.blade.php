@@ -1,40 +1,40 @@
 @extends('layouts.app')
 
-@section('title', 'Tableau de bord | SchoolGood')
-@section('topbar_title', 'Tableau de bord')
+@section('title', __('dashboard.page_title') . ' | SchoolGood')
+@section('topbar_title', __('dashboard.topbar_title'))
 
 @section('content')
     @php
         $actions = [
-            ['title' => 'Élèves', 'url' => route('students.index'), 'icon' => 'users'],
-            ['title' => 'Classes', 'url' => route('classrooms.index'), 'icon' => 'building'],
-            ['title' => 'Cours', 'url' => route('courses.index'), 'icon' => 'book'],
-            ['title' => 'Emploi du temps', 'url' => route('timetable-entries.index'), 'icon' => 'calendar'],
+            ['title' => __('dashboard.tile_students'),   'url' => route('students.index'),         'icon' => 'users'],
+            ['title' => __('dashboard.tile_classrooms'), 'url' => route('classrooms.index'),       'icon' => 'building'],
+            ['title' => __('dashboard.tile_courses'),    'url' => route('courses.index'),           'icon' => 'book'],
+            ['title' => __('dashboard.tile_timetable'),  'url' => route('timetable-entries.index'), 'icon' => 'calendar'],
         ];
 
         if (! auth()->user()->hasRole(\App\Enums\UserRole::Parent)) {
-            $actions[] = ['title' => 'Bibliothèque', 'url' => route('books.index'), 'icon' => 'library'];
-            $actions[] = ['title' => 'Emprunts', 'url' => route('book-loans.index'), 'icon' => 'loan'];
+            $actions[] = ['title' => __('dashboard.tile_library'), 'url' => route('books.index'),      'icon' => 'library'];
+            $actions[] = ['title' => __('dashboard.tile_loans'),   'url' => route('book-loans.index'), 'icon' => 'loan'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher, \App\Enums\UserRole::Parent])) {
-            $actions[] = ['title' => 'Devoirs', 'url' => route('homeworks.index'), 'icon' => 'clipboard'];
+            $actions[] = ['title' => __('dashboard.tile_homeworks'), 'url' => route('homeworks.index'), 'icon' => 'clipboard'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Scolarite])) {
-            $actions[] = ['title' => 'Années scolaires', 'url' => route('school-years.index'), 'icon' => 'academic'];
+            $actions[] = ['title' => __('dashboard.tile_school_years'), 'url' => route('school-years.index'), 'icon' => 'academic'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Scolarite, \App\Enums\UserRole::Parent])) {
-            $actions[] = ['title' => 'Paiements', 'url' => route('payments.index'), 'icon' => 'payment'];
+            $actions[] = ['title' => __('dashboard.tile_payments'), 'url' => route('payments.index'), 'icon' => 'payment'];
         }
 
         if (! auth()->user()->hasRole(\App\Enums\UserRole::Teacher)) {
-            $actions[] = ['title' => 'Messages', 'url' => route('announcements.index'), 'icon' => 'chat'];
+            $actions[] = ['title' => __('dashboard.tile_messages'), 'url' => route('announcements.index'), 'icon' => 'chat'];
         }
 
         if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin])) {
-            $actions[] = ['title' => 'Utilisateurs', 'url' => route('users.index'), 'icon' => 'user-group'];
+            $actions[] = ['title' => __('dashboard.tile_users'), 'url' => route('users.index'), 'icon' => 'user-group'];
         }
 
         $statIcons = ['users', 'building', 'payment', 'clipboard'];
@@ -42,7 +42,7 @@
 
     <section class="dash-hero" data-reveal>
         <div class="dash-hero__copy">
-            <p class="dash-hero__greeting">Bonjour, {{ strtok(auth()->user()->name, ' ') }}</p>
+            <p class="dash-hero__greeting">{{ __('dashboard.greeting') }}, {{ strtok(auth()->user()->name, ' ') }}</p>
             <h2 class="dash-hero__title">{{ $headline }}</h2>
             <p class="dash-hero__sub">{{ $subheadline }}</p>
         </div>
@@ -66,16 +66,21 @@
 
     @if (auth()->user()->hasRole(\App\Enums\UserRole::Parent) && $children->isNotEmpty())
         <section class="mt-6 surface-card p-5 lg:p-6" data-reveal>
-            <h2 class="section-title">Mes enfants</h2>
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <h2 class="section-heading">{{ __('dashboard.my_children') }}</h2>
+            <div class="grid gap-4 md:grid-cols-2">
                 @foreach ($children as $child)
-                    <article class="rounded-xl border border-slate-200 p-4">
-                        <p class="font-bold text-slate-900">{{ $child->full_name }}</p>
-                        <p class="text-sm text-slate-500">{{ $child->classroom?->name ?? 'Sans classe' }}</p>
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="{{ route('homeworks.index') }}" class="btn-secondary text-sm">Devoirs</a>
-                            <a href="{{ route('payments.index') }}" class="btn-secondary text-sm">Paiements</a>
-                            <a href="{{ route('announcements.index') }}" class="btn-secondary text-sm">Messages</a>
+                    <article class="flex items-start gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="avatar avatar--indigo" style="flex-shrink:0;">
+                            {{ mb_strtoupper(mb_substr($child->full_name, 0, 2)) }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-slate-900 truncate">{{ $child->full_name }}</p>
+                            <p class="text-sm text-slate-500 mb-3">{{ $child->classroom?->name ?? __('dashboard.no_class') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{{ route('homeworks.index') }}" class="btn-secondary text-xs py-1 px-2">{{ __('dashboard.homework_btn') }}</a>
+                                <a href="{{ route('payments.index') }}" class="btn-secondary text-xs py-1 px-2">{{ __('dashboard.payments_btn') }}</a>
+                                <a href="{{ route('announcements.index') }}" class="btn-secondary text-xs py-1 px-2">{{ __('dashboard.messages_btn') }}</a>
+                            </div>
                         </div>
                     </article>
                 @endforeach
@@ -101,14 +106,14 @@
         <section class="content-panel" data-reveal>
             <div class="content-panel__head">
                 <div>
-                    <h2 class="content-panel__title">Activité récente</h2>
-                    <p class="content-panel__subtitle">Dernières mises à jour de votre espace</p>
+                    <h2 class="content-panel__title">{{ __('dashboard.activity_title') }}</h2>
+                    <p class="content-panel__subtitle">{{ __('dashboard.activity_subtitle') }}</p>
                 </div>
             </div>
             <div class="content-panel__body">
                 <div class="activity-grid">
                     <div class="activity-block">
-                        <h3 class="activity-block__title">Élèves</h3>
+                        <h3 class="activity-block__title">{{ __('dashboard.block_students') }}</h3>
                         <ul class="activity-list">
                             @forelse ($recentStudents as $student)
                                 <li>
@@ -117,12 +122,12 @@
                                     <span class="activity-list__meta">{{ $student->classroom?->name ?? '-' }}</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien à afficher</li>
+                                <li class="activity-list__empty">{{ __('dashboard.nothing') }}</li>
                             @endforelse
                         </ul>
                     </div>
                     <div class="activity-block">
-                        <h3 class="activity-block__title">Cours</h3>
+                        <h3 class="activity-block__title">{{ __('dashboard.block_courses') }}</h3>
                         <ul class="activity-list">
                             @forelse ($recentCourses as $course)
                                 <li>
@@ -131,12 +136,12 @@
                                     <span class="activity-list__meta">{{ $course->classroom?->name }}</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien à afficher</li>
+                                <li class="activity-list__empty">{{ __('dashboard.nothing') }}</li>
                             @endforelse
                         </ul>
                     </div>
                     <div class="activity-block">
-                        <h3 class="activity-block__title">Paiements</h3>
+                        <h3 class="activity-block__title">{{ __('dashboard.block_payments') }}</h3>
                         <ul class="activity-list">
                             @forelse ($recentPayments as $payment)
                                 <li>
@@ -145,12 +150,12 @@
                                     <span class="activity-list__meta">{{ number_format((float) $payment->amount, 0, ',', ' ') }} F</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien à afficher</li>
+                                <li class="activity-list__empty">{{ __('dashboard.nothing') }}</li>
                             @endforelse
                         </ul>
                     </div>
                     <div class="activity-block">
-                        <h3 class="activity-block__title">Devoirs</h3>
+                        <h3 class="activity-block__title">{{ __('dashboard.block_homeworks') }}</h3>
                         <ul class="activity-list">
                             @forelse ($recentHomeworks as $homework)
                                 <li>
@@ -161,7 +166,7 @@
                                     <span class="activity-list__meta">{{ $homework->classroom?->name }}</span>
                                 </li>
                             @empty
-                                <li class="activity-list__empty">Rien à afficher</li>
+                                <li class="activity-list__empty">{{ __('dashboard.nothing') }}</li>
                             @endforelse
                         </ul>
                     </div>
@@ -172,8 +177,8 @@
         <aside class="content-panel" data-reveal>
             <div class="content-panel__head">
                 <div>
-                    <h2 class="content-panel__title">Accès rapides</h2>
-                    <p class="content-panel__subtitle">Modules selon votre rôle</p>
+                    <h2 class="content-panel__title">{{ __('dashboard.quick_title') }}</h2>
+                    <p class="content-panel__subtitle">{{ __('dashboard.quick_subtitle') }}</p>
                 </div>
             </div>
             <div class="content-panel__body">

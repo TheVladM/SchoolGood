@@ -1,121 +1,119 @@
 @extends('layouts.app')
 
-@section('title', 'Devoirs | SchoolGood')
-@section('topbar_title', 'Devoirs')
+@section('title', __('homeworks.page_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.homeworks'))
 
 @section('content')
     @include('partials.page-header', [
-        'title' => 'Devoirs',
-        'description' => 'Assignation et suivi par classe.',
-        'statLabel' => 'Total',
+        'title' => __('homeworks.page_title'),
+        'description' => __('homeworks.page_desc'),
+        'statLabel' => __('ui.total'),
         'statValue' => $homeworks->total(),
     ])
 
-    <section class="surface-card mt-6 p-5 lg:p-6" data-filter-scope data-reveal>
-        <div class="toolbar">
-            <div>
-                <h2 class="section-title">Registre des devoirs</h2>
-                <p class="section-subtitle">Recherchez un titre, une matière, une classe ou une date limite.</p>
-            </div>
-
-            <div class="flex flex-wrap gap-3">
+    <x-content-panel class="mt-6" data-filter-scope :title="__('homeworks.registry')" :subtitle="__('homeworks.registry_subtitle')">
+        <x-slot:toolbar>
+            <div class="content-panel__toolbar">
                 <label class="search-shell">
-                    <span class="search-shell__label">Recherche locale</span>
-                    <input type="search" class="field min-w-[18rem]" placeholder="Titre, matière, classe..." data-table-search>
+                    <span class="search-shell__label">{{ __('homeworks.search_label') }}</span>
+                    <input type="search" class="field min-w-[18rem]" placeholder="{{ __('homeworks.search_placeholder') }}" data-table-search>
                 </label>
 
                 @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher]))
-                    <a href="{{ route('homeworks.create') }}" class="btn-primary self-end">Nouveau devoir</a>
+                    <a href="{{ route('homeworks.create') }}" class="btn-primary self-end">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        {{ __('homeworks.new_homework') }}
+                    </a>
                 @endif
             </div>
+        </x-slot:toolbar>
+
+        <div class="overflow-x-auto table-shell">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('homeworks.col_title') }}</th>
+                        <th>{{ __('homeworks.col_subject') }}</th>
+                        <th>{{ __('homeworks.col_classroom') }}</th>
+                        <th>{{ __('homeworks.col_teacher') }}</th>
+                        <th>{{ __('homeworks.col_due') }}</th>
+                        <th>{{ __('ui.status_col') }}</th>
+                        <th class="text-right">{{ __('ui.actions_col') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($homeworks as $homework)
+                        @php
+                            $status = $homework->status?->value ?? $homework->status;
+                            $statusBadge = match ($status) {
+                                'assigned'  => 'badge--warning',
+                                'submitted' => 'badge--info',
+                                'graded'    => 'badge--success',
+                                default     => '',
+                            };
+                            $statusLabel = match ($status) {
+                                'assigned'  => __('homeworks.status_assigned'),
+                                'submitted' => __('homeworks.status_submitted'),
+                                'graded'    => __('homeworks.status_graded'),
+                                'closed'    => __('homeworks.status_closed'),
+                                default     => ucfirst($status ?? '—'),
+                            };
+                        @endphp
+                        <tr data-filterable-row>
+                            <td>
+                                <a href="{{ route('homeworks.show', $homework) }}" class="font-semibold text-slate-900 hover:text-indigo-600">
+                                    {{ Str::limit($homework->title, 35) }}
+                                </a>
+                            </td>
+                            <td class="text-slate-600">{{ $homework->subject ?? '—' }}</td>
+                            <td><span class="badge badge--teal">{{ $homework->classroom->name }}</span></td>
+                            <td class="text-slate-600">{{ $homework->teacher->name }}</td>
+                            <td class="{{ $homework->isOverdue() ? 'text-rose-600 font-medium' : 'text-slate-600' }} text-sm">
+                                {{ $homework->due_date->format('d/m/Y H:i') }}
+                                @if ($homework->isOverdue())
+                                    <span class="ml-1 text-xs">{{ __('homeworks.overdue') }}</span>
+                                @endif
+                            </td>
+                            <td><span class="badge {{ $statusBadge }}">{{ $statusLabel }}</span></td>
+                            <td>
+                                <div class="record-actions justify-end">
+                                    <a href="{{ route('homeworks.show', $homework) }}" class="btn-secondary">{{ __('ui.view') }}</a>
+                                    @can('update', $homework)
+                                        <a href="{{ route('homeworks.edit', $homework) }}" class="btn-secondary">{{ __('ui.edit') }}</a>
+                                    @endcan
+                                    @can('delete', $homework)
+                                        <form action="{{ route('homeworks.destroy', $homework) }}" method="POST" onsubmit="return confirm('{{ __('homeworks.delete_confirm') }}')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-danger">{{ __('ui.delete') }}</button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>
+                                    <p class="empty-state__title">{{ __('homeworks.empty_title') }}</p>
+                                    <p class="empty-state__desc">{{ __('homeworks.empty_desc') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
 
-        @if ($homeworks->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 bg-gray-50">
-                            <th class="px-4 py-3 text-left font-semibold">Titre</th>
-                            <th class="px-4 py-3 text-left font-semibold">Matière</th>
-                            <th class="px-4 py-3 text-left font-semibold">Classe</th>
-                            <th class="px-4 py-3 text-left font-semibold">Enseignant</th>
-                            <th class="px-4 py-3 text-left font-semibold">Date limite</th>
-                            <th class="px-4 py-3 text-left font-semibold">Statut</th>
-                            <th class="px-4 py-3 text-center font-semibold">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($homeworks as $homework)
-                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition" data-filterable-row>
-                                <td class="px-4 py-3">
-                                    <a href="{{ route('homeworks.show', $homework) }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                                        {{ Str::limit($homework->title, 30) }}
-                                    </a>
-                                </td>
-                                <td class="px-4 py-3 text-gray-600">{{ $homework->subject ?? 'N/A' }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ $homework->classroom->name }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-gray-600">{{ $homework->teacher->name }}</td>
-                                <td class="px-4 py-3">
-                                    @if ($homework->isOverdue())
-                                        <span class="text-red-600 font-medium">
-                                            {{ $homework->due_date->format('d/m/Y H:i') }} ⚠️
-                                        </span>
-                                    @else
-                                        <span class="text-gray-600">
-                                            {{ $homework->due_date->format('d/m/Y H:i') }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    @if ($homework->status === 'assigned')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                            Assigné
-                                        </span>
-                                    @elseif ($homework->status === 'submitted')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Soumis
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Noté
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="flex justify-center gap-2">
-                                        <a href="{{ route('homeworks.show', $homework) }}" class="text-blue-600 hover:text-blue-800" title="Voir">👁️</a>
-                                        @can('update', $homework)
-                                            <a href="{{ route('homeworks.edit', $homework) }}" class="text-yellow-600 hover:text-yellow-800" title="Éditer">✏️</a>
-                                        @endcan
-                                        @can('delete', $homework)
-                                            <form action="{{ route('homeworks.destroy', $homework) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-800" title="Supprimer">🗑️</button>
-                                            </form>
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <div class="empty-state mt-4" data-filter-empty hidden>
+            <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <p class="empty-state__title">{{ __('ui.empty_title') }}</p>
+            <p class="empty-state__desc">{{ __('homeworks.no_match_desc') }}</p>
+        </div>
 
-            <div class="mt-6 flex justify-center">
-                {{ $homeworks->links() }}
-            </div>
-        @else
-            <div class="text-center py-12">
-                <p class="text-gray-500 text-lg">Aucun devoir pour le moment.</p>
-                @if (auth()->user()->hasAnyRole([\App\Enums\UserRole::Founder, \App\Enums\UserRole::Admin, \App\Enums\UserRole::Teacher]))
-                    <a href="{{ route('homeworks.create') }}" class="btn-primary mt-4 inline-block">Créer le premier devoir</a>
-                @endif
-            </div>
-        @endif
-    </section>
+        <div class="mt-6 pagination-wrap">
+            {{ $homeworks->links() }}
+        </div>
+    </x-content-panel>
 @endsection

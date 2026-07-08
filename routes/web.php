@@ -15,6 +15,34 @@ use App\Http\Controllers\HomeworkSubmissionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentMobileController;
 use App\Http\Controllers\PaymentReceiptController;
+use App\Http\Controllers\Pedagogie\AnneeAcademiqueController;
+use App\Http\Controllers\Pedagogie\ClasseController;
+use App\Http\Controllers\Pedagogie\CycleController;
+use App\Http\Controllers\Pedagogie\CoursController;
+use App\Http\Controllers\Pedagogie\EleveController;
+use App\Http\Controllers\Pedagogie\EmploiDuTempsController;
+use App\Http\Controllers\Pedagogie\EpreuveController;
+use App\Http\Controllers\Pedagogie\EvaluationController;
+use App\Http\Controllers\Pedagogie\LivreController;
+use App\Http\Controllers\Pedagogie\NatureEpreuveController;
+use App\Http\Controllers\Pedagogie\PersonneController;
+use App\Http\Controllers\Pedagogie\SalleController;
+use App\Http\Controllers\Pedagogie\SessionController;
+use App\Http\Controllers\Pedagogie\SpecialiteController;
+use App\Http\Controllers\Pedagogie\TitulaireController;
+use App\Http\Controllers\Pedagogie\TrimestreController;
+use App\Http\Controllers\Finance\ModeController;
+use App\Http\Controllers\Finance\PaiementController as FinancePaiementController;
+use App\Http\Controllers\Finance\ScolariteController;
+use App\Http\Controllers\Finance\TrancheController;
+use App\Http\Controllers\Administration\AdminController;
+use App\Http\Controllers\Administration\DisciplineController;
+use App\Http\Controllers\Administration\ParentsController;
+use App\Http\Controllers\Administration\QuartierController;
+use App\Http\Controllers\Administration\ResidentController;
+use App\Http\Controllers\Administration\RapportController;
+use App\Http\Controllers\Administration\VilleNaissanceController;
+use App\Http\Controllers\Communication\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SchoolYearController;
@@ -30,6 +58,13 @@ Route::get('/', function () {
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
+
+Route::get('/lang/{locale}', function (string $locale) {
+    if (in_array($locale, ['fr', 'en'])) {
+        request()->session()->put('locale', $locale);
+    }
+    return redirect()->back(fallback: '/');
+})->name('lang.switch');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -54,6 +89,47 @@ Route::middleware('auth')->group(function (): void {
         ->name('classrooms.setup-titular-courses');
     Route::resource('rooms', RoomController::class)->middleware('role:fondateur,admin');
     Route::resource('courses', CourseController::class);
+
+    Route::prefix('pedagogie')->name('pedagogie.')->group(function (): void {
+        Route::resource('eleves', EleveController::class);
+        Route::resource('annee-academiques', AnneeAcademiqueController::class);
+        Route::resource('trimestres', TrimestreController::class);
+        Route::resource('salles', SalleController::class);
+        Route::resource('classes', ClasseController::class);
+        Route::resource('cycles', CycleController::class);
+        Route::resource('cours', CoursController::class);
+        Route::resource('livres', LivreController::class);
+        Route::resource('specialites', SpecialiteController::class);
+        Route::resource('personnes', PersonneController::class);
+        Route::resource('titulaires', TitulaireController::class);
+        Route::resource('enseignants', EnseignantController::class);
+        Route::resource('epreuves', EpreuveController::class);
+        Route::resource('nature-epreuves', NatureEpreuveController::class);
+        Route::resource('evaluations', EvaluationController::class);
+        Route::resource('sessions', SessionController::class);
+        Route::resource('emploi-du-temps', EmploiDuTempsController::class);
+        Route::resource('rapports', RapportController::class);
+    });
+
+    Route::prefix('finance')->name('finance.')->group(function (): void {
+        Route::resource('scolarites', ScolariteController::class);
+        Route::resource('tranches', TrancheController::class);
+        Route::resource('modes', ModeController::class);
+        Route::resource('paiements', FinancePaiementController::class);
+    });
+
+    Route::prefix('administration')->name('administration.')->group(function (): void {
+        Route::resource('admins', AdminController::class);
+        Route::resource('ville-naissances', VilleNaissanceController::class);
+        Route::resource('parents', ParentsController::class);
+        Route::resource('disciplines', DisciplineController::class);
+        Route::resource('quartiers', QuartierController::class);
+        Route::resource('residents', ResidentController::class);
+    });
+
+    Route::prefix('communication')->name('communication.')->group(function (): void {
+        Route::resource('messages', MessageController::class);
+    });
 
     Route::get('/paiements/declarer', [PaymentController::class, 'declareForm'])->name('payments.declare');
     Route::post('/paiements/declarer', [PaymentController::class, 'declareStore'])->name('payments.declare.store');
@@ -93,6 +169,9 @@ Route::middleware('auth')->group(function (): void {
         ->name('homeworks.submissions.store');
     Route::post('/homeworks/{homework}/rendus/{submission}/noter', [HomeworkSubmissionController::class, 'grade'])
         ->name('homeworks.submissions.grade');
+
+    // Demo page for the three new features
+    Route::get('/integration-demo', fn() => view('integration-demo'))->name('integration-demo');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

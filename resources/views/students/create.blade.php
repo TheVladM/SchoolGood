@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouvel élève | SchoolGood')
-@section('topbar_title', 'Nouvel élève')
+@section('title', __('students.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.students'))
 
 @section('content')
     <x-form-shell
-        title="Créer un élève"
-        description="Rattachez l'élève à une classe et à son parent responsable."
+        :title="__('students.create_title')"
+        :description="__('students.create_desc')"
         :action="route('students.store')"
         :cancel-url="route('students.index')"
     >

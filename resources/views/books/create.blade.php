@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouveau livre | SchoolGood')
-@section('topbar_title', 'Bibliothèque')
+@section('title', __('books.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.library'))
 
 @section('content')
     <x-form-shell
-        title="Ajouter un livre"
+        :title="__('books.create_title')"
+        :description="__('books.create_desc')"
         :action="route('books.store')"
         :cancel-url="route('books.index')"
     >

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — SchoolGood</title>
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/layout.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages/dashboard.css">
+</head>
+<body>
+  <div id="topbar-placeholder"></div>
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main" role="main">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Bonjour, Admin 👋</div>
+          <div class="card-sub">Aujourd'hui — <span id="today"></span></div>
+        </div>
+        <div>
+          <button class="btn btn-primary">Nouveau</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+
+    <section class="kpi-grid">
+      <div class="card kpi-card">
+        <div style="font-size:24px">👨‍🎓</div>
+        <div>
+          <div class="num">1,248</div>
+          <div class="label">Total élèves actifs</div>
+          <div class="delta" style="color:var(--color-success)">+5 ce mois</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div style="font-size:24px">👨‍🏫</div>
+        <div>
+          <div class="num">86</div>
+          <div class="label">Total enseignants</div>
+          <div class="delta" style="color:var(--color-success)">+2 ce mois</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div style="font-size:24px">💰</div>
+        <div>
+          <div class="num">23,450€</div>
+          <div class="label">Paiements du mois</div>
+          <div class="delta" style="color:var(--color-warning)">+8% ce mois</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div style="font-size:24px">✉️</div>
+        <div>
+          <div class="num">7</div>
+          <div class="label">Messages non lus</div>
+          <div class="delta" style="color:var(--color-danger)">+1 ce mois</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="recent-activity">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Activité récente</div><div class="card-sub">Paiements récents</div></div></div>
+        <div class="card-sep"></div>
+        <ul style="display:grid;gap:10px">
+          <li>Jean Dupont — 120€ — <small style="color:var(--color-text-secondary)">2h</small></li>
+          <li>Marie Durand — 200€ — <small style="color:var(--color-text-secondary)">5h</small></li>
+          <li>... (5 items)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Nouvelles inscriptions</div><div class="card-sub">Dernières 5</div></div></div>
+        <div class="card-sep"></div>
+        <ul style="display:grid;gap:10px">
+          <li>Paul Martin — Classe 3A — <small style="color:var(--color-text-secondary)">1 jour</small></li>
+          <li>... (5 items)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="schedule card">
+      <div class="card-header"><div><div class="card-title">Emploi du temps du jour</div><div class="card-sub">Filtré sur aujourd'hui</div></div></div>
+      <div class="card-sep"></div>
+      <table class="data-table" aria-label="Emploi du temps du jour">
+        <thead><tr><th>Heure</th><th>Cours</th><th>Classe</th><th>Enseignant</th></tr></thead>
+        <tbody>
+          <tr><td>08:00</td><td>Mathématiques</td><td>3A</td><td>Mme Lefevre</td></tr>
+          <tr><td>09:30</td><td>Français</td><td>2B</td><td>M. Rousseau</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <div class="right-panel">
+    <div class="card">Raccourcis</div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="/js/layout.js"></script>
+  <script src="/js/ui.js"></script>
+  <script>
+    document.getElementById('today').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  </script>
+</body>
+</html>

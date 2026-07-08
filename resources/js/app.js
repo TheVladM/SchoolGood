@@ -237,6 +237,31 @@ const setupSplashScreen = () => {
     window.setTimeout(finish, minDisplay);
 };
 
+const setupThemeToggle = () => {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    const root = document.documentElement;
+
+    const applyTheme = (dark) => {
+        if (dark) {
+            root.dataset.theme = 'dark';
+            localStorage.setItem('sg-theme', 'dark');
+        } else {
+            delete root.dataset.theme;
+            localStorage.removeItem('sg-theme');
+        }
+        btn.querySelector('[data-sun]').style.display  = dark ? '' : 'none';
+        btn.querySelector('[data-moon]').style.display = dark ? 'none' : '';
+        btn.setAttribute('aria-label', dark ? 'Passer en mode clair' : 'Passer en mode sombre');
+    };
+
+    const isDark = root.dataset.theme === 'dark';
+    applyTheme(isDark);
+
+    btn.addEventListener('click', () => applyTheme(root.dataset.theme !== 'dark'));
+};
+
 setupSplashScreen();
 setupSidebar();
 setupPasswordToggles();
@@ -244,3 +269,20 @@ setupFlashDismiss();
 setupRevealAnimations();
 setupCounters();
 setupTableSearch();
+setupThemeToggle();
+
+// Import API modules for integration-demo
+import('./api/elevePhoto.js').then(module => {
+    window.setupPhotoPreview = module.setupPhotoPreview;
+    window.submitPhotoForm = module.submitPhotoForm;
+});
+
+import('./api/parentLink.js').then(module => {
+    window.setupParentAutocomplete = module.setupParentAutocomplete;
+    window.setupEleveAutocomplete = module.setupEleveAutocomplete;
+    window.setupLinkParentEleve = module.setupLinkParentEleve;
+});
+
+import('./api/printLists.js').then(module => {
+    window.setupPrintControls = module.setupPrintControls;
+});

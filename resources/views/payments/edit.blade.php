@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier paiement | SchoolGood')
-@section('topbar_title', 'Modifier paiement')
+@section('title', __('payments.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.payments'))
 
 @section('content')
     <x-form-shell
-        title="Modifier le paiement"
-        description="Statut, mode et montant."
+        :title="__('payments.edit_title')"
+        :description="__('payments.edit_desc')"
         :action="route('payments.update', $payment)"
         method="PUT"
         :cancel-url="route('payments.index')"
-        submit-label="Mettre à jour"
     >
         @include('payments._form')
     </x-form-shell>

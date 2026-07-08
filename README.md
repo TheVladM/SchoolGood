@@ -126,6 +126,7 @@ tests/
 
 ## 🔒 Authorization Matrix
 
+
 ### Policies (8 Total)
 
 | Resource | Founder | Admin | Scolarite | Teacher | Parent |

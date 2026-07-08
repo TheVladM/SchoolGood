@@ -1,0 +1,34 @@
+<header class="topbar" role="banner">
+  <div class="brand" aria-label="École">
+    <!-- Diplôme SVG -->
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="var(--color-primary)"/><path d="M2 17l10 5 10-5" stroke="var(--color-primary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <div style="font-weight:600">SchoolGood</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Gestion scolaire</div>
+    </div>
+  </div>
+
+  <div class="search" role="search" aria-label="Recherche">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.6"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/></svg>
+    <input type="search" placeholder="Rechercher..." aria-label="Rechercher" />
+  </div>
+
+  <div class="actions" role="navigation" aria-label="Actions">
+    <button class="btn-icon" aria-label="Notifications" id="btn-notifs" style="position:relative">
+      <!-- Bell -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 17H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17a7 7 0 0014 0v-4a7 7 0 10-14 0v4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="badge count" style="position:absolute;top:-6px;right:-6px">3</span>
+    </button>
+
+    <div class="avatar" style="cursor:pointer" id="avatar-btn" aria-haspopup="true" aria-expanded="false">
+      <img src="https://via.placeholder.com/36" alt="Admin avatar" style="width:36px;height:36px;border-radius:50%" />
+    </div>
+
+    <div id="avatar-menu" role="menu" aria-label="Menu utilisateur" style="display:none;position:absolute;right:16px;top:64px;background:var(--color-surface);border:1px solid var(--color-border);box-shadow:var(--shadow-sm);border-radius:8px;padding:8px;min-width:180px">
+      <button role="menuitem" class="btn-secondary" style="width:100%;text-align:left;padding:8px 12px">Mon profil</button>
+      <button role="menuitem" class="btn-secondary" style="width:100%;text-align:left;padding:8px 12px;margin-top:6px">Paramètres</button>
+      <div style="height:1px;background:var(--color-border);margin:8px 0"></div>
+      <button role="menuitem" class="btn-danger" style="width:100%;text-align:left;padding:8px 12px">Déconnexion</button>
+    </div>
+  </div>
+</header>

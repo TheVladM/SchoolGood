@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouveau message | SchoolGood')
-@section('topbar_title', 'Nouveau message')
+@section('title', __('announcements.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.messages'))
 
 @section('content')
     <x-form-shell
-        title="Publier un message"
-        description="Annonce ou communication aux parents."
+        :title="__('announcements.create_title')"
+        :description="__('announcements.create_desc')"
         :action="route('announcements.store')"
         :cancel-url="route('announcements.index')"
     >

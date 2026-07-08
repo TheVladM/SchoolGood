@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouvelle salle | SchoolGood')
-@section('topbar_title', 'Salles')
+@section('title', __('rooms.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.rooms'))
 
 @section('content')
     <x-form-shell
-        title="Nouvelle salle"
+        :title="__('rooms.create_title')"
+        :description="__('rooms.create_desc')"
         :action="route('rooms.store')"
         :cancel-url="route('rooms.index')"
         max-width="max-w-lg"

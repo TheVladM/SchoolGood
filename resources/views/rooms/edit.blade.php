@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier salle | SchoolGood')
-@section('topbar_title', 'Salles')
+@section('title', __('rooms.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.rooms'))
 
 @section('content')
     <x-form-shell
-        title="Modifier la salle"
+        :title="__('rooms.edit_title')"
         :action="route('rooms.update', $room)"
         method="PUT"
         :cancel-url="route('rooms.index')"

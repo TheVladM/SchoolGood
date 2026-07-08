@@ -1,0 +1,15 @@
+@import '../variables.css';
+@import '../components.css';
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi-card{display:flex;align-items:center;gap:12px;padding:18px}
+.kpi-card .num{font-size:28px;font-weight:700}
+.kpi-card .label{font-size:13px;color:var(--color-text-secondary)}
+.kpi-card .delta{font-size:13px}
+.recent-activity{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.schedule{margin-top:20px}
+
+@media (max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .recent-activity{grid-template-columns:1fr}
+}

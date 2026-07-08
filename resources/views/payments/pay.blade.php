@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Payer en ligne | SchoolGood')
-@section('topbar_title', 'Paiement mobile')
+@section('title', __('payments.pay_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.payments'))
 
 @section('content')
     <x-form-shell
-        title="Payer avec Orange Money ou MTN MoMo"
-        description="Le paiement est confirmé automatiquement par l’opérateur (webhook). Un reçu PDF sera disponible après validation."
+        :title="__('payments.pay_title')"
+        :description="__('payments.pay_desc')"
         :action="route('payments.mobile.store')"
         :cancel-url="route('payments.declare')"
-        submit-label="Lancer le paiement"
+        :submit-label="__('payments.pay_btn')"
         max-width="max-w-2xl"
     >
         <div class="grid gap-6">
             <div>
-                <label for="student_id" class="label">Enfant</label>
+                <label for="student_id" class="label">{{ __('payments.declare_child') }}</label>
                 <select id="student_id" name="student_id" class="field" required>
                     @foreach ($children as $child)
                         <option value="{{ $child->id }}" @selected(old('student_id') == $child->id)>
@@ -24,7 +24,7 @@
                 </select>
             </div>
             <div>
-                <label for="type" class="label">Type</label>
+                <label for="type" class="label">{{ __('payments.form_type') }}</label>
                 <select id="type" name="type" class="field" required>
                     @foreach ($types as $value => $label)
                         <option value="{{ $value }}" @selected(old('type') === $value)>{{ $label }}</option>
@@ -32,11 +32,11 @@
                 </select>
             </div>
             <div>
-                <label for="amount" class="label">Montant (FCFA)</label>
+                <label for="amount" class="label">{{ __('payments.form_amount_fcfa') }}</label>
                 <input id="amount" name="amount" type="number" min="1" step="1" class="field" value="{{ old('amount') }}" required>
             </div>
             <div>
-                <label for="method" class="label">Opérateur</label>
+                <label for="method" class="label">{{ __('payments.form_operator') }}</label>
                 <select id="method" name="method" class="field" required>
                     @foreach ($methods as $value => $label)
                         <option value="{{ $value }}" @selected(old('method') === $value)>{{ $label }}</option>
@@ -44,14 +44,14 @@
                 </select>
             </div>
             <div>
-                <label for="payer_phone" class="label">Numéro mobile du payeur</label>
+                <label for="payer_phone" class="label">{{ __('payments.form_payer_phone') }}</label>
                 <input id="payer_phone" name="payer_phone" type="tel" class="field" placeholder="6XXXXXXXX" value="{{ old('payer_phone', auth()->user()->phone) }}" required>
-                <p class="mt-1 text-xs text-slate-500">Numéro Orange ou MTN utilisé pour valider la transaction.</p>
+                <p class="mt-1 text-xs text-slate-500">{{ __('payments.form_phone_hint') }}</p>
             </div>
         </div>
     </x-form-shell>
 
     <p class="mt-4 text-center text-sm text-slate-500">
-        Vous pouvez aussi <a href="{{ route('payments.declare') }}" class="text-indigo-600 underline">déclarer un paiement manuel</a> avec référence.
+        {{ __('payments.pay_footer_before') }}<a href="{{ route('payments.declare') }}" class="text-indigo-600 underline">{{ __('payments.pay_footer_link') }}</a>{{ __('payments.pay_footer_after') }}
     </p>
 @endsection

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Élèves — SchoolGood</title>
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/layout.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/pages/eleves.css">
+</head>
+<body>
+  <div id="topbar-placeholder"></div>
+  <div id="sidebar-placeholder"></div>
+
+  <main class="main" role="main">
+    <div class="page-header">
+      <div>
+        <h1 style="font-size:20px;margin-bottom:6px">Élèves <span class="badge">1,248</span></h1>
+        <div style="color:var(--color-text-secondary)">Liste complète des élèves</div>
+      </div>
+      <div>
+        <button class="btn btn-secondary">Imprimer PDF</button>
+        <button class="btn btn-secondary">Exporter Excel</button>
+        <button class="btn btn-primary" onclick="openModal('student-modal')">+ Nouvel élève</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="search input-icon" style="flex:1">
+        <svg width="16" height="16" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.6"> <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        <input class="form-control" placeholder="Recherche nom / matricule" />
+      </div>
+      <select class="form-control" style="width:180px"><option>Classe</option></select>
+      <select class="form-control" style="width:160px"><option>Tous</option><option>Actifs</option><option>Inactifs</option></select>
+    </div>
+
+    <div class="card">
+      <table class="data-table" aria-label="Liste des élèves">
+        <thead><tr><th>Photo</th><th>Matricule</th><th>Nom complet</th><th>Classe</th><th>Langue</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="avatar-cell"><div class="avatar"><img src="https://via.placeholder.com/36" alt="" style="width:36px;height:36px;border-radius:50%"/></div></td>
+            <td>2025-001</td>
+            <td>Jean Dupont</td>
+            <td>3A</td>
+            <td>Français</td>
+            <td><span class="status-pill status-active">Actif</span></td>
+            <td><div class="row-actions"><button aria-label="Voir">👁</button><button aria-label="Modifier">✏️</button><button aria-label="Supprimer">🗑</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="table-cards">
+        <div class="card student-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-weight:700">Jean Dupont</div><div style="color:var(--color-text-secondary)">2025-001 — 3A</div></div>
+            <div><span class="status-pill status-active">Actif</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="student-modal" class="modal-backdrop" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Nouvel élève">
+      <div class="modal-header"><div><div style="font-weight:700">Nouvel élève</div><div style="font-size:13px;color:var(--color-text-secondary)">Remplissez les informations</div></div><button aria-label="Fermer" onclick="closeModal('student-modal')">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Photo</label>
+          <div class="upload-zone">Glisser ou cliquer</div>
+        </div>
+        <div class="form-group"><label>Matricule</label><input class="form-control" /></div>
+        <div class="form-group"><label>Nom</label><input class="form-control" /></div>
+        <div class="form-group"><label>Prénom</label><input class="form-control" /></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('student-modal')">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="/js/layout.js"></script>
+  <script src="/js/ui.js"></script>
+</body>
+</html>

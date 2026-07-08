@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* === Palette === */
+  --color-primary: #1877F2;
+  --color-primary-dark: #166FE5;
+  --color-primary-light: #E7F3FF;
+  --color-bg: #F0F2F5;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E6EB;
+  --color-text-primary: #050505;
+  --color-text-secondary: #65676B;
+  --color-text-disabled: #BEC3C9;
+  --color-success: #42B72A;
+  --color-danger: #FA3E3E;
+  --color-warning: #F7B928;
+
+  /* === Typographie === */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-xs: 11px;
+  --font-sm: 13px;
+  --font-base: 15px;
+  --font-md: 17px;
+  --font-lg: 20px;
+  --font-xl: 24px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* === Espacements === */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --space-8: 32px; --space-10: 40px;
+
+  /* === Bordures & ombres === */
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-full: 50px;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+
+  /* Layout sizes */
+  --sidebar-width: 260px;
+  --right-panel-width: 300px;
+  --topbar-height: 60px;
+}
+
+html,body{
+  height:100%;
+  background:var(--color-bg);
+  color:var(--color-text-primary);
+  font-family:var(--font-family);
+  font-size:var(--font-base);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

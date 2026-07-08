@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Éditer le devoir | SchoolGood')
-@section('topbar_title', 'Éditer: '.$homework->title)
+@section('title', __('homeworks.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.homeworks'))
 
 @section('content')
     <x-form-shell
-        title="Éditer le devoir"
+        :title="__('homeworks.edit_title')"
         :description="$homework->title"
         :action="route('homeworks.update', $homework)"
         method="PUT"
         :cancel-url="route('homeworks.show', $homework)"
-        submit-label="Mettre à jour"
         max-width="max-w-3xl"
     >
         @include('homeworks._form', ['homework' => $homework, 'classrooms' => $classrooms, 'teachers' => $teachers])

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier utilisateur | SchoolGood')
-@section('topbar_title', 'Modifier utilisateur')
+@section('title', __('users.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.users'))
 
 @section('content')
     <x-form-shell
-        title="Modifier {{ $user->name }}"
+        :title="__('users.edit_title') . ' – ' . $user->name"
         :action="route('users.update', $user)"
         method="PUT"
         :cancel-url="route('users.show', $user)"

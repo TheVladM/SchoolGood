@@ -1,48 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'Nouveau paiement | SchoolGood')
-@section('topbar_title', 'Nouveau paiement')
+@section('title', __('payments.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.payments'))
 
 @section('content')
-    @include('partials.page-header', [
-        'title' => 'Enregistrer un paiement',
-        'description' => 'Le montant suggéré provient des tarifs de scolarité (niveau et section).',
-    ])
-
-    <section class="surface-card mt-6 mx-auto max-w-4xl p-5 lg:p-6" data-reveal>
-        <div id="tuition-summary" class="mb-6 hidden rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950">
-            <p><strong>Reste à payer (année) :</strong> <span data-balance>-</span> FCFA</p>
-            <ul class="mt-2 space-y-1" data-installments></ul>
+    <x-form-shell
+        :title="__('payments.create_title')"
+        :description="__('payments.create_desc')"
+        :action="route('payments.store')"
+        :cancel-url="route('payments.index')"
+        submit-label="{{ __('ui.save') }}"
+        max-width="max-w-4xl"
+    >
+        <div id="tuition-summary" class="hidden rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950">
+            <p class="font-semibold">{{ __('payments.remaining_label') }} <span data-balance class="font-mono">-</span> FCFA</p>
+            <ul class="mt-2 space-y-1 text-indigo-800" data-installments></ul>
         </div>
 
-        <form method="POST" action="{{ route('payments.store') }}" class="space-y-6" id="payment-form">
-            @csrf
-            @include('payments._form')
-
-            <div class="flex gap-3">
-                <button type="submit" class="btn-primary">Enregistrer</button>
-                <a href="{{ route('payments.index') }}" class="btn-secondary">Annuler</a>
-            </div>
-        </form>
-    </section>
+        @include('payments._form')
+    </x-form-shell>
 
     @push('scripts')
         <script>
             (function () {
                 const studentSelect = document.getElementById('student_id');
-                const typeSelect = document.getElementById('type');
-                const amountInput = document.getElementById('amount');
-                const summary = document.getElementById('tuition-summary');
-                const balanceEl = summary?.querySelector('[data-balance]');
+                const typeSelect    = document.getElementById('type');
+                const amountInput   = document.getElementById('amount');
+                const summary       = document.getElementById('tuition-summary');
+                const balanceEl     = summary?.querySelector('[data-balance]');
                 const installmentsEl = summary?.querySelector('[data-installments]');
 
                 async function refreshTuition() {
                     const studentId = studentSelect?.value;
                     const type = typeSelect?.value;
-                    if (!studentId) {
-                        summary?.classList.add('hidden');
-                        return;
-                    }
+                    if (!studentId) { summary?.classList.add('hidden'); return; }
 
                     const url = `{{ url('/paiements/eleves') }}/${studentId}/tarifs` + (type ? `?type=${encodeURIComponent(type)}` : '');
                     const response = await fetch(url, { headers: { 'Accept': 'application/json' } });

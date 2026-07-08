@@ -47,13 +47,13 @@ class DashboardController extends Controller
             $classroomIds = $children->pluck('classroom_id')->unique();
 
             return [
-                'headline' => 'Vue parent',
-                'subheadline' => 'Suivez les inscriptions, les paiements, les classes et les devoirs de vos enfants.',
+                'headline' => __('dashboard.headline_parent'),
+                'subheadline' => __('dashboard.subheadline_parent'),
                 'cards' => [
-                    ['label' => 'Enfants', 'value' => $children->count()],
-                    ['label' => 'Classes', 'value' => $classroomIds->count()],
-                    ['label' => 'Paiements payés', 'value' => Payment::whereIn('student_id', $childIds)->where('status', PaymentStatus::Paid->value)->count()],
-                    ['label' => 'Devoirs actifs', 'value' => Homework::whereIn('classroom_id', $classroomIds)->where('due_date', '>', now())->count()],
+                    ['label' => __('dashboard.card_children'), 'value' => $children->count()],
+                    ['label' => __('dashboard.card_classes'), 'value' => $classroomIds->count()],
+                    ['label' => __('dashboard.card_paid_payments'), 'value' => Payment::whereIn('student_id', $childIds)->where('status', PaymentStatus::Paid->value)->count()],
+                    ['label' => __('dashboard.card_active_homeworks'), 'value' => Homework::whereIn('classroom_id', $classroomIds)->where('due_date', '>', now())->count()],
                 ],
                 'children' => $children,
                 'recentStudents' => $children,
@@ -94,13 +94,13 @@ class DashboardController extends Controller
                 ->count();
 
             return [
-                'headline' => 'Vue enseignant',
-                'subheadline' => 'Vos classes, cours du jour et devoirs à corriger.',
+                'headline' => __('dashboard.headline_teacher'),
+                'subheadline' => __('dashboard.subheadline_teacher'),
                 'cards' => [
-                    ['label' => 'Mes classes', 'value' => $classrooms->count()],
-                    ['label' => 'Mes cours', 'value' => Course::where('teacher_id', $user->id)->count()],
-                    ['label' => 'Mes devoirs', 'value' => Homework::where('teacher_id', $user->id)->count()],
-                    ['label' => 'Rendus à noter', 'value' => $homeworksToGrade],
+                    ['label' => __('dashboard.card_my_classes'), 'value' => $classrooms->count()],
+                    ['label' => __('dashboard.card_my_courses'), 'value' => Course::where('teacher_id', $user->id)->count()],
+                    ['label' => __('dashboard.card_my_homeworks'), 'value' => Homework::where('teacher_id', $user->id)->count()],
+                    ['label' => __('dashboard.card_to_grade'), 'value' => $homeworksToGrade],
                 ],
                 'recentStudents' => Student::with(['classroom', 'parent'])
                     ->whereIn('classroom_id', $classroomIds)
@@ -120,7 +120,7 @@ class DashboardController extends Controller
                 'recentPayments' => collect(),
                 'pendingActions' => $homeworksToGrade > 0 ? [
                     [
-                        'label' => 'Devoirs à corriger',
+                        'label' => __('dashboard.homeworks_to_grade'),
                         'count' => $homeworksToGrade,
                         'url' => route('homeworks.index'),
                     ],
@@ -132,13 +132,13 @@ class DashboardController extends Controller
             $pendingPayments = Payment::where('status', PaymentStatus::Pending->value)->count();
 
             return [
-                'headline' => 'Vue scolarité',
-                'subheadline' => 'Encaissements, messages et suivi des familles.',
+                'headline' => __('dashboard.headline_scolarite'),
+                'subheadline' => __('dashboard.subheadline_scolarite'),
                 'cards' => [
-                    ['label' => 'Élèves actifs', 'value' => Student::where('is_active', true)->count()],
-                    ['label' => 'Paiements en attente', 'value' => $pendingPayments],
-                    ['label' => 'Messages envoyés', 'value' => Announcement::where('author_id', $user->id)->count()],
-                    ['label' => 'Classes', 'value' => Classroom::count()],
+                    ['label' => __('dashboard.card_active_students'), 'value' => Student::where('is_active', true)->count()],
+                    ['label' => __('dashboard.card_pending_payments'), 'value' => $pendingPayments],
+                    ['label' => __('dashboard.card_sent_messages'), 'value' => Announcement::where('author_id', $user->id)->count()],
+                    ['label' => __('dashboard.card_classes'), 'value' => Classroom::count()],
                 ],
                 'recentStudents' => Student::with(['classroom', 'parent'])->latest()->take(5)->get(),
                 'recentCourses' => Course::with(['classroom', 'teacher'])->latest()->take(5)->get(),
@@ -146,12 +146,12 @@ class DashboardController extends Controller
                 'recentPayments' => Payment::with('student')->latest()->take(5)->get(),
                 'pendingActions' => array_filter([
                     $pendingPayments > 0 ? [
-                        'label' => 'Paiements à valider',
+                        'label' => __('dashboard.pending_payments_validate'),
                         'count' => $pendingPayments,
                         'url' => route('payments.index'),
                     ] : null,
                     [
-                        'label' => 'Nouveau paiement',
+                        'label' => __('dashboard.new_payment'),
                         'count' => null,
                         'url' => route('payments.create'),
                     ],
@@ -167,7 +167,7 @@ class DashboardController extends Controller
         if ($user->hasRole(UserRole::Founder)) {
             if ($pendingMessages > 0) {
                 $pendingActions[] = [
-                    'label' => 'Messages à approuver',
+                    'label' => __('dashboard.pending_messages'),
                     'count' => $pendingMessages,
                     'url' => route('announcements.index', ['filter' => 'pending']),
                 ];
@@ -175,7 +175,7 @@ class DashboardController extends Controller
 
             if ($pendingPayments > 0) {
                 $pendingActions[] = [
-                    'label' => 'Paiements en attente',
+                    'label' => __('dashboard.pending_payments'),
                     'count' => $pendingPayments,
                     'url' => route('payments.index'),
                 ];
@@ -183,13 +183,13 @@ class DashboardController extends Controller
         }
 
         return [
-            'headline' => $user->hasRole(UserRole::Admin) ? 'Vue administration' : 'Vue fondateur',
-            'subheadline' => 'Pilotez l\'établissement, les affectations et les validations.',
+            'headline' => $user->hasRole(UserRole::Admin) ? __('dashboard.headline_admin') : __('dashboard.headline_founder'),
+            'subheadline' => __('dashboard.subheadline_founder'),
             'cards' => [
-                ['label' => 'Élèves', 'value' => Student::count()],
-                ['label' => 'Enseignants', 'value' => User::where('role', UserRole::Teacher->value)->count()],
-                ['label' => 'Classes', 'value' => Classroom::count()],
-                ['label' => 'Devoirs', 'value' => Homework::count()],
+                ['label' => __('dashboard.card_students'), 'value' => Student::count()],
+                ['label' => __('dashboard.card_teachers'), 'value' => User::where('role', UserRole::Teacher->value)->count()],
+                ['label' => __('dashboard.card_classes'), 'value' => Classroom::count()],
+                ['label' => __('dashboard.card_homeworks'), 'value' => Homework::count()],
             ],
             'recentStudents' => Student::with(['classroom', 'parent'])->latest()->take(5)->get(),
             'recentCourses' => Course::with(['classroom', 'teacher'])->latest()->take(5)->get(),

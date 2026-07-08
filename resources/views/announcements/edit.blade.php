@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier message | SchoolGood')
-@section('topbar_title', 'Modifier message')
+@section('title', __('announcements.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.messages'))
 
 @section('content')
     <x-form-shell
-        title="Modifier le message"
+        :title="__('announcements.edit_title')"
         :action="route('announcements.update', $announcement)"
         method="PUT"
         :cancel-url="route('announcements.show', $announcement)"

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier emploi du temps | SchoolGood')
-@section('topbar_title', 'Emploi du temps')
+@section('title', __('timetable.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.timetable'))
 
 @section('content')
     <x-form-shell
-        title="Modifier le créneau"
+        :title="__('timetable.edit_title')"
         :action="route('timetable-entries.update', $entry)"
         method="PUT"
         :cancel-url="route('timetable-entries.index')"

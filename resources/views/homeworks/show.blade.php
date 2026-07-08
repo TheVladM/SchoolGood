@@ -1,40 +1,40 @@
 @extends('layouts.app')
 
 @section('title', $homework->title . ' | SchoolGood')
-@section('topbar_title', 'Détail du devoir')
+@section('topbar_title', __('homeworks.show_title'))
 
 @section('content')
     @include('partials.page-header', [
         'title' => $homework->title,
-        'description' => ($homework->subject ?? 'Devoir') . ' · ' . $homework->classroom->name . ' · échéance ' . $homework->due_date->format('d/m/Y'),
+        'description' => ($homework->subject ?? __('homeworks.page_title')) . ' · ' . $homework->classroom->name . ' · ' . __('homeworks.due_prefix') . ' ' . $homework->due_date->format('d/m/Y'),
     ])
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3" data-reveal>
         <div class="lg:col-span-2 space-y-6">
-            <x-content-panel title="Consignes" subtitle="Description et pièces jointes">
+            <x-content-panel :title="__('homeworks.instructions')" :subtitle="__('homeworks.instructions_sub')">
                 @if ($homework->description)
                     <div class="prose prose-slate max-w-none whitespace-pre-wrap text-slate-700">{{ $homework->description }}</div>
                 @else
-                    <p class="text-slate-500">Aucune description.</p>
+                    <p class="text-slate-500">{{ __('homeworks.no_description') }}</p>
                 @endif
 
                 <div class="mt-4 flex flex-wrap gap-3">
                     @can('update', $homework)
-                        <a href="{{ route('homeworks.edit', $homework) }}" class="btn-primary">Modifier</a>
+                        <a href="{{ route('homeworks.edit', $homework) }}" class="btn-primary">{{ __('ui.edit') }}</a>
                     @endcan
-                    <a href="{{ route('homeworks.index') }}" class="btn-secondary">Retour</a>
+                    <a href="{{ route('homeworks.index') }}" class="btn-secondary">{{ __('ui.back') }}</a>
                 </div>
             </x-content-panel>
 
-            <x-content-panel title="Suivi par élève" subtitle="Rendu et notation individuels">
+            <x-content-panel :title="__('homeworks.tracking')" :subtitle="__('homeworks.tracking_sub')">
                 <div class="table-shell">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Élève</th>
-                                <th>Statut</th>
-                                <th>Note</th>
-                                <th class="text-right">Actions</th>
+                                <th>{{ __('homeworks.col_student') }}</th>
+                                <th>{{ __('ui.status_col') }}</th>
+                                <th>{{ __('homeworks.col_grade') }}</th>
+                                <th class="text-right">{{ __('ui.actions_col') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,15 +46,15 @@
                                     <td>
                                         <div class="record-actions justify-end">
                                             @if ($submission->file_path)
-                                                <a href="{{ asset('storage/' . $submission->file_path) }}" class="btn-secondary" target="_blank" rel="noopener">Fichier</a>
+                                                <a href="{{ asset('storage/' . $submission->file_path) }}" class="btn-secondary" target="_blank" rel="noopener">{{ __('homeworks.file_btn') }}</a>
                                             @endif
 
                                             @can('update', $homework)
                                                 @if ($submission->status->value === 'submitted' || $submission->status->value === 'graded')
                                                     <form method="POST" action="{{ route('homeworks.submissions.grade', [$homework, $submission]) }}" class="inline-flex flex-wrap items-center gap-2">
                                                         @csrf
-                                                        <input type="number" name="grade" min="0" max="20" step="0.25" class="field w-20" placeholder="Note" value="{{ old('grade', $submission->grade) }}" required>
-                                                        <button type="submit" class="btn-primary">Noter</button>
+                                                        <input type="number" name="grade" min="0" max="20" step="0.25" class="field w-20" placeholder="{{ __('homeworks.grade_placeholder') }}" value="{{ old('grade', $submission->grade) }}" required>
+                                                        <button type="submit" class="btn-primary">{{ __('homeworks.grade_btn') }}</button>
                                                     </form>
                                                 @endif
                                             @endcan
@@ -64,7 +64,7 @@
                                                     @csrf
                                                     <input type="hidden" name="student_id" value="{{ $submission->student_id }}">
                                                     <input type="file" name="file" class="field text-sm max-w-[12rem]">
-                                                    <button type="submit" class="btn-primary">Rendre</button>
+                                                    <button type="submit" class="btn-primary">{{ __('homeworks.submit_btn') }}</button>
                                                 </form>
                                             @endif
                                         </div>
@@ -78,30 +78,30 @@
         </div>
 
         <aside>
-            <x-content-panel title="Informations" subtitle="Enseignant et échéance">
-                <dl class="space-y-3 text-sm">
-                    <div class="flex justify-between gap-4">
-                        <dt class="text-slate-500">Enseignant</dt>
-                        <dd class="font-medium text-slate-900">{{ $homework->teacher->name }}</dd>
+            <x-content-panel :title="__('homeworks.info_panel')" :subtitle="__('homeworks.info_sub')">
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-key">{{ __('homeworks.info_teacher') }}</span>
+                        <span class="info-val">{{ $homework->teacher->name }}</span>
                     </div>
-                    <div class="flex justify-between gap-4">
-                        <dt class="text-slate-500">Classe</dt>
-                        <dd class="font-medium text-slate-900">{{ $homework->classroom->name }}</dd>
+                    <div class="info-row">
+                        <span class="info-key">{{ __('homeworks.info_classroom') }}</span>
+                        <span class="info-val">{{ $homework->classroom->name }}</span>
                     </div>
-                    <div class="flex justify-between gap-4">
-                        <dt class="text-slate-500">Date limite</dt>
-                        <dd class="font-medium @if($homework->isOverdue()) text-rose-600 @else text-emerald-700 @endif">
+                    <div class="info-row">
+                        <span class="info-key">{{ __('homeworks.info_due') }}</span>
+                        <span class="info-val {{ $homework->isOverdue() ? 'text-rose-600 font-semibold' : 'text-emerald-700' }}">
                             {{ $homework->due_date->format('d/m/Y H:i') }}
-                        </dd>
+                        </span>
                     </div>
-                    <div class="flex justify-between gap-4">
-                        <dt class="text-slate-500">Rendus</dt>
-                        <dd class="font-medium text-slate-900">
+                    <div class="info-row">
+                        <span class="info-key">{{ __('homeworks.info_submissions') }}</span>
+                        <span class="info-val">
                             {{ $homework->submissions->whereIn('status', ['submitted', 'graded'])->count() }}
                             / {{ $homework->submissions->count() }}
-                        </dd>
+                        </span>
                     </div>
-                </dl>
+                </div>
             </x-content-panel>
         </aside>
     </div>

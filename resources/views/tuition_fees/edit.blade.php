@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier grille | SchoolGood')
-@section('topbar_title', 'Frais de scolarité')
+@section('title', __('tuition_fees.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.tuition_fees'))
 
 @section('content')
     <x-form-shell
-        :title="'Modifier la grille · '.$fee->level"
+        :title="__('tuition_fees.edit_title') . ' · ' . $fee->level"
         :action="route('tuition-fees.update', $fee)"
         method="PUT"
         :cancel-url="route('tuition-fees.index')"

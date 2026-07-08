@@ -1,0 +1,13 @@
+@import '../variables.css';
+@import '../components.css';
+
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.filters{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.filters .search{flex:1}
+.table-cards{display:none}
+
+@media (max-width:768px){
+  .data-table{display:none}
+  .table-cards{display:block}
+  .student-card{margin-bottom:12px}
+}

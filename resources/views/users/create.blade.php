@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Nouvel utilisateur | SchoolGood')
-@section('topbar_title', 'Nouvel utilisateur')
+@section('title', __('users.create_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.users'))
 
 @section('content')
     <x-form-shell
-        title="Créer un utilisateur"
-        description="Compte d’accès et rôle."
+        :title="__('users.create_title')"
+        :description="__('users.create_desc')"
         :action="route('users.store')"
         :cancel-url="route('users.index')"
     >

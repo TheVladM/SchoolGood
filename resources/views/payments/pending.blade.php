@@ -1,30 +1,30 @@
 @extends('layouts.app')
 
-@section('title', 'Paiement en cours | SchoolGood')
-@section('topbar_title', 'Paiement en cours')
+@section('title', __('payments.pending_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.payments'))
 
 @section('content')
     @include('partials.page-header', [
-        'title' => 'Paiement en attente',
-        'description' => 'Référence '.$payment->intent_reference,
+        'title' => __('payments.pending_title'),
+        'description' => __('payments.info_reference') . ' ' . $payment->intent_reference,
     ])
 
     <section class="surface-card mt-6 max-w-xl p-5 lg:p-6" data-reveal>
-        <dl class="space-y-3 text-sm">
-            <div class="flex justify-between"><dt class="text-slate-500">Élève</dt><dd class="font-medium">{{ $payment->student?->full_name }}</dd></div>
-            <div class="flex justify-between"><dt class="text-slate-500">Montant</dt><dd class="font-medium">{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</dd></div>
-            <div class="flex justify-between"><dt class="text-slate-500">Opérateur</dt><dd class="font-medium">{{ $payment->method?->label() }}</dd></div>
-            <div class="flex justify-between"><dt class="text-slate-500">Statut</dt><dd class="font-medium">{{ $payment->status?->label() }} / {{ $payment->operator_status ?: '-' }}</dd></div>
-        </dl>
+        <div class="info-list">
+            <div class="info-row"><span class="info-key">{{ __('payments.col_student') }}</span><span class="info-val">{{ $payment->student?->full_name }}</span></div>
+            <div class="info-row"><span class="info-key">{{ __('payments.col_amount') }}</span><span class="info-val font-semibold">{{ number_format((float) $payment->amount, 0, ',', ' ') }} FCFA</span></div>
+            <div class="info-row"><span class="info-key">{{ __('payments.operator_label') }}</span><span class="info-val">{{ $payment->method?->label() }}</span></div>
+            <div class="info-row"><span class="info-key">{{ __('payments.status_operator') }}</span><span class="info-val">{{ $payment->status?->label() }} / {{ $payment->operator_status ?: '—' }}</span></div>
+        </div>
 
         <p class="mt-6 text-sm text-slate-600">
-            Dès confirmation par {{ $payment->method?->label() }}, le paiement passera automatiquement à « Payé » et vous recevrez une notification (et un SMS si activé).
+            {{ str_replace(':operator', $payment->method?->label(), __('payments.pending_note')) }}
         </p>
 
         <div class="mt-6 flex flex-wrap gap-3">
-            <a href="{{ route('payments.index') }}" class="btn-secondary">Mes paiements</a>
+            <a href="{{ route('payments.index') }}" class="btn-secondary">{{ __('payments.my_payments') }}</a>
             @if ($payment->status === \App\Enums\PaymentStatus::Paid)
-                <a href="{{ route('payments.receipt', $payment) }}" class="btn-primary">Télécharger le reçu PDF</a>
+                <a href="{{ route('payments.receipt', $payment) }}" class="btn-primary">{{ __('payments.download_receipt') }}</a>
             @endif
         </div>
     </section>

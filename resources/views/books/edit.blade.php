@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier livre | SchoolGood')
-@section('topbar_title', 'Bibliothèque')
+@section('title', __('books.edit_title') . ' | SchoolGood')
+@section('topbar_title', __('nav.library'))
 
 @section('content')
     <x-form-shell
-        title="Modifier le livre"
+        :title="__('books.edit_title')"
         :action="route('books.update', $book)"
         method="PUT"
         :cancel-url="route('books.show', $book)"
